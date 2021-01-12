@@ -1,4 +1,4 @@
-package com.example.alloc
+package br.gss.alloc
 
 import io.flutter.embedding.android.FlutterActivity
 
