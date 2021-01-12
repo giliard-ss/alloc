@@ -5,7 +5,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.test
+  // This widget is the root of your application.tes gitflow
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
