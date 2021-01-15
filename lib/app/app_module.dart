@@ -1,3 +1,8 @@
+import 'package:alloc/app/shared/repositories/icarteira_repository.dart';
+import 'package:alloc/app/shared/repositories/impl/carteira_repository.dart';
+import 'package:alloc/app/shared/services/icarteira_service.dart';
+import 'package:alloc/app/shared/services/impl/carteira_service.dart';
+
 import 'app_controller.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +13,9 @@ class AppModule extends MainModule {
   @override
   List<Bind> get binds => [
         $AppController,
+        Bind<ICarteiraRepository>((i) => CarteiraRepository()),
+        Bind<ICarteiraService>(
+            (i) => CarteiraService(carteiraRepository: i.get())),
       ];
 
   @override

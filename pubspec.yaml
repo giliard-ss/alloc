@@ -35,6 +35,7 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  logger: ^0.9.4
   cloud_firestore: ^0.16.0
   dio: ^3.0.10
   flutter_mobx: ^1.1.0+2
