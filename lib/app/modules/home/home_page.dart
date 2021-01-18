@@ -1,4 +1,6 @@
+import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/listener_firestore.dart';
+import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
@@ -28,52 +30,32 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
   }
 
   _body() {
-    return Column(
-      children: [
-        SizedBox(
-          height: 100,
-        ),
-        Observer(
-          builder: (_) {
-            // print(controller.cotacoes.value[0].ultimo);
-            // return Text(controller.cotacoes.value[0].ultimo.toString());
-            print(controller.cotacoes.value[0].ultimo);
-            return Text("");
-          },
-        ),
-        RaisedButton(
-          onPressed: () {},
-        ),
-        RaisedButton(
-          onPressed: () {
-            ListenerFirestore.stop();
-          },
-        )
-      ],
-    );
-    /* return ListView.builder(
-        scrollDirection: Axis.vertical,
-        itemCount: controller.carteiras.length,
-        itemBuilder: (context, index) {
-          CarteiraModel carteira = controller.carteiras[index];
-          return ListTile(
-            subtitle: Text("Aportado: 752,20"),
-            title: Text(carteira.descricao),
-            trailing: Text("Saldo: 721,00"),
-          );
-        }); */
+    return Column(children: [
+      getCarteiras(),
+      RaisedButton(
+        onPressed: () {
+          controller.refresh();
+        },
+      ),
+    ]);
   }
 
-  // test() async {
-  //   await Firebase.initializeApp();
-  //   FirebaseFirestore.instance
-  //       .collection('cotacao')
-  //       .where("id", whereIn: ["IRBR3"])
-  //       .snapshots()
-  //       .listen((result) {
-  //         result.docs.forEach((d) {
-  //           print(d.data());
-  //         });
-  //       });
-  // }
+  Widget getCarteiras() {
+    return Observer(builder: (_) {
+      return ListView.builder(
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          itemCount: controller.carteiras.length,
+          itemBuilder: (context, index) {
+            CarteiraDTO carteira = controller.carteiras[index];
+
+            return ListTile(
+              subtitle: Text(
+                  "Aportado: ${carteira.totalAportado.toString()}     Aportar: ${carteira.getSaldo().toString()}"),
+              title: Text(carteira.descricao),
+              trailing: Text(" ${carteira.totalAportadoAtual.toString()}"),
+            );
+          });
+    });
+  }
 }

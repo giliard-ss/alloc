@@ -1,7 +1,10 @@
+import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/listener_firestore.dart';
+import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
+import 'package:alloc/app/shared/models/usuario_model.dart';
 import 'package:alloc/app/shared/services/icarteira_service.dart';
 import 'package:alloc/app/shared/services/impl/carteira_service.dart';
 import 'package:alloc/app/shared/shared_main.dart';
@@ -17,30 +20,35 @@ part 'home_controller.g.dart';
 class HomeController = _HomeControllerBase with _$HomeController;
 
 abstract class _HomeControllerBase with Store {
-  final ICarteiraService _carteiraService = Modular.get<CarteiraService>();
+  // final ICarteiraService _carteiraService = Modular.get<CarteiraService>();
 
   @observable
-  List<CarteiraModel> carteiras = [];
+  List<CarteiraDTO> carteiras = [];
 
-  Observable<List<CotacaoModel>> cotacoes = SharedMain.cotacoes;
-
+  ReactionDisposer _carteirasReactDispose;
   @action
   Future<void> init() async {
     try {
-      SharedMain.startListenerCotacoes();
-      //ListenerFirestore.init();
+      await SharedMain.init(UsuarioModel('gss'));
+      _startCarteirasReaction();
     } catch (e) {
       LoggerUtil.error(e);
     }
   }
 
-  @action
-  Future refresh() {
-    // cotacao = ListenerFirestore.cotacao;
+  void _startCarteirasReaction() {
+    if (_carteirasReactDispose != null) {
+      _carteirasReactDispose();
+    }
+
+    _carteirasReactDispose =
+        SharedMain.createCarteirasReact((List<CarteiraDTO> carteiras) {
+      this.carteiras = carteiras;
+    });
   }
 
-  num getTotalAportado(CarteiraModel carteira) {
-    //!deve ser baseado nos ativos
-    return 150;
+  @action
+  Future refresh() async {
+    // await SharedMain.refreshCarteiras();
   }
 }

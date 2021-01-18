@@ -1,6 +1,10 @@
+import 'package:alloc/app/shared/repositories/iativo_repository.dart';
 import 'package:alloc/app/shared/repositories/icarteira_repository.dart';
+import 'package:alloc/app/shared/repositories/impl/ativo_repository.dart';
 import 'package:alloc/app/shared/repositories/impl/carteira_repository.dart';
+import 'package:alloc/app/shared/services/iativo_service.dart';
 import 'package:alloc/app/shared/services/icarteira_service.dart';
+import 'package:alloc/app/shared/services/impl/ativo_service.dart';
 import 'package:alloc/app/shared/services/impl/carteira_service.dart';
 
 import 'app_controller.dart';
@@ -14,8 +18,10 @@ class AppModule extends MainModule {
   List<Bind> get binds => [
         $AppController,
         Bind<ICarteiraRepository>((i) => CarteiraRepository()),
+        Bind<IAtivoRepository>((i) => AtivoRepository()),
         Bind<ICarteiraService>(
             (i) => CarteiraService(carteiraRepository: i.get())),
+        Bind<IAtivoService>((i) => AtivoService(ativoRepository: i.get())),
       ];
 
   @override

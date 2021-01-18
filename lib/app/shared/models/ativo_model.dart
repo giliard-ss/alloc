@@ -1,17 +1,20 @@
 class AtivoModel {
   String _idUsuario;
   String _papel;
+  String _idCarteira;
+
   num _alocacao;
   num _qtd;
   num _totalAportado;
   List _superiores;
 
-  AtivoModel(this._idUsuario, this._papel, this._alocacao, this._qtd,
-      this._totalAportado, this._superiores);
+  AtivoModel(this._idUsuario, this._papel, this._idCarteira, this._alocacao,
+      this._qtd, this._totalAportado, this._superiores);
 
   AtivoModel.fromMap(Map map) {
     this._idUsuario = map['idUsuario'];
     this._papel = map['papel'];
+    this._idCarteira = map['idCarteira'];
     this._alocacao = map['alocacao'];
     this._qtd = map['qtd'];
     this._totalAportado = map['totalAportado'];
@@ -19,6 +22,9 @@ class AtivoModel {
       return map['subcategs'][i];
     });
   }
+  String get idCarteira => _idCarteira;
+
+  set idCarteira(String value) => _idCarteira = value;
 
   String get idUsuario => _idUsuario;
 

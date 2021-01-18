@@ -23,6 +23,24 @@ class AppWidget extends StatelessWidget {
       ),
       initialRoute: '/',
       onGenerateRoute: Modular.generateRoute,
+      builder: (BuildContext context, Widget widget) {
+        ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
+          return buildError(context, errorDetails);
+        };
+
+        return widget;
+      },
+    );
+  }
+
+  Widget buildError(BuildContext context, FlutterErrorDetails error) {
+    return Scaffold(
+      body: Center(
+        child: Text(
+          "Error appeared.",
+          style: Theme.of(context).textTheme.title,
+        ),
+      ),
     );
   }
 }

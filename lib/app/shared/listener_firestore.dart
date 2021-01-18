@@ -52,7 +52,7 @@ class ListenerFirestore {
 
   static stop() {
     // streamSub.cancel();
-    SharedMain.stopListenerCotacoes();
+    //SharedMain.stopListenerCotacoes();
   }
 
   static ref(String value) {

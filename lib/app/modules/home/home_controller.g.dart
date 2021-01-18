@@ -22,13 +22,13 @@ mixin _$HomeController on _HomeControllerBase, Store {
   final _$carteirasAtom = Atom(name: '_HomeControllerBase.carteiras');
 
   @override
-  List<CarteiraModel> get carteiras {
+  List<CarteiraDTO> get carteiras {
     _$carteirasAtom.reportRead();
     return super.carteiras;
   }
 
   @override
-  set carteiras(List<CarteiraModel> value) {
+  set carteiras(List<CarteiraDTO> value) {
     _$carteirasAtom.reportWrite(value, super.carteiras, () {
       super.carteiras = value;
     });
@@ -41,18 +41,11 @@ mixin _$HomeController on _HomeControllerBase, Store {
     return _$initAsyncAction.run(() => super.init());
   }
 
-  final _$_HomeControllerBaseActionController =
-      ActionController(name: '_HomeControllerBase');
+  final _$refreshAsyncAction = AsyncAction('_HomeControllerBase.refresh');
 
   @override
   Future<dynamic> refresh() {
-    final _$actionInfo = _$_HomeControllerBaseActionController.startAction(
-        name: '_HomeControllerBase.refresh');
-    try {
-      return super.refresh();
-    } finally {
-      _$_HomeControllerBaseActionController.endAction(_$actionInfo);
-    }
+    return _$refreshAsyncAction.run(() => super.refresh());
   }
 
   @override

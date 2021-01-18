@@ -1,15 +1,22 @@
 class CarteiraModel {
+  String _id;
+
   String _idUsuario;
   String _descricao;
   num _totalDeposito;
 
-  CarteiraModel(this._idUsuario, this._descricao, this._totalDeposito);
+  CarteiraModel(
+      this._id, this._idUsuario, this._descricao, this._totalDeposito);
 
   CarteiraModel.fromMap(Map map) {
+    this._id = map['id'];
     this._descricao = map['descricao'];
     this._idUsuario = map['idUsuario'];
     this._totalDeposito = map['totalDeposito'];
   }
+  String get id => _id;
+
+  set id(String value) => _id = value;
 
   String get idUsuario => _idUsuario;
 
@@ -19,7 +26,7 @@ class CarteiraModel {
 
   set descricao(String value) => _descricao = value;
 
-  double get totalDeposito => _totalDeposito;
+  num get totalDeposito => _totalDeposito;
 
-  set totalDeposito(double value) => _totalDeposito = value;
+  set totalDeposito(num value) => _totalDeposito = value;
 }
