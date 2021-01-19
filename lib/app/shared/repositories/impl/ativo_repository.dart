@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/repositories/iativo_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,8 +18,9 @@ class AtivoRepository implements IAtivoRepository {
         return AtivoModel.fromMap(snapshot.docs[i].data());
       });
     } catch (e) {
-      print(e);
-      return [];
+      throw ApplicationException(
+          'Falha ao consultar os ativos do usuário $idUsuario! ' +
+              e.toString());
     }
   }
 }

@@ -13,6 +13,15 @@ class CarteiraDTO extends CarteiraModel {
     return super.totalDeposito.toDouble() - _totalAportado;
   }
 
+  double getTotalAportar() {
+    return super.totalDeposito.toDouble() - _totalAportado;
+  }
+
+  ///retorna o total como se ja estivesse aportado (futuro)
+  double getTotalAposAporte() {
+    return _totalAportadoAtual + getTotalAportar();
+  }
+
   double get totalAportado => _totalAportado;
 
   set totalAportado(double value) => _totalAportado = value;

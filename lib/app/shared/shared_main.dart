@@ -89,6 +89,19 @@ class SharedMain {
     return totalAgora - totalAportado;
   }
 
+  static double getRendimentoAtivosByAlocacao(String idAlocacao) {
+    double totalAgora = 0;
+    double totalAportado = 0;
+    _ativos.value.forEach((e) {
+      if (e.superiores.contains(idAlocacao)) {
+        totalAgora += e.qtd * _getCotacao(e.papel).ultimo.toDouble();
+        totalAportado += e.totalAportado.toDouble();
+      }
+    });
+
+    return totalAgora - totalAportado;
+  }
+
   ///crie a reacao vinculada a um variavel para que seja possivel chamar o dispose() pra encerrar
   static ReactionDisposer _createCotacoesReact(
       Function(List<CotacaoModel> cotacoes) fnc) {
@@ -117,6 +130,16 @@ class SharedMain {
     double total = 0;
     _ativos.value.forEach((e) {
       if (e.idCarteira == idCarteira) {
+        total += e.totalAportado.toDouble();
+      }
+    });
+    return total;
+  }
+
+  static double getTotalAportadoAtivosByAlocacao(String idAlocacao) {
+    double total = 0;
+    _ativos.value.forEach((e) {
+      if (e.superiores.contains(idAlocacao)) {
         total += e.totalAportado.toDouble();
       }
     });
@@ -158,6 +181,13 @@ class SharedMain {
       throw new ApplicationException(
           'Falha ao interromper Listener de cotações!', ex);
     }
+  }
+
+  static CarteiraDTO getCarteira(String carteiraId) {
+    for (CarteiraDTO c in _carteirasDTO.value) {
+      if (c.id == carteiraId) return c;
+    }
+    throw new ApplicationException('Carteira $carteiraId não encontrada!');
   }
 
   static List<CarteiraDTO> get carteiras => _carteirasDTO.value;

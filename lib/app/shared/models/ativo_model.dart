@@ -19,7 +19,7 @@ class AtivoModel {
     this._qtd = map['qtd'];
     this._totalAportado = map['totalAportado'];
     this._superiores = List.generate(map['superiores'].length, (i) {
-      return map['subcategs'][i];
+      return map['superiores'][i];
     });
   }
   String get idCarteira => _idCarteira;

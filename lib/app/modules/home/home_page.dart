@@ -33,9 +33,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
     return Column(children: [
       getCarteiras(),
       RaisedButton(
-        onPressed: () {
-          controller.refresh();
-        },
+        onPressed: () {},
       ),
     ]);
   }
@@ -50,8 +48,11 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
             CarteiraDTO carteira = controller.carteiras[index];
 
             return ListTile(
+              onTap: () {
+                Modular.to.pushNamed("/carteira/${carteira.id}");
+              },
               subtitle: Text(
-                  "Aportado: ${carteira.totalAportado.toString()}     Aportar: ${carteira.getSaldo().toString()}"),
+                  "Aportado: ${carteira.totalAportado.toString()}     Aportar: ${carteira.getSaldo().toString()}  Dep: ${carteira.totalDeposito.toString()}"),
               title: Text(carteira.descricao),
               trailing: Text(" ${carteira.totalAportadoAtual.toString()}"),
             );
