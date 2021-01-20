@@ -1,33 +1,33 @@
+import 'package:alloc/app/modules/carteira/controllers/sub_alocacao_controller.dart';
 import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'carteira_controller.dart';
 
-class CarteiraPage extends StatefulWidget {
+class SubAlocacaoPage extends StatefulWidget {
   final String title;
-  final String carteiraId;
-  const CarteiraPage(this.carteiraId, {Key key, this.title = "Carteira"})
+  final String id;
+  const SubAlocacaoPage(this.id, {Key key, this.title = "SubAlocacao"})
       : super(key: key);
 
   @override
-  _CarteiraPageState createState() => _CarteiraPageState();
+  _SubAlocacaoPageState createState() => _SubAlocacaoPageState();
 }
 
-class _CarteiraPageState
-    extends ModularState<CarteiraPage, CarteiraController> {
+class _SubAlocacaoPageState
+    extends ModularState<SubAlocacaoPage, SubAlocacaoController> {
   //use 'controller' variable to access controller
 
   @override
   void initState() {
-    controller.setCarteira(widget.carteiraId);
+    controller.id = widget.id;
     super.initState();
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    //controller.dispose();
     super.dispose();
   }
 
@@ -35,27 +35,16 @@ class _CarteiraPageState
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(controller.title),
+          title: Text('controller.title'),
         ),
         body: WidgetUtil.futureBuild(controller.init, _body));
   }
 
   _body() {
     return Column(children: [
-      getResumoCarteira(),
+      //getResumoCarteira(),
       getAlocacoes(),
     ]);
-  }
-
-  Widget getResumoCarteira() {
-    return Card(
-      child: Column(
-        children: [
-          Text('Aportado: ${controller.carteira.totalAportado}'),
-          Text('Saldo: ${controller.carteira.getSaldo()}'),
-        ],
-      ),
-    );
   }
 
   Widget getAlocacoes() {
@@ -68,9 +57,7 @@ class _CarteiraPageState
             AlocacaoDTO alocacao = controller.alocacoes[index];
 
             return ListTile(
-              onTap: () {
-                Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
-              },
+              onTap: () {},
               subtitle: Text(
                   "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  "),
               title: Text(alocacao.descricao),

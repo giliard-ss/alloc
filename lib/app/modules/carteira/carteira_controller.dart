@@ -25,6 +25,7 @@ abstract class _CarteiraControllerBase with Store {
 
   Future<void> init() async {
     await loadAlocacoes();
+    _startCarteirasReaction();
     _refreshAlocacoes();
   }
 
@@ -56,10 +57,6 @@ abstract class _CarteiraControllerBase with Store {
   _refreshAlocacoes() async {
     List<AlocacaoDTO> result = [];
     for (AlocacaoDTO aloc in allAlocacoes.value) {
-      if (aloc.idCarteira != _carteira.id || aloc.idSuperior.isNotEmpty) {
-        result.add(aloc);
-        continue;
-      }
       aloc.totalAportado = SharedMain.getTotalAportadoAtivosByAlocacao(aloc.id);
       aloc.totalAportadoAtual = aloc.totalAportado +
           (SharedMain.getRendimentoAtivosByAlocacao(aloc.id));
@@ -81,4 +78,10 @@ abstract class _CarteiraControllerBase with Store {
   String get title => _carteira.descricao;
 
   CarteiraDTO get carteira => _carteira;
+
+  void dispose() {
+    if (_carteirasReactDispose != null) {
+      _carteirasReactDispose();
+    }
+  }
 }
