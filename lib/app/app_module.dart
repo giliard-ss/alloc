@@ -1,9 +1,9 @@
+import 'package:alloc/app/modules/carteira/carteira_module.dart';
 import 'package:alloc/app/shared/services/impl/preference_service.dart';
 import 'package:alloc/app/shared/services/ipreference_service.dart';
 import 'package:alloc/app/splash/splash_page.dart';
 
 import 'splash/splash_controller.dart';
-import 'package:alloc/app/modules/carteira/carteira_module.dart';
 import 'package:alloc/app/modules/login/login_module.dart';
 import 'package:alloc/app/shared/repositories/ialocacao_repository.dart';
 import 'package:alloc/app/shared/repositories/iativo_repository.dart';

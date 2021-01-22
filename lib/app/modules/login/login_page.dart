@@ -44,7 +44,7 @@ class _LoginPageState extends ModularState<LoginPage, LoginController> {
           visible: controller.aguardaCodigo == false,
           child: RaisedButton(
             child: Text('Cadastrar'),
-            onPressed: () => Modular.to.pushNamed("/cadastro"),
+            onPressed: () => Modular.to.pushNamed("/login/cadastro"),
           ),
         );
       },

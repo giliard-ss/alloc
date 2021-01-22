@@ -161,8 +161,12 @@ class SharedMain {
           FirebaseFirestore.instance.collection(_tableCotacoes);
       _listenerCotacoes =
           reference.where("id", whereIn: papeis).snapshots().listen((snapshot) {
-        _cotacoes.value = List.generate(snapshot.docs.length, (i) {
+        List<CotacaoModel> cotacoes = List.generate(snapshot.docs.length, (i) {
           return CotacaoModel.fromMap(snapshot.docs[i].data());
+        });
+
+        runInAction(() async {
+          _cotacoes.value = cotacoes;
         });
       });
       LoggerUtil.info("Listener de cotações iniciado.");
