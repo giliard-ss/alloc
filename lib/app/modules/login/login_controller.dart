@@ -1,4 +1,9 @@
+import 'dart:math';
+
+import 'package:alloc/app/shared/email.dart';
 import 'package:alloc/app/shared/models/usuario_model.dart';
+import 'package:alloc/app/shared/services/iemail_service.dart';
+import 'package:alloc/app/shared/services/impl/email_service.dart';
 import 'package:alloc/app/shared/services/impl/usuario_service.dart';
 import 'package:alloc/app/shared/services/iusuario_service.dart';
 import 'package:mobx/mobx.dart';
@@ -11,7 +16,9 @@ class LoginController = _LoginControllerBase with _$LoginController;
 
 abstract class _LoginControllerBase with Store {
   IUsuarioService _usuarioService = Modular.get<UsuarioService>();
-  String _codigoEnviado = "abc";
+  IEmailService _emailService = Modular.get<EmailService>();
+  String _codigo;
+
   @observable
   String email;
 
@@ -28,7 +35,13 @@ abstract class _LoginControllerBase with Store {
     if (usuario == null) {
       error = "Usuário não identificado.";
     } else {
-      aguardaCodigo = true;
+      bool enviou = await _enviarCodigo();
+
+      if (enviou) {
+        aguardaCodigo = true;
+      } else {
+        error = 'Falha ao enviar código. Tente novamente mais tarde';
+      }
     }
   }
 
@@ -40,9 +53,20 @@ abstract class _LoginControllerBase with Store {
   }
 
   @action
-  changeCodigo(text) {
-    if (text == _codigoEnviado) {
+  changeCodigo(text) async {
+    if (_codigo != null && !_codigo.isEmpty && text == _codigo) {
       Modular.to.pushReplacementNamed("/home");
     }
+  }
+
+  _enviarCodigo() async {
+    var rng = new Random();
+    String cod = rng.nextInt(100000).toString();
+    bool result = await _emailService.sendMessage(
+        'Seu código é: $cod', email, 'Código de Verificação');
+    if (result) {
+      _codigo = cod;
+    }
+    return result;
   }
 }

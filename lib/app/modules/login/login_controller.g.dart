@@ -71,6 +71,14 @@ mixin _$LoginController on _LoginControllerBase, Store {
     return _$entrarAsyncAction.run(() => super.entrar());
   }
 
+  final _$changeCodigoAsyncAction =
+      AsyncAction('_LoginControllerBase.changeCodigo');
+
+  @override
+  Future changeCodigo(dynamic text) {
+    return _$changeCodigoAsyncAction.run(() => super.changeCodigo(text));
+  }
+
   final _$_LoginControllerBaseActionController =
       ActionController(name: '_LoginControllerBase');
 
@@ -80,17 +88,6 @@ mixin _$LoginController on _LoginControllerBase, Store {
         name: '_LoginControllerBase.changeEmail');
     try {
       return super.changeEmail(text);
-    } finally {
-      _$_LoginControllerBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  dynamic changeCodigo(dynamic text) {
-    final _$actionInfo = _$_LoginControllerBaseActionController.startAction(
-        name: '_LoginControllerBase.changeCodigo');
-    try {
-      return super.changeCodigo(text);
     } finally {
       _$_LoginControllerBaseActionController.endAction(_$actionInfo);
     }
