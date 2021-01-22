@@ -19,8 +19,10 @@ class AppWidget extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Slidy',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+          primarySwatch: Colors.blue,
+          buttonTheme: ButtonThemeData(
+            minWidth: double.infinity,
+          )),
       initialRoute: '/',
       onGenerateRoute: Modular.generateRoute,
       builder: (BuildContext context, Widget widget) {

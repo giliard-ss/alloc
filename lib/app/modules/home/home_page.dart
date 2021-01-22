@@ -23,9 +23,14 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Alloc"),
+      ),
       body: RefreshIndicator(
           onRefresh: controller.refresh,
-          child: WidgetUtil.futureBuild(controller.init, _body)),
+          child: Container(
+              padding: EdgeInsets.all(10),
+              child: WidgetUtil.futureBuild(controller.init, _body))),
     );
   }
 
@@ -39,24 +44,51 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
   }
 
   Widget getCarteiras() {
-    return Observer(builder: (_) {
-      return ListView.builder(
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          itemCount: controller.carteiras.length,
-          itemBuilder: (context, index) {
-            CarteiraDTO carteira = controller.carteiras[index];
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            leading: Icon(
+              Icons.wallet_giftcard,
+              color: Color(0XFF01579B),
+            ),
+            title: Text(
+              "Carteiras",
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0XFF01579B)),
+            ),
+            trailing: IconButton(
+              icon: Icon(Icons.add_box),
+              onPressed: () {},
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Observer(builder: (_) {
+            return ListView.builder(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: controller.carteiras.length,
+                itemBuilder: (context, index) {
+                  CarteiraDTO carteira = controller.carteiras[index];
 
-            return ListTile(
-              onTap: () {
-                Modular.to.pushNamed("/carteira/${carteira.id}");
-              },
-              subtitle: Text(
-                  "Aportado: ${carteira.totalAportado.toString()}     Aportar: ${carteira.getSaldo().toString()}  Dep: ${carteira.totalDeposito.toString()}"),
-              title: Text(carteira.descricao),
-              trailing: Text(" ${carteira.totalAportadoAtual.toString()}"),
-            );
-          });
-    });
+                  return ListTile(
+                    onTap: () {
+                      Modular.to.pushNamed("/carteira/${carteira.id}");
+                    },
+                    subtitle: Text(
+                        "Aportado: ${carteira.totalAportado.toString()}     Aportar: ${carteira.getSaldo().toString()}  Dep: ${carteira.totalDeposito.toString()}"),
+                    title: Text(carteira.descricao),
+                    trailing:
+                        Text(" ${carteira.totalAportadoAtual.toString()}"),
+                  );
+                });
+          })
+        ],
+      ),
+    );
   }
 }
