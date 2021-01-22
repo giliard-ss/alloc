@@ -30,7 +30,6 @@ abstract class _HomeControllerBase with Store {
   @action
   Future<void> init() async {
     try {
-      await SharedMain.init(UsuarioModel('gss', "", ""));
       _startCarteirasReaction();
     } catch (e) {
       LoggerUtil.error(e);

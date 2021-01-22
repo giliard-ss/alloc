@@ -11,6 +11,10 @@ class UsuarioModel {
     this._nome = map['nome'];
   }
 
+  Map toMap() {
+    return {'id': this._id, 'email': this._email, 'nome': this._nome};
+  }
+
   String get nome => _nome;
 
   set nome(String value) => _nome = value;

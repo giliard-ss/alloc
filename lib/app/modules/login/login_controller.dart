@@ -1,10 +1,11 @@
 import 'dart:math';
 
-import 'package:alloc/app/shared/email.dart';
 import 'package:alloc/app/shared/models/usuario_model.dart';
 import 'package:alloc/app/shared/services/iemail_service.dart';
 import 'package:alloc/app/shared/services/impl/email_service.dart';
+import 'package:alloc/app/shared/services/impl/preference_service.dart';
 import 'package:alloc/app/shared/services/impl/usuario_service.dart';
+import 'package:alloc/app/shared/services/ipreference_service.dart';
 import 'package:alloc/app/shared/services/iusuario_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -17,7 +18,9 @@ class LoginController = _LoginControllerBase with _$LoginController;
 abstract class _LoginControllerBase with Store {
   IUsuarioService _usuarioService = Modular.get<UsuarioService>();
   IEmailService _emailService = Modular.get<EmailService>();
+  IPreferenceService _preferenceService = Modular.get<PreferenceService>();
   String _codigo;
+  UsuarioModel _usuario;
 
   @observable
   String email;
@@ -30,9 +33,9 @@ abstract class _LoginControllerBase with Store {
 
   @action
   entrar() async {
-    UsuarioModel usuario = await _usuarioService.getUsuario(email);
+    _usuario = await _usuarioService.getUsuario(email);
 
-    if (usuario == null) {
+    if (_usuario == null) {
       error = "Usuário não identificado.";
     } else {
       bool enviou = await _enviarCodigo();
@@ -54,7 +57,8 @@ abstract class _LoginControllerBase with Store {
 
   @action
   changeCodigo(text) async {
-    if (_codigo != null && !_codigo.isEmpty && text == _codigo) {
+    if (_codigo != null && _codigo.trim() != '' && text == _codigo) {
+      _preferenceService.saveUsuario(_usuario);
       Modular.to.pushReplacementNamed("/home");
     }
   }

@@ -1,3 +1,8 @@
+import 'package:alloc/app/shared/services/impl/preference_service.dart';
+import 'package:alloc/app/shared/services/ipreference_service.dart';
+import 'package:alloc/app/splash/splash_page.dart';
+
+import 'splash/splash_controller.dart';
 import 'package:alloc/app/modules/carteira/carteira_module.dart';
 import 'package:alloc/app/modules/login/login_module.dart';
 import 'package:alloc/app/shared/repositories/ialocacao_repository.dart';
@@ -26,6 +31,7 @@ import 'package:alloc/app/modules/home/home_module.dart';
 class AppModule extends MainModule {
   @override
   List<Bind> get binds => [
+        $SplashController,
         $AppController,
         Bind<IUsuarioRepository>((i) => UsuarioRepository()),
         Bind<ICarteiraRepository>((i) => CarteiraRepository()),
@@ -38,11 +44,13 @@ class AppModule extends MainModule {
         Bind<IAtivoService>((i) => AtivoService(ativoRepository: i.get())),
         Bind<IAlocacaoService>(
             (i) => AlocacaoService(alocacaoRepository: i.get())),
+        Bind<IPreferenceService>((i) => PreferenceService()),
       ];
 
   @override
   List<ModularRouter> get routers => [
-        ModularRouter('/', module: LoginModule()),
+        ModularRouter('/', child: (_, args) => SplashPage()),
+        ModularRouter('/login', module: LoginModule()),
         ModularRouter('/home', module: HomeModule()),
         ModularRouter('/carteira', module: CarteiraModule()),
       ];
