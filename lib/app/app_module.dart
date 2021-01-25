@@ -37,14 +37,14 @@ class AppModule extends MainModule {
         Bind<ICarteiraRepository>((i) => CarteiraRepository()),
         Bind<IAtivoRepository>((i) => AtivoRepository()),
         Bind<IAlocacaoRepository>((i) => AlocacaoRepository()),
+        Bind<IPreferenceService>((i) => PreferenceService()),
         Bind<ICarteiraService>(
             (i) => CarteiraService(carteiraRepository: i.get())),
-        Bind<IUsuarioService>(
-            (i) => UsuarioService(usuarioRepository: i.get())),
+        Bind<IUsuarioService>((i) => UsuarioService(
+            usuarioRepository: i.get(), preferenceService: i.get())),
         Bind<IAtivoService>((i) => AtivoService(ativoRepository: i.get())),
         Bind<IAlocacaoService>(
             (i) => AlocacaoService(alocacaoRepository: i.get())),
-        Bind<IPreferenceService>((i) => PreferenceService()),
       ];
 
   @override

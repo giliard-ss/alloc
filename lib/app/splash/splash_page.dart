@@ -33,7 +33,7 @@ class _SplashPageState extends ModularState<SplashPage, SplashController> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Icon(
-                  Icons.account_balance,
+                  Icons.donut_small_rounded,
                   size: 40,
                   color: Theme.of(context).primaryColor,
                 ),

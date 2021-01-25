@@ -11,7 +11,7 @@ class UsuarioModel {
     this._nome = map['nome'];
   }
 
-  Map toMap() {
+  Map<String, dynamic> toMap() {
     return {'id': this._id, 'email': this._email, 'nome': this._nome};
   }
 

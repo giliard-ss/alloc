@@ -7,6 +7,7 @@ import 'package:alloc/app/shared/services/impl/preference_service.dart';
 import 'package:alloc/app/shared/services/impl/usuario_service.dart';
 import 'package:alloc/app/shared/services/ipreference_service.dart';
 import 'package:alloc/app/shared/services/iusuario_service.dart';
+import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -19,20 +20,35 @@ abstract class _LoginControllerBase with Store {
   IUsuarioService _usuarioService = Modular.get<UsuarioService>();
   IEmailService _emailService = Modular.get<EmailService>();
   IPreferenceService _preferenceService = Modular.get<PreferenceService>();
-  String _codigo;
+  String _codigoGerado;
   UsuarioModel _usuario;
-
+  String codigo;
   @observable
   String email;
 
   @observable
-  String error;
+  String error = "";
 
   @observable
   bool aguardaCodigo = false;
 
   @action
-  entrar() async {
+  Future<bool> entrar() async {
+    try {
+      error = "";
+      if (aguardaCodigo) {
+        return _concluirLogin();
+      } else {
+        return _iniciarLogin();
+      }
+    } catch (e) {
+      LoggerUtil.error(e);
+      error = "Falha ao realizar o login, tente novamente mais tarde.";
+      return false;
+    }
+  }
+
+  _iniciarLogin() async {
     _usuario = await _usuarioService.getUsuario(email);
 
     if (_usuario == null) {
@@ -46,21 +62,30 @@ abstract class _LoginControllerBase with Store {
         error = 'Falha ao enviar código. Tente novamente mais tarde';
       }
     }
+    return false;
+  }
+
+  _concluirLogin() async {
+    if (codigo == _codigoGerado) {
+      await _preferenceService.saveUsuario(_usuario);
+      return true;
+    } else {
+      error = 'Código inválido!';
+    }
+    return false;
   }
 
   @action
   changeEmail(text) {
     email = text;
-    error = null;
+    error = '';
     aguardaCodigo = false;
   }
 
   @action
-  changeCodigo(text) async {
-    if (_codigo != null && _codigo.trim() != '' && text == _codigo) {
-      _preferenceService.saveUsuario(_usuario);
-      Modular.to.pushReplacementNamed("/home");
-    }
+  cancelar() {
+    error = '';
+    aguardaCodigo = false;
   }
 
   _enviarCodigo() async {
@@ -69,7 +94,7 @@ abstract class _LoginControllerBase with Store {
     bool result = await _emailService.sendMessage(
         'Seu código é: $cod', email, 'Código de Verificação');
     if (result) {
-      _codigo = cod;
+      _codigoGerado = cod;
     }
     return result;
   }

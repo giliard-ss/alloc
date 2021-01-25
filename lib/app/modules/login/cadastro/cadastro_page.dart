@@ -1,4 +1,8 @@
+import 'dart:ui';
+
+import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'cadastro_controller.dart';
 
@@ -22,19 +26,31 @@ class _CadastroPageState
       ),
       body: Container(
         padding: EdgeInsets.all(10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            _nomeTextField(),
-            SizedBox(
-              height: 10,
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _errorText(),
+                SizedBox(
+                  height: 10,
+                ),
+                _nomeTextField(),
+                SizedBox(
+                  height: 10,
+                ),
+                _emailTextField(),
+                SizedBox(
+                  height: 10,
+                ),
+                _codigoTextField(),
+                SizedBox(
+                  height: 10,
+                ),
+                _continueButton(),
+              ],
             ),
-            _emailTextField(),
-            SizedBox(
-              height: 10,
-            ),
-            _continueButton(),
-          ],
+          ),
         ),
       ),
     );
@@ -63,7 +79,68 @@ class _CadastroPageState
   _continueButton() {
     return RaisedButton(
       child: Text('Continuar'),
-      onPressed: () {},
+      onPressed: () async {
+        try {
+          LoadingUtil.start(context);
+          bool concluiu = await controller.continuar();
+          if (concluiu) {
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+          } else {
+            LoadingUtil.end(context);
+          }
+        } on Exception catch (e) {
+          LoadingUtil.end(context);
+        }
+      },
+    );
+  }
+
+  _errorText() {
+    return Observer(
+      builder: (_) {
+        return Column(
+          children: [
+            SizedBox(
+              height: 10,
+            ),
+            Visibility(
+              visible:
+                  (controller.error != null && controller.error.isNotEmpty),
+              child: Text(
+                controller.error,
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _codigoTextField() {
+    return Observer(
+      builder: (_) {
+        return Column(
+          children: [
+            SizedBox(
+              height: 10,
+            ),
+            Visibility(
+              visible: controller.aguardaCodigo == true,
+              child: TextField(
+                autofocus: true,
+                onChanged: (text) => controller.codigo = text,
+                decoration: InputDecoration(
+                    labelText: "Código ",
+                    helperText: "Código enviado para seu e-mail",
+                    suffixIcon: Icon(Icons.security),
+                    border: const OutlineInputBorder()),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

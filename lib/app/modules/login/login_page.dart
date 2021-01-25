@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -23,15 +24,23 @@ class _LoginPageState extends ModularState<LoginPage, LoginController> {
       ),
       body: Container(
         padding: EdgeInsets.all(10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            _emailTextField(),
-            _codigoTextField(),
-            _entrarButton(),
-            _cadastrarButton(),
-            _cancelarButton()
-          ],
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _errorText(),
+                SizedBox(
+                  height: 10,
+                ),
+                _emailTextField(),
+                _codigoTextField(),
+                _entrarButton(),
+                _cadastrarButton(),
+                _cancelarButton()
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -57,39 +66,58 @@ class _LoginPageState extends ModularState<LoginPage, LoginController> {
         return Visibility(
           visible: controller.aguardaCodigo == true,
           child: RaisedButton(
-              child: Text('Cancelar'),
-              onPressed: () => controller.aguardaCodigo = false),
+              child: Text('Cancelar'), onPressed: controller.cancelar),
         );
       },
     );
   }
 
   _entrarButton() {
-    return Observer(
-      builder: (_) {
-        return Visibility(
-          visible: controller.aguardaCodigo == false,
-          child: RaisedButton(
-            child: Text('Entrar'),
-            onPressed: controller.entrar,
-          ),
-        );
+    return RaisedButton(
+      child: Text('Entrar'),
+      onPressed: () async {
+        LoadingUtil.start(context);
+        bool goHome = await controller.entrar();
+        if (goHome) {
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+        } else {
+          LoadingUtil.end(context);
+        }
       },
     );
   }
 
   _emailTextField() {
-    return Observer(builder: (_) {
-      return TextField(
-        onChanged: controller.changeEmail,
-        decoration: InputDecoration(
-            labelText: "E-mail",
-            errorText: controller.error,
-            errorStyle: TextStyle(color: Colors.red),
-            suffixIcon: Icon(Icons.email),
-            border: const OutlineInputBorder()),
-      );
-    });
+    return TextField(
+      onChanged: controller.changeEmail,
+      decoration: InputDecoration(
+          labelText: "E-mail",
+          suffixIcon: Icon(Icons.email),
+          border: const OutlineInputBorder()),
+    );
+  }
+
+  _errorText() {
+    return Observer(
+      builder: (_) {
+        return Column(
+          children: [
+            SizedBox(
+              height: 10,
+            ),
+            Visibility(
+              visible:
+                  (controller.error != null && controller.error.isNotEmpty),
+              child: Text(
+                controller.error,
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   _codigoTextField() {
@@ -104,7 +132,7 @@ class _LoginPageState extends ModularState<LoginPage, LoginController> {
               visible: controller.aguardaCodigo == true,
               child: TextField(
                 autofocus: true,
-                onChanged: controller.changeCodigo,
+                onChanged: (text) => controller.codigo = text,
                 decoration: InputDecoration(
                     labelText: "Código ",
                     helperText: "Código enviado para seu e-mail",
