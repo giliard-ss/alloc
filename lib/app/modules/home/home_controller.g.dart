@@ -19,6 +19,21 @@ final $HomeController = BindInject(
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$HomeController on _HomeControllerBase, Store {
+  final _$errorAtom = Atom(name: '_HomeControllerBase.error');
+
+  @override
+  String get error {
+    _$errorAtom.reportRead();
+    return super.error;
+  }
+
+  @override
+  set error(String value) {
+    _$errorAtom.reportWrite(value, super.error, () {
+      super.error = value;
+    });
+  }
+
   final _$carteirasAtom = Atom(name: '_HomeControllerBase.carteiras');
 
   @override
@@ -41,6 +56,15 @@ mixin _$HomeController on _HomeControllerBase, Store {
     return _$initAsyncAction.run(() => super.init());
   }
 
+  final _$salvarNovaCarteiraAsyncAction =
+      AsyncAction('_HomeControllerBase.salvarNovaCarteira');
+
+  @override
+  Future<bool> salvarNovaCarteira() {
+    return _$salvarNovaCarteiraAsyncAction
+        .run(() => super.salvarNovaCarteira());
+  }
+
   final _$refreshAsyncAction = AsyncAction('_HomeControllerBase.refresh');
 
   @override
@@ -51,6 +75,7 @@ mixin _$HomeController on _HomeControllerBase, Store {
   @override
   String toString() {
     return '''
+error: ${error},
 carteiras: ${carteiras}
     ''';
   }

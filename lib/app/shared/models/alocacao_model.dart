@@ -26,6 +26,8 @@ class AlocacaoModel {
     };
   }
 
+  double get alocacaoDouble => this._alocacao == null ? 0 : this._alocacao;
+
   String get id => _id;
 
   set id(String value) => _id = value;

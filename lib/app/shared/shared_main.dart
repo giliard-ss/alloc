@@ -35,12 +35,18 @@ class SharedMain {
     await _loadAtivos();
     await _startListenerCotacoes();
     _startReactionCotacoes();
+    _refreshCarteiraDTO();
   }
 
   static Future<void> _loadCarteiras() async {
     await runInAction(() async {
       _carteiras.value = await _carteiraService.getCarteiras(_usuario.id);
     });
+  }
+
+  static Future<void> refreshCarteiras() async {
+    await _loadCarteiras();
+    _refreshCarteiraDTO();
   }
 
   static CotacaoModel _getCotacao(String id) {
@@ -64,16 +70,18 @@ class SharedMain {
   }
 
   static void _refreshCarteiraDTO() {
-    List<CarteiraDTO> carteiras = [];
-    _carteiras.value.forEach((carteira) {
-      double totalAportadoAtivos = _getTotalAportadoAtivos(carteira.id);
-      double rendimentoAtivos = _getRendimentoAtivos(carteira.id);
-      double totalAportadoComRendimento =
-          (totalAportadoAtivos + (rendimentoAtivos));
-      carteiras.add(CarteiraDTO(
-          carteira, totalAportadoAtivos, totalAportadoComRendimento));
+    runInAction(() {
+      List<CarteiraDTO> carteiras = [];
+      _carteiras.value.forEach((carteira) {
+        double totalAportadoAtivos = _getTotalAportadoAtivos(carteira.id);
+        double rendimentoAtivos = _getRendimentoAtivos(carteira.id);
+        double totalAportadoComRendimento =
+            (totalAportadoAtivos + (rendimentoAtivos));
+        carteiras.add(CarteiraDTO(
+            carteira, totalAportadoAtivos, totalAportadoComRendimento));
+      });
+      _carteirasDTO.value = carteiras;
     });
-    _carteirasDTO.value = carteiras;
   }
 
   static double _getRendimentoAtivos(String idCarteira) {
@@ -195,4 +203,6 @@ class SharedMain {
   }
 
   static List<CarteiraDTO> get carteiras => _carteirasDTO.value;
+
+  static UsuarioModel get usuario => _usuario;
 }

@@ -23,4 +23,19 @@ class CarteiraRepository implements ICarteiraRepository {
               e.toString());
     }
   }
+
+  @override
+  Future<CarteiraModel> create(String idUsuario, String descricao) async {
+    try {
+      DocumentReference ref = _db.collection(_table).doc();
+      CarteiraModel carteira = CarteiraModel(ref.id, idUsuario, descricao, 0);
+      await _db.runTransaction((transaction) async {
+        transaction.set(ref, carteira.toMap());
+      });
+      return carteira;
+    } on Exception catch (e) {
+      throw ApplicationException(
+          'Falha ao criar nova carteira! ' + e.toString());
+    }
+  }
 }

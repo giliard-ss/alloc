@@ -25,4 +25,21 @@ class AlocacaoRepository implements IAlocacaoRepository {
               e.toString());
     }
   }
+
+  @override
+  Future<AlocacaoModel> create(
+      String descricao, String idCarteira, String idSuperior) async {
+    DocumentReference ref = _db.collection(_table).doc();
+    AlocacaoModel alocacao =
+        AlocacaoModel(ref.id, descricao, null, idCarteira, idSuperior);
+
+    await _db.runTransaction((transaction) async {
+      transaction.set(ref, alocacao.toMap());
+    }).catchError((e) {
+      throw ApplicationException(
+          'Falha ao salvar nova alocação! ' + e.toString());
+    }).then((e) {
+      return alocacao;
+    });
+  }
 }

@@ -2,6 +2,7 @@ import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/listener_firestore.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/shared_main.dart';
+import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -35,12 +36,60 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
   }
 
   _body() {
-    return Column(children: [
-      getCarteiras(),
-      RaisedButton(
-        onPressed: () {},
-      ),
-    ]);
+    return SingleChildScrollView(
+      child: Column(children: [
+        getCarteiras(),
+        RaisedButton(
+          onPressed: () {},
+        ),
+      ]),
+    );
+  }
+
+  _showNovaCarteiraDialog() {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Nova Carteira'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Observer(
+                  builder: (_) {
+                    return TextField(
+                      onChanged: (text) => controller.descricao = text,
+                      decoration: InputDecoration(
+                          errorStyle: TextStyle(color: Colors.red),
+                          errorText: controller.error,
+                          labelText: "Título",
+                          border: const OutlineInputBorder()),
+                    );
+                  },
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            RaisedButton(
+              child: Text("Concluir"),
+              onPressed: () async {
+                bool ok = await LoadingUtil.onLoading(
+                    context, controller.salvarNovaCarteira);
+                if (ok) Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      },
+    );
   }
 
   Widget getCarteiras() {
@@ -61,7 +110,9 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
             ),
             trailing: IconButton(
               icon: Icon(Icons.add_box),
-              onPressed: () {},
+              onPressed: () {
+                _showNovaCarteiraDialog();
+              },
             ),
           ),
           SizedBox(
@@ -71,6 +122,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
             return ListView.builder(
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
                 itemCount: controller.carteiras.length,
                 itemBuilder: (context, index) {
                   CarteiraDTO carteira = controller.carteiras[index];

@@ -14,6 +14,16 @@ class CarteiraModel {
     this._idUsuario = map['idUsuario'];
     this._totalDeposito = map['totalDeposito'];
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "id": this._id,
+      "descricao": this._descricao,
+      "idUsuario": this._idUsuario,
+      "totalDeposito": this._totalDeposito
+    };
+  }
+
   String get id => _id;
 
   set id(String value) => _id = value;

@@ -34,10 +34,27 @@ mixin _$CarteiraController on _CarteiraControllerBase, Store {
     });
   }
 
+  final _$novaAlocacaoErrorAtom =
+      Atom(name: '_CarteiraControllerBase.novaAlocacaoError');
+
+  @override
+  String get novaAlocacaoError {
+    _$novaAlocacaoErrorAtom.reportRead();
+    return super.novaAlocacaoError;
+  }
+
+  @override
+  set novaAlocacaoError(String value) {
+    _$novaAlocacaoErrorAtom.reportWrite(value, super.novaAlocacaoError, () {
+      super.novaAlocacaoError = value;
+    });
+  }
+
   @override
   String toString() {
     return '''
-alocacoes: ${alocacoes}
+alocacoes: ${alocacoes},
+novaAlocacaoError: ${novaAlocacaoError}
     ''';
   }
 }

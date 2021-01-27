@@ -12,4 +12,10 @@ class AlocacaoService implements IAlocacaoService {
   Future<List<AlocacaoModel>> getAlocacoes(String idCarteira) {
     return alocacaoRepository.findAlocacoes(idCarteira);
   }
+
+  @override
+  Future<AlocacaoModel> create(
+      String descricao, String idCarteira, String idSuperior) async {
+    return alocacaoRepository.create(descricao, idCarteira, idSuperior);
+  }
 }

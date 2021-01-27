@@ -3,6 +3,7 @@ import 'package:alloc/app/modules/carteira/controllers/sub_alocacao_controller.d
 import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/shared_main.dart';
+import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ class SubAlocacaoPage extends StatefulWidget {
 class _SubAlocacaoPageState
     extends ModularState<SubAlocacaoPage, SubAlocacaoController> {
   //use 'controller' variable to access controller
+  CarteiraController _carteiraController = Modular.get();
   Observable<List<AlocacaoDTO>> alocacoes = Observable<List<AlocacaoDTO>>([]);
   AlocacaoDTO alocacaoAtual;
 
@@ -30,25 +32,29 @@ class _SubAlocacaoPageState
 
   @override
   void initState() {
-    controller.id = widget.id;
     try {
-      CarteiraController _carteiraController = Modular.get();
       alocacaoAtual = _carteiraController.allAlocacoes.value
           .firstWhere((e) => e.id == widget.id);
+      controller.alocacaoAtual = alocacaoAtual;
 
-      alocacoes.value = _carteiraController.allAlocacoes.value
-          .where(
-            (e) => e.idSuperior == widget.id,
-          )
-          .toList();
-
-      _refreshAlocacoes();
+      _loadAlocacoes();
       _startCarteirasReaction();
     } catch (e) {
       LoggerUtil.error(e);
     }
 
     super.initState();
+  }
+
+  void _loadAlocacoes() {
+    runInAction(() {
+      alocacoes.value = _carteiraController.allAlocacoes.value
+          .where(
+            (e) => e.idSuperior == widget.id,
+          )
+          .toList();
+      _refreshAlocacoesValues();
+    });
   }
 
   void _startCarteirasReaction() {
@@ -58,15 +64,14 @@ class _SubAlocacaoPageState
 
     _alocacaoReactDispose =
         SharedMain.createCarteirasReact((List<CarteiraDTO> carteiras) {
-      _refreshAlocacoes();
+      _refreshAlocacoesValues();
     });
   }
 
-  _refreshAlocacoes() async {
+  _refreshAlocacoesValues() {
     List<AlocacaoDTO> result = [];
     for (AlocacaoDTO aloc in alocacoes.value) {
-      aloc.totalInvestir =
-          alocacaoAtual.totalInvestir * aloc.alocacao.toDouble();
+      aloc.totalInvestir = alocacaoAtual.totalInvestir * aloc.alocacaoDouble;
 
       result.add(aloc);
     }
@@ -89,10 +94,55 @@ class _SubAlocacaoPageState
   }
 
   _body() {
-    return Column(children: [
-      //getResumoCarteira(),
-      getAlocacoes(),
-    ]);
+    return SingleChildScrollView(
+      child: Column(children: [
+        getResumoAlocacaoPrincipal(),
+        getAlocacoes(),
+      ]),
+    );
+  }
+
+  Widget getResumoAlocacaoPrincipal() {
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            title: Text("Aportado"),
+            trailing: Text(alocacaoAtual.totalAportado.toString()),
+          ),
+          ListTile(
+            title: Text("Investir"),
+            trailing: Text(alocacaoAtual.totalInvestir.toString()),
+          ),
+          Container(
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: Row(
+              children: [
+                Flexible(
+                  child: RaisedButton.icon(
+                    onPressed: () {},
+                    icon: Icon(Icons.add),
+                    label: Text("Ativo"),
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Flexible(
+                  child: RaisedButton.icon(
+                    onPressed: () {
+                      _showNovaAlocacaoDialog();
+                    },
+                    icon: Icon(Icons.add),
+                    label: Text("Alocação"),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   Widget getAlocacoes() {
@@ -100,6 +150,7 @@ class _SubAlocacaoPageState
       return ListView.builder(
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
           itemCount: alocacoes.value.length,
           itemBuilder: (context, index) {
             AlocacaoDTO alocacao = alocacoes.value[index];
@@ -119,5 +170,57 @@ class _SubAlocacaoPageState
             );
           });
     });
+  }
+
+  _showNovaAlocacaoDialog() {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Nova Alocação'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Observer(
+                  builder: (_) {
+                    return TextField(
+                      onChanged: (text) => controller.novaAlocacaoDesc = text,
+                      decoration: InputDecoration(
+                          errorStyle: TextStyle(color: Colors.red),
+                          errorText: controller.novaAlocacaoError,
+                          labelText: "Título",
+                          border: const OutlineInputBorder()),
+                    );
+                  },
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            RaisedButton(
+              child: Text("Concluir"),
+              onPressed: () async {
+                bool ok = await LoadingUtil.onLoading(
+                    context, controller.salvarNovaAlocacao);
+                if (ok) {
+                  //
+                  setState(() {
+                    _loadAlocacoes();
+                    Navigator.of(context).pop();
+                  });
+                }
+              },
+            )
+          ],
+        );
+      },
+    );
   }
 }

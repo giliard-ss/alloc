@@ -22,7 +22,12 @@ part 'home_controller.g.dart';
 class HomeController = _HomeControllerBase with _$HomeController;
 
 abstract class _HomeControllerBase with Store {
+  ICarteiraService _carteiraService = Modular.get<CarteiraService>();
   ReactionDisposer _carteirasReactDispose;
+  String descricao;
+
+  @observable
+  String error;
 
   @observable
   List<CarteiraDTO> carteiras = [];
@@ -30,9 +35,23 @@ abstract class _HomeControllerBase with Store {
   @action
   Future<void> init() async {
     try {
+      carteiras = SharedMain.carteiras;
       _startCarteirasReaction();
     } catch (e) {
       LoggerUtil.error(e);
+    }
+  }
+
+  @action
+  Future<bool> salvarNovaCarteira() async {
+    try {
+      await _carteiraService.create(descricao);
+      await SharedMain.refreshCarteiras();
+      return true;
+    } on Exception catch (e) {
+      LoggerUtil.error(e);
+      error = "Falha ao salvar nova carteira.";
+      return false;
     }
   }
 
