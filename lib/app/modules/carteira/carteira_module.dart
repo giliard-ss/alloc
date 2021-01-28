@@ -1,9 +1,7 @@
 import 'package:alloc/app/modules/carteira/pages/ativo/ativo_page.dart';
-
+import 'package:alloc/app/modules/carteira/pages/subalocacao/sub_alocacao_controller.dart';
+import 'package:alloc/app/modules/carteira/pages/subalocacao/sub_alocacao_page.dart';
 import 'pages/ativo/ativo_controller.dart';
-import 'package:alloc/app/modules/carteira/controllers/sub_alocacao_controller.dart';
-import 'package:alloc/app/modules/carteira/pages/sub_alocacao_page.dart';
-
 import 'carteira_controller.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 

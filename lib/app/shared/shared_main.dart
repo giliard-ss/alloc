@@ -208,6 +208,7 @@ class SharedMain {
   }
 
   static List<CarteiraDTO> get carteiras => _carteirasDTO.value;
+  static List<AtivoModel> get ativos => _ativos.value;
 
   static UsuarioModel get usuario => _usuario;
 }
