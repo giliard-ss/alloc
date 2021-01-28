@@ -120,7 +120,10 @@ class _SubAlocacaoPageState
               children: [
                 Flexible(
                   child: RaisedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      Modular.to
+                          .pushNamed("/carteira/ativo/${alocacaoAtual.id}");
+                    },
                     icon: Icon(Icons.add),
                     label: Text("Ativo"),
                   ),

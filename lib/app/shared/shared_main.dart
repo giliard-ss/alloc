@@ -49,6 +49,11 @@ class SharedMain {
     _refreshCarteiraDTO();
   }
 
+  static Future<void> refreshAtivos() async {
+    await _loadAtivos();
+    _refreshCarteiraDTO();
+  }
+
   static CotacaoModel _getCotacao(String id) {
     for (CotacaoModel cm in _cotacoes.value) {
       if (cm.id == id) {
@@ -56,7 +61,7 @@ class SharedMain {
       }
     }
 
-    throw ApplicationException('Cotação não encontrada para o id: $id');
+    return CotacaoModel(id, 0);
   }
 
   static _startReactionCotacoes() {

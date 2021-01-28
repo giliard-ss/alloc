@@ -23,4 +23,22 @@ class AtivoRepository implements IAtivoRepository {
               e.toString());
     }
   }
+
+  @override
+  Future<AtivoModel> create(AtivoModel ativoModel) async {
+    try {
+      DocumentReference ref = _db.collection(_table).doc();
+      ativoModel.id = ref.id;
+      await _db.runTransaction((transaction) async {
+        transaction.set(ref, ativoModel.toMap());
+      }).then((e) {
+        return ativoModel;
+      });
+      return null;
+    } catch (e) {
+      throw ApplicationException(
+          'Falha ao cadastrar ativos do usuario ${ativoModel.idUsuario} ' +
+              e.toString());
+    }
+  }
 }

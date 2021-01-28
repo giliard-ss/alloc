@@ -12,4 +12,9 @@ class AtivoService implements IAtivoService {
   Future<List<AtivoModel>> getAtivos(String usuarioId) {
     return ativoRepository.findAtivos(usuarioId);
   }
+
+  @override
+  Future<AtivoModel> create(AtivoModel ativoModel) {
+    return ativoRepository.create(ativoModel);
+  }
 }

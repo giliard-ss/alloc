@@ -1,5 +1,6 @@
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/services/ialocacao_service.dart';
 import 'package:alloc/app/shared/services/impl/alocacao_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
@@ -17,6 +18,7 @@ abstract class _SubAlocacaoControllerBase with Store {
   CarteiraController _carteiraController = Modular.get();
   AlocacaoDTO alocacaoAtual;
   String novaAlocacaoDesc;
+  AtivoModel novoAtivo;
 
   @observable
   String novaAlocacaoError;
@@ -24,6 +26,7 @@ abstract class _SubAlocacaoControllerBase with Store {
   Future<void> init() async {
     novaAlocacaoDesc = null;
     novaAlocacaoError = null;
+    novoAtivo = AtivoModel();
   }
 
   @action
