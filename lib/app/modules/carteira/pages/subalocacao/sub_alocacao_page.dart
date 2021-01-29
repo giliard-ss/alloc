@@ -5,6 +5,7 @@ import 'package:alloc/app/modules/carteira/pages/subalocacao/sub_alocacao_contro
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/shared_main.dart';
+import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
@@ -73,7 +74,6 @@ class _SubAlocacaoPageState
             (e) => e.superiores.contains(widget.id),
           )
           .toList();
-      ;
     });
   }
 
@@ -85,6 +85,7 @@ class _SubAlocacaoPageState
     _alocacaoReactDispose =
         SharedMain.createCarteirasReact((List<CarteiraDTO> carteiras) {
       _refreshAlocacoesValues();
+      _loadAtivos();
     });
   }
 
@@ -184,12 +185,50 @@ class _SubAlocacaoPageState
           itemBuilder: (context, index) {
             AtivoModel ativo = _ativos.value[index];
 
-            return ListTile(
-              subtitle: Text("Aportado: ${ativo.totalAportado.toString()} "),
-              title: Text(ativo.papel),
+            return Dismissible(
+              key: Key(index.toString()),
+              confirmDismiss: (e) async {
+                String msg = await LoadingUtil.onLoading(context, () async {
+                  return await controller.excluir(ativo);
+                });
+
+                if (msg == null) {
+                  return true;
+                }
+                DialogUtil.showMessageDialog(context, msg);
+                return false;
+              },
+              background: Container(),
+              secondaryBackground: _slideRightBackground(),
+              direction: DismissDirection.endToStart,
+              child: ListTile(
+                subtitle: Text("Aportado: ${ativo.totalAportado.toString()} "),
+                title: Text(ativo.papel),
+              ),
             );
           });
     });
+  }
+
+  Widget _slideRightBackground() {
+    return Container(
+      color: Colors.red,
+      child: Align(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Icon(
+              Icons.delete,
+              color: Colors.white,
+            ),
+            SizedBox(
+              width: 15,
+            )
+          ],
+        ),
+        alignment: Alignment.centerRight,
+      ),
+    );
   }
 
   Widget getAlocacoes() {

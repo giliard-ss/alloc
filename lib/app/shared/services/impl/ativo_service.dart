@@ -17,4 +17,9 @@ class AtivoService implements IAtivoService {
   Future<AtivoModel> create(AtivoModel ativoModel) {
     return ativoRepository.create(ativoModel);
   }
+
+  @override
+  Future<void> delete(AtivoModel ativoModel) {
+    return ativoRepository.delete(ativoModel);
+  }
 }

@@ -31,7 +31,7 @@ abstract class _AtivoControllerBase with Store {
   Future<bool> comprar() async {
     try {
       AtivoModel ativo = AtivoModel();
-      ativo.idCarteira = _alocacaoAtual.idCarteira;
+      ativo.idCarteira = _carteiraController.carteira.id;
       ativo.idUsuario = SharedMain.usuario.id;
       ativo.papel = papel;
       ativo.preco = preco;
@@ -48,18 +48,22 @@ abstract class _AtivoControllerBase with Store {
   }
 
   List<String> getIdSuperiores() {
-    List<String> result = [_alocacaoAtual.id];
+    if (_alocacaoAtual != null) {
+      List<String> result = [_alocacaoAtual.id];
 
-    AlocacaoDTO superior = _alocacaoAtual;
-    while (superior != null) {
-      if (StringUtil.isEmpty(superior.idSuperior)) {
-        break;
-      } else {
-        result.add(superior.idSuperior);
-        superior = _getAlocacaoDTO(superior.idSuperior);
+      AlocacaoDTO superior = _alocacaoAtual;
+      while (superior != null) {
+        if (StringUtil.isEmpty(superior.idSuperior)) {
+          break;
+        } else {
+          result.add(superior.idSuperior);
+          superior = _getAlocacaoDTO(superior.idSuperior);
+        }
       }
+      return result;
+    } else {
+      return [];
     }
-    return result;
   }
 
   @action
@@ -70,6 +74,8 @@ abstract class _AtivoControllerBase with Store {
   }
 
   void setAlocacaoAtual(String idAlocacao) {
-    _alocacaoAtual = _getAlocacaoDTO(idAlocacao);
+    if (!StringUtil.isEmpty(idAlocacao)) {
+      _alocacaoAtual = _getAlocacaoDTO(idAlocacao);
+    }
   }
 }

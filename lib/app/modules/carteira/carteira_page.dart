@@ -1,4 +1,6 @@
 import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/models/ativo_model.dart';
+import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +24,7 @@ class _CarteiraPageState
 
   @override
   void initState() {
+    print('initState');
     controller.setCarteira(widget.carteiraId);
     super.initState();
   }
@@ -34,6 +37,7 @@ class _CarteiraPageState
 
   @override
   Widget build(BuildContext context) {
+    print('build');
     return Scaffold(
         appBar: AppBar(
           title: Text(controller.title),
@@ -53,13 +57,15 @@ class _CarteiraPageState
   }
 
   _body() {
-    return Column(children: [
-      getResumoCarteira(),
-      SizedBox(
-        height: 10,
-      ),
-      getAlocacoes(),
-    ]);
+    return SingleChildScrollView(
+      child: Column(children: [
+        getResumoCarteira(),
+        SizedBox(
+          height: 10,
+        ),
+        getAlocacoesOuAtivos()
+      ]),
+    );
   }
 
   Widget getResumoCarteira() {
@@ -80,7 +86,9 @@ class _CarteiraPageState
               children: [
                 Flexible(
                   child: RaisedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      Modular.to.pushNamed("/carteira/ativo");
+                    },
                     icon: Icon(Icons.add),
                     label: Text("Ativo"),
                   ),
@@ -105,7 +113,15 @@ class _CarteiraPageState
     );
   }
 
-  Widget getAlocacoes() {
+  Widget getAlocacoesOuAtivos() {
+    if (controller.alocacoes.isEmpty) {
+      return _getAtivos();
+    } else {
+      return _getAlocacoes();
+    }
+  }
+
+  Widget _getAlocacoes() {
     return Card(
       child: Column(
         children: [
@@ -138,6 +154,62 @@ class _CarteiraPageState
                 });
           }),
         ],
+      ),
+    );
+  }
+
+  Widget _getAtivos() {
+    return Observer(builder: (_) {
+      return ListView.builder(
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: controller.ativos.length,
+          itemBuilder: (context, index) {
+            AtivoModel ativo = controller.ativos[index];
+
+            return Dismissible(
+              key: Key(index.toString()),
+              confirmDismiss: (e) async {
+                String msg = await LoadingUtil.onLoading(context, () async {
+                  return await controller.excluir(ativo);
+                });
+
+                if (msg == null) {
+                  return true;
+                }
+                DialogUtil.showMessageDialog(context, msg);
+                return false;
+              },
+              background: Container(),
+              secondaryBackground: _slideRightBackground(),
+              direction: DismissDirection.endToStart,
+              child: ListTile(
+                subtitle: Text("Aportado: ${ativo.totalAportado.toString()} "),
+                title: Text(ativo.papel),
+              ),
+            );
+          });
+    });
+  }
+
+  Widget _slideRightBackground() {
+    return Container(
+      color: Colors.red,
+      child: Align(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Icon(
+              Icons.delete,
+              color: Colors.white,
+            ),
+            SizedBox(
+              width: 15,
+            )
+          ],
+        ),
+        alignment: Alignment.centerRight,
       ),
     );
   }

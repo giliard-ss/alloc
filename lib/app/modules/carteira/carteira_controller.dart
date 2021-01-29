@@ -1,7 +1,10 @@
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
+import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/services/ialocacao_service.dart';
+import 'package:alloc/app/shared/services/iativo_service.dart';
 import 'package:alloc/app/shared/services/impl/alocacao_service.dart';
+import 'package:alloc/app/shared/services/impl/ativo_service.dart';
 import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:mobx/mobx.dart';
@@ -18,6 +21,7 @@ abstract class _CarteiraControllerBase with Store {
   CarteiraDTO _carteira;
   ReactionDisposer _carteirasReactDispose;
   IAlocacaoService _alocacaoService = Modular.get<AlocacaoService>();
+  IAtivoService _ativoService = Modular.get<AtivoService>();
   Observable<List<AlocacaoDTO>> allAlocacoes =
       Observable<List<AlocacaoDTO>>([]);
 
@@ -25,12 +29,14 @@ abstract class _CarteiraControllerBase with Store {
 
   @observable
   List<AlocacaoDTO> alocacoes = [];
+  @observable
+  List<AtivoModel> ativos = [];
 
   @observable
   String novaAlocacaoError;
 
   Future<void> init() async {
-    await loadAlocacoes();
+    await _loadAlocacoesOuAtivos();
     _startCarteirasReaction();
     _refreshAlocacoes();
   }
@@ -45,6 +51,32 @@ abstract class _CarteiraControllerBase with Store {
       novaAlocacaoError = "Falha ao salvar nova alocação.";
       return false;
     }
+  }
+
+  Future<String> excluir(AtivoModel ativoModel) async {
+    try {
+      await _ativoService.delete(ativoModel);
+      await SharedMain.refreshAtivos();
+      return null;
+    } on Exception catch (e) {
+      LoggerUtil.error(e);
+      return "Falha ao exlcuir ativo!";
+    }
+  }
+
+  Future<void> _loadAlocacoesOuAtivos() async {
+    await loadAlocacoes();
+    if (alocacoes.isEmpty) {
+      _loadAtivos();
+    }
+  }
+
+  void _loadAtivos() {
+    ativos = SharedMain.ativos
+        .where(
+          (e) => e.idCarteira == _carteira.id,
+        )
+        .toList();
   }
 
   Future<void> loadAlocacoes() async {
@@ -64,6 +96,7 @@ abstract class _CarteiraControllerBase with Store {
     _carteirasReactDispose =
         SharedMain.createCarteirasReact((List<CarteiraDTO> carteiras) {
       _refreshCarteira();
+      _loadAtivos();
     });
   }
 

@@ -41,4 +41,15 @@ class AtivoRepository implements IAtivoRepository {
               e.toString());
     }
   }
+
+  @override
+  Future<void> delete(AtivoModel ativoModel) async {
+    try {
+      await _db.collection(_table).doc(ativoModel.id).delete();
+    } catch (e) {
+      throw ApplicationException(
+          'Falha ao deletar ativos do usuario ${ativoModel.idUsuario} ' +
+              e.toString());
+    }
+  }
 }

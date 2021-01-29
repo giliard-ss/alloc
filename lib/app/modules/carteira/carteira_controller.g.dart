@@ -34,6 +34,21 @@ mixin _$CarteiraController on _CarteiraControllerBase, Store {
     });
   }
 
+  final _$ativosAtom = Atom(name: '_CarteiraControllerBase.ativos');
+
+  @override
+  List<AtivoModel> get ativos {
+    _$ativosAtom.reportRead();
+    return super.ativos;
+  }
+
+  @override
+  set ativos(List<AtivoModel> value) {
+    _$ativosAtom.reportWrite(value, super.ativos, () {
+      super.ativos = value;
+    });
+  }
+
   final _$novaAlocacaoErrorAtom =
       Atom(name: '_CarteiraControllerBase.novaAlocacaoError');
 
@@ -54,6 +69,7 @@ mixin _$CarteiraController on _CarteiraControllerBase, Store {
   String toString() {
     return '''
 alocacoes: ${alocacoes},
+ativos: ${ativos},
 novaAlocacaoError: ${novaAlocacaoError}
     ''';
   }

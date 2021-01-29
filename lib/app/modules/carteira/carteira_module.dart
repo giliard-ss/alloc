@@ -22,7 +22,8 @@ class CarteiraModule extends ChildModule {
         ModularRouter("/sub-alocacao/:id",
             child: (_, args) => SubAlocacaoPage(args.params['id'])),
         ModularRouter("/ativo/:idAlocacao",
-            child: (_, args) => AtivoPage(args.params['idAlocacao']))
+            child: (_, args) => AtivoPage(args.params['idAlocacao'])),
+        ModularRouter("/ativo", child: (_, args) => AtivoPage(null))
       ];
 
   static Inject get to => Inject<CarteiraModule>.of();
