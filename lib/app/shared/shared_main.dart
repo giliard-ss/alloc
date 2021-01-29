@@ -115,6 +115,12 @@ class SharedMain {
     return totalAgora - totalAportado;
   }
 
+  static bool alocacaoPossuiAtivos(String idAlocacao) {
+    return _ativos.value
+        .where((e) => e.superiores.contains(idAlocacao))
+        .isNotEmpty;
+  }
+
   ///crie a reacao vinculada a um variavel para que seja possivel chamar o dispose() pra encerrar
   static ReactionDisposer _createCotacoesReact(
       Function(List<CotacaoModel> cotacoes) fnc) {

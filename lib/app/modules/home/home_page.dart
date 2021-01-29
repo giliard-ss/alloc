@@ -39,9 +39,6 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
     return SingleChildScrollView(
       child: Column(children: [
         getCarteiras(),
-        RaisedButton(
-          onPressed: () {},
-        ),
       ]),
     );
   }

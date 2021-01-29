@@ -1,8 +1,6 @@
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/repositories/ialocacao_repository.dart';
-import 'package:alloc/app/shared/utils/exception_util.dart';
-import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AlocacaoRepository implements IAlocacaoRepository {
@@ -41,5 +39,15 @@ class AlocacaoRepository implements IAlocacaoRepository {
     }).then((e) {
       return alocacao;
     });
+  }
+
+  @override
+  Future<void> delete(String idAlocacao) {
+    try {
+      return _db.collection(_table).doc(idAlocacao).delete();
+    } catch (e) {
+      throw ApplicationException(
+          'Falha ao salvar nova alocação! ' + e.toString());
+    }
   }
 }

@@ -51,10 +51,25 @@ abstract class _SubAlocacaoControllerBase with Store {
     try {
       await _ativoService.delete(ativoModel);
       await SharedMain.refreshAtivos();
+
       return null;
     } on Exception catch (e) {
       LoggerUtil.error(e);
       return "Falha ao exlcuir ativo!";
+    }
+  }
+
+  Future<String> excluirAlocacao(AlocacaoDTO alocacaoDTO) async {
+    try {
+      if (SharedMain.alocacaoPossuiAtivos(alocacaoDTO.id)) {
+        return "Alocação possui ativos!";
+      }
+      await _alocacaoService.delete(alocacaoDTO.id);
+      await _carteiraController.loadAlocacoes();
+      return null;
+    } on Exception catch (e) {
+      LoggerUtil.error(e);
+      return "Falha ao exlcuir alocação!";
     }
   }
 }

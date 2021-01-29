@@ -39,6 +39,7 @@ abstract class _AtivoControllerBase with Store {
       ativo.superiores = getIdSuperiores();
       await _ativoService.create(ativo);
       await SharedMain.refreshAtivos();
+
       return true;
     } catch (e) {
       error = "Falha ao finalizar compra!";

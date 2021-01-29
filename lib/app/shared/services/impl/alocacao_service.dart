@@ -18,4 +18,9 @@ class AlocacaoService implements IAlocacaoService {
       String descricao, String idCarteira, String idSuperior) async {
     return alocacaoRepository.create(descricao, idCarteira, idSuperior);
   }
+
+  @override
+  Future<void> delete(String idAlocacao) {
+    return alocacaoRepository.delete(idAlocacao);
+  }
 }

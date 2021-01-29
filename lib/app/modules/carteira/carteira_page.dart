@@ -63,7 +63,12 @@ class _CarteiraPageState
         SizedBox(
           height: 10,
         ),
-        getAlocacoesOuAtivos()
+        _getButtons(),
+        SizedBox(
+          height: 10,
+        ),
+        _getAtivos(),
+        _getAlocacoes()
       ]),
     );
   }
@@ -80,116 +85,182 @@ class _CarteiraPageState
             title: Text("Saldo"),
             trailing: Text(controller.carteira.getSaldo().toString()),
           ),
-          Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-            child: Row(
-              children: [
-                Flexible(
-                  child: RaisedButton.icon(
-                    onPressed: () {
-                      Modular.to.pushNamed("/carteira/ativo");
-                    },
-                    icon: Icon(Icons.add),
-                    label: Text("Ativo"),
-                  ),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Flexible(
-                  child: RaisedButton.icon(
-                    onPressed: () {
-                      _showNovaCarteiraDialog();
-                    },
-                    icon: Icon(Icons.add),
-                    label: Text("Alocação"),
-                  ),
-                ),
-              ],
-            ),
-          )
         ],
       ),
     );
   }
 
-  Widget getAlocacoesOuAtivos() {
-    if (controller.alocacoes.isEmpty) {
-      return _getAtivos();
-    } else {
-      return _getAlocacoes();
-    }
+  Widget _getButtons() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Flexible(
+              child: _createButton(
+                  Icons.add_box_rounded, "Ativo", Colors.lightBlue, () {
+                Modular.to.pushNamed("/carteira/ativo");
+              }),
+            ),
+            Flexible(
+              child: _createButton(
+                  Icons.add_box_rounded, "Alocação", Colors.lightGreen, () {
+                _showNovaAlocacaoDialog();
+              }),
+            ),
+            Flexible(
+              child: _createButton(
+                  Icons.settings, "Configurar", Colors.lightGreen, () {}),
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Flexible(
+              child: _createButton(
+                  Icons.upload_file, "Depositar", Colors.lightGreen, () {}),
+            ),
+            Flexible(
+              child: _createButton(Icons.download_done_outlined, "Retirar",
+                  Colors.lightGreen, () {}),
+            ),
+            Flexible(
+              child: _createButton(
+                  Icons.delete, "Excluir Carteira", Colors.lightGreen, () {}),
+            )
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _createButton(
+      IconData icon, String text, Color color, Function onPressed) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        color: color,
+        width: 120,
+        height: 70,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              icon,
+              size: 20,
+            ),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _getAlocacoes() {
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            title: Text("Alocações",
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0XFF01579B))),
-          ),
-          Observer(builder: (_) {
-            return ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: controller.alocacoes.length,
-                itemBuilder: (context, index) {
-                  AlocacaoDTO alocacao = controller.alocacoes[index];
+    return Observer(
+      builder: (_) {
+        return Visibility(
+          visible: controller.alocacoes.isNotEmpty,
+          child: Card(
+            child: Column(
+              children: [
+                ListTile(
+                  title: Text("Alocações",
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0XFF01579B))),
+                ),
+                ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: controller.alocacoes.length,
+                    itemBuilder: (context, index) {
+                      AlocacaoDTO alocacao = controller.alocacoes[index];
 
-                  return ListTile(
-                    onTap: () {
-                      Modular.to
-                          .pushNamed("/carteira/sub-alocacao/${alocacao.id}");
-                    },
-                    subtitle: Text(
-                        "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  "),
-                    title: Text(alocacao.descricao),
-                    trailing:
-                        Text(" ${alocacao.totalAportadoAtual.toString()}"),
-                  );
-                });
-          }),
-        ],
-      ),
+                      return Dismissible(
+                        key: Key(alocacao.id),
+                        confirmDismiss: (e) async {
+                          String msg =
+                              await LoadingUtil.onLoading(context, () async {
+                            return await controller.excluirAlocacao(alocacao);
+                          });
+
+                          if (msg == null) {
+                            return true;
+                          }
+                          DialogUtil.showMessageDialog(context, msg);
+                          return false;
+                        },
+                        background: Container(),
+                        secondaryBackground: _slideRightBackground(),
+                        direction: DismissDirection.endToStart,
+                        child: ListTile(
+                          onTap: () {
+                            Modular.to.pushNamed(
+                                "/carteira/sub-alocacao/${alocacao.id}");
+                          },
+                          subtitle: Text(
+                              "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  "),
+                          title: Text(alocacao.descricao),
+                          trailing: Text(
+                              " ${alocacao.totalAportadoAtual.toString()}"),
+                        ),
+                      );
+                    }),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _getAtivos() {
     return Observer(builder: (_) {
-      return ListView.builder(
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: controller.ativos.length,
-          itemBuilder: (context, index) {
-            AtivoModel ativo = controller.ativos[index];
+      return Visibility(
+        //mostrar ativos somente se nao houve subalocacoes , ou seja, se estiver no ultimo nivel
+        visible: controller.ativos.isNotEmpty && controller.alocacoes.isEmpty,
+        child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: controller.ativos.length,
+            itemBuilder: (context, index) {
+              AtivoModel ativo = controller.ativos[index];
 
-            return Dismissible(
-              key: Key(index.toString()),
-              confirmDismiss: (e) async {
-                String msg = await LoadingUtil.onLoading(context, () async {
-                  return await controller.excluir(ativo);
-                });
+              return Dismissible(
+                key: Key(ativo.id),
+                confirmDismiss: (e) async {
+                  String msg = await LoadingUtil.onLoading(context, () async {
+                    return await controller.excluir(ativo);
+                  });
 
-                if (msg == null) {
-                  return true;
-                }
-                DialogUtil.showMessageDialog(context, msg);
-                return false;
-              },
-              background: Container(),
-              secondaryBackground: _slideRightBackground(),
-              direction: DismissDirection.endToStart,
-              child: ListTile(
-                subtitle: Text("Aportado: ${ativo.totalAportado.toString()} "),
-                title: Text(ativo.papel),
-              ),
-            );
-          });
+                  if (msg == null) {
+                    return true;
+                  }
+                  DialogUtil.showMessageDialog(context, msg);
+                  return false;
+                },
+                background: Container(),
+                secondaryBackground: _slideRightBackground(),
+                direction: DismissDirection.endToStart,
+                child: ListTile(
+                  subtitle:
+                      Text("Aportado: ${ativo.totalAportado.toString()} "),
+                  title: Text(ativo.papel),
+                ),
+              );
+            }),
+      );
     });
   }
 
@@ -214,7 +285,7 @@ class _CarteiraPageState
     );
   }
 
-  _showNovaCarteiraDialog() {
+  _showNovaAlocacaoDialog() {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -251,7 +322,9 @@ class _CarteiraPageState
               onPressed: () async {
                 bool ok = await LoadingUtil.onLoading(
                     context, controller.salvarNovaAlocacao);
-                if (ok) Navigator.of(context).pop();
+                if (ok) {
+                  Navigator.of(context).pop();
+                }
               },
             )
           ],

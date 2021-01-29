@@ -1,4 +1,5 @@
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
+import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/services/ialocacao_service.dart';
@@ -38,7 +39,7 @@ abstract class _CarteiraControllerBase with Store {
   Future<void> init() async {
     await _loadAlocacoesOuAtivos();
     _startCarteirasReaction();
-    _refreshAlocacoes();
+    refreshAlocacoes();
   }
 
   Future<bool> salvarNovaAlocacao() async {
@@ -61,6 +62,20 @@ abstract class _CarteiraControllerBase with Store {
     } on Exception catch (e) {
       LoggerUtil.error(e);
       return "Falha ao exlcuir ativo!";
+    }
+  }
+
+  Future<String> excluirAlocacao(AlocacaoDTO alocacaoDTO) async {
+    try {
+      if (SharedMain.alocacaoPossuiAtivos(alocacaoDTO.id)) {
+        return "Alocação possui ativos!";
+      }
+      await _alocacaoService.delete(alocacaoDTO.id);
+      await loadAlocacoes();
+      return null;
+    } on Exception catch (e) {
+      LoggerUtil.error(e);
+      return "Falha ao exlcuir alocação!";
     }
   }
 
@@ -100,12 +115,12 @@ abstract class _CarteiraControllerBase with Store {
     });
   }
 
-  _refreshCarteira() {
+  void _refreshCarteira() {
     _carteira = SharedMain.getCarteira(_carteira.id);
-    _refreshAlocacoes();
+    refreshAlocacoes();
   }
 
-  _refreshAlocacoes() async {
+  void refreshAlocacoes() {
     List<AlocacaoDTO> result = [];
     for (AlocacaoDTO aloc in allAlocacoes.value) {
       aloc.totalAportado = SharedMain.getTotalAportadoAtivosByAlocacao(aloc.id);

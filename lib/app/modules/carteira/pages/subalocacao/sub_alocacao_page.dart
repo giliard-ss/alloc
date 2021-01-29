@@ -30,17 +30,15 @@ class _SubAlocacaoPageState
   CarteiraController _carteiraController = Modular.get();
   Observable<List<AlocacaoDTO>> _alocacoes = Observable<List<AlocacaoDTO>>([]);
   Observable<List<AtivoModel>> _ativos = Observable<List<AtivoModel>>([]);
-  AlocacaoDTO alocacaoAtual;
+
+  Observable<AlocacaoDTO> alocacaoAtual = Observable<AlocacaoDTO>(null);
 
   ReactionDisposer _alocacaoReactDispose;
 
   @override
   void initState() {
     try {
-      alocacaoAtual = _carteiraController.allAlocacoes.value
-          .firstWhere((e) => e.id == widget.id);
-      controller.alocacaoAtual = alocacaoAtual;
-
+      _loadAlocacaoAtual();
       _loadAlocacoes();
       _startCarteirasReaction();
     } catch (e) {
@@ -48,6 +46,12 @@ class _SubAlocacaoPageState
     }
 
     super.initState();
+  }
+
+  void _loadAlocacaoAtual() {
+    alocacaoAtual.value = _carteiraController.allAlocacoes.value
+        .firstWhere((e) => e.id == widget.id);
+    controller.alocacaoAtual = alocacaoAtual.value;
   }
 
   void _loadAlocacoes() {
@@ -92,7 +96,8 @@ class _SubAlocacaoPageState
   _refreshAlocacoesValues() {
     List<AlocacaoDTO> result = [];
     for (AlocacaoDTO aloc in _alocacoes.value) {
-      aloc.totalInvestir = alocacaoAtual.totalInvestir * aloc.alocacaoDouble;
+      aloc.totalInvestir =
+          alocacaoAtual.value.totalInvestir * aloc.alocacaoDouble;
 
       result.add(aloc);
     }
@@ -109,104 +114,108 @@ class _SubAlocacaoPageState
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(alocacaoAtual.descricao),
+          title: Text(alocacaoAtual.value.descricao),
         ),
         body: WidgetUtil.futureBuild(controller.init, _body));
   }
 
   _body() {
     return SingleChildScrollView(
-      child: Column(
-          children: [getResumoAlocacaoPrincipal(), getAlocacoesOuAtivos()]),
+      child: Column(children: [
+        getResumoAlocacaoPrincipal(),
+        _getAtivos(),
+        _getAlocacoes()
+      ]),
     );
   }
 
   Widget getResumoAlocacaoPrincipal() {
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            title: Text("Aportado"),
-            trailing: Text(alocacaoAtual.totalAportado.toString()),
+    return Observer(
+      builder: (_) {
+        return Card(
+          child: Column(
+            children: [
+              ListTile(
+                title: Text("Aportado"),
+                trailing: Text(alocacaoAtual.value.totalAportado.toString()),
+              ),
+              ListTile(
+                title: Text("Investir"),
+                trailing: Text(alocacaoAtual.value.totalInvestir.toString()),
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: RaisedButton.icon(
+                        onPressed: () {
+                          Modular.to.pushNamed(
+                              "/carteira/ativo/${alocacaoAtual.value.id}");
+                        },
+                        icon: Icon(Icons.add),
+                        label: Text("Ativo"),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Flexible(
+                      child: RaisedButton.icon(
+                        onPressed: () {
+                          _showNovaAlocacaoDialog();
+                        },
+                        icon: Icon(Icons.add),
+                        label: Text("Alocação"),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
           ),
-          ListTile(
-            title: Text("Investir"),
-            trailing: Text(alocacaoAtual.totalInvestir.toString()),
-          ),
-          Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-            child: Row(
-              children: [
-                Flexible(
-                  child: RaisedButton.icon(
-                    onPressed: () {
-                      Modular.to
-                          .pushNamed("/carteira/ativo/${alocacaoAtual.id}");
-                    },
-                    icon: Icon(Icons.add),
-                    label: Text("Ativo"),
-                  ),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Flexible(
-                  child: RaisedButton.icon(
-                    onPressed: () {
-                      _showNovaAlocacaoDialog();
-                    },
-                    icon: Icon(Icons.add),
-                    label: Text("Alocação"),
-                  ),
-                ),
-              ],
-            ),
-          )
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget getAlocacoesOuAtivos() {
-    if (_alocacoes.value.isEmpty) {
-      return getAtivos();
-    } else {
-      return getAlocacoes();
-    }
-  }
-
-  Widget getAtivos() {
+  Widget _getAtivos() {
     return Observer(builder: (_) {
-      return ListView.builder(
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: _ativos.value.length,
-          itemBuilder: (context, index) {
-            AtivoModel ativo = _ativos.value[index];
+      return Visibility(
+        //mostrar ativos se tiver no ultimo nivel, ou seja, que nao haja mais alocacoes
+        visible: _ativos.value.isNotEmpty && _alocacoes.value.isEmpty,
+        child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: _ativos.value.length,
+            itemBuilder: (context, index) {
+              AtivoModel ativo = _ativos.value[index];
 
-            return Dismissible(
-              key: Key(index.toString()),
-              confirmDismiss: (e) async {
-                String msg = await LoadingUtil.onLoading(context, () async {
-                  return await controller.excluir(ativo);
-                });
+              return Dismissible(
+                key: Key(ativo.id),
+                confirmDismiss: (e) async {
+                  String msg = await LoadingUtil.onLoading(context, () async {
+                    return await controller.excluir(ativo);
+                  });
 
-                if (msg == null) {
-                  return true;
-                }
-                DialogUtil.showMessageDialog(context, msg);
-                return false;
-              },
-              background: Container(),
-              secondaryBackground: _slideRightBackground(),
-              direction: DismissDirection.endToStart,
-              child: ListTile(
-                subtitle: Text("Aportado: ${ativo.totalAportado.toString()} "),
-                title: Text(ativo.papel),
-              ),
-            );
-          });
+                  if (msg == null) {
+                    return true;
+                  }
+                  DialogUtil.showMessageDialog(context, msg);
+                  return false;
+                },
+                background: Container(),
+                secondaryBackground: _slideRightBackground(),
+                direction: DismissDirection.endToStart,
+                child: ListTile(
+                  subtitle:
+                      Text("Aportado: ${ativo.totalAportado.toString()} "),
+                  title: Text(ativo.papel),
+                ),
+              );
+            }),
+      );
     });
   }
 
@@ -231,7 +240,7 @@ class _SubAlocacaoPageState
     );
   }
 
-  Widget getAlocacoes() {
+  Widget _getAlocacoes() {
     return Observer(builder: (_) {
       return ListView.builder(
           scrollDirection: Axis.vertical,
@@ -241,18 +250,33 @@ class _SubAlocacaoPageState
           itemBuilder: (context, index) {
             AlocacaoDTO alocacao = _alocacoes.value[index];
 
-            return ListTile(
-              onTap: () {
-                Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
-                // Modular.to
-                //     .popAndPushNamed("/carteira/sub-alocacao/${alocacao.id}");
-                //Modular.to.pushReplacementNamed(
-                //    "/carteira/sub-alocacao/${alocacao.id}");
+            return Dismissible(
+              key: Key(alocacao.id),
+              confirmDismiss: (e) async {
+                String msg = await LoadingUtil.onLoading(context, () async {
+                  return await controller.excluirAlocacao(alocacao);
+                });
+
+                if (msg == null) {
+                  _loadAlocacoes();
+                  //como estou chamando o _loadAlocacoes, nao preciso que a list seja reconstruida pelo efeito do Dismissible
+                  return false;
+                }
+                DialogUtil.showMessageDialog(context, msg);
+                return false;
               },
-              subtitle: Text(
-                  "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  "),
-              title: Text(alocacao.descricao),
-              trailing: Text(" ${alocacao.totalAportadoAtual.toString()}"),
+              background: Container(),
+              secondaryBackground: _slideRightBackground(),
+              direction: DismissDirection.endToStart,
+              child: ListTile(
+                onTap: () {
+                  Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
+                },
+                subtitle: Text(
+                    "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  "),
+                title: Text(alocacao.descricao),
+                trailing: Text(" ${alocacao.totalAportadoAtual.toString()}"),
+              ),
             );
           });
     });
@@ -297,10 +321,9 @@ class _SubAlocacaoPageState
                     context, controller.salvarNovaAlocacao);
                 if (ok) {
                   //
-                  setState(() {
-                    _loadAlocacoes();
-                    Navigator.of(context).pop();
-                  });
+
+                  _loadAlocacoes();
+                  Navigator.of(context).pop();
                 }
               },
             )
