@@ -19,7 +19,6 @@ part 'carteira_controller.g.dart';
 class CarteiraController = _CarteiraControllerBase with _$CarteiraController;
 
 abstract class _CarteiraControllerBase with Store {
-  CarteiraDTO _carteira;
   ReactionDisposer _carteirasReactDispose;
   IAlocacaoService _alocacaoService = Modular.get<AlocacaoService>();
   IAtivoService _ativoService = Modular.get<AtivoService>();
@@ -32,6 +31,8 @@ abstract class _CarteiraControllerBase with Store {
   List<AlocacaoDTO> alocacoes = [];
   @observable
   List<AtivoModel> ativos = [];
+  @observable
+  CarteiraDTO _carteira;
 
   @observable
   String novaAlocacaoError;

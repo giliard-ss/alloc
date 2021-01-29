@@ -74,19 +74,23 @@ class _CarteiraPageState
   }
 
   Widget getResumoCarteira() {
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            title: Text("Aportado"),
-            trailing: Text(controller.carteira.totalAportado.toString()),
+    return Observer(
+      builder: (_) {
+        return Card(
+          child: Column(
+            children: [
+              ListTile(
+                title: Text("Aportado"),
+                trailing: Text(controller.carteira.totalAportado.toString()),
+              ),
+              ListTile(
+                title: Text("Saldo"),
+                trailing: Text(controller.carteira.getSaldo().toString()),
+              ),
+            ],
           ),
-          ListTile(
-            title: Text("Saldo"),
-            trailing: Text(controller.carteira.getSaldo().toString()),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

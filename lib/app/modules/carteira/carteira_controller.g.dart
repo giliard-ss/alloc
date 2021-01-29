@@ -49,6 +49,21 @@ mixin _$CarteiraController on _CarteiraControllerBase, Store {
     });
   }
 
+  final _$_carteiraAtom = Atom(name: '_CarteiraControllerBase._carteira');
+
+  @override
+  CarteiraDTO get _carteira {
+    _$_carteiraAtom.reportRead();
+    return super._carteira;
+  }
+
+  @override
+  set _carteira(CarteiraDTO value) {
+    _$_carteiraAtom.reportWrite(value, super._carteira, () {
+      super._carteira = value;
+    });
+  }
+
   final _$novaAlocacaoErrorAtom =
       Atom(name: '_CarteiraControllerBase.novaAlocacaoError');
 

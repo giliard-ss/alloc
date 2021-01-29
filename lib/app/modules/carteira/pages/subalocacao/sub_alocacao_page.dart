@@ -3,6 +3,7 @@ import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
 import 'package:alloc/app/modules/carteira/pages/subalocacao/sub_alocacao_controller.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
+import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
@@ -30,8 +31,7 @@ class _SubAlocacaoPageState
   CarteiraController _carteiraController = Modular.get();
   Observable<List<AlocacaoDTO>> _alocacoes = Observable<List<AlocacaoDTO>>([]);
   Observable<List<AtivoModel>> _ativos = Observable<List<AtivoModel>>([]);
-
-  Observable<AlocacaoDTO> alocacaoAtual = Observable<AlocacaoDTO>(null);
+  Observable<List<AlocacaoDTO>> _alocAtual = Observable<List<AlocacaoDTO>>([]);
 
   ReactionDisposer _alocacaoReactDispose;
 
@@ -48,10 +48,13 @@ class _SubAlocacaoPageState
     super.initState();
   }
 
+  AlocacaoDTO get alocacaoAtual => _alocAtual.value[0];
+  set alocacaoAtual(e) => _alocAtual.value = [e];
+
   void _loadAlocacaoAtual() {
-    alocacaoAtual.value = _carteiraController.allAlocacoes.value
+    alocacaoAtual = _carteiraController.allAlocacoes.value
         .firstWhere((e) => e.id == widget.id);
-    controller.alocacaoAtual = alocacaoAtual.value;
+    controller.alocacaoAtual = alocacaoAtual;
   }
 
   void _loadAlocacoes() {
@@ -90,14 +93,14 @@ class _SubAlocacaoPageState
         SharedMain.createCarteirasReact((List<CarteiraDTO> carteiras) {
       _refreshAlocacoesValues();
       _loadAtivos();
+      _loadAlocacaoAtual();
     });
   }
 
   _refreshAlocacoesValues() {
     List<AlocacaoDTO> result = [];
     for (AlocacaoDTO aloc in _alocacoes.value) {
-      aloc.totalInvestir =
-          alocacaoAtual.value.totalInvestir * aloc.alocacaoDouble;
+      aloc.totalInvestir = alocacaoAtual.totalInvestir * aloc.alocacaoDouble;
 
       result.add(aloc);
     }
@@ -114,7 +117,7 @@ class _SubAlocacaoPageState
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(alocacaoAtual.value.descricao),
+          title: Text(alocacaoAtual.descricao),
         ),
         body: WidgetUtil.futureBuild(controller.init, _body));
   }
@@ -137,11 +140,11 @@ class _SubAlocacaoPageState
             children: [
               ListTile(
                 title: Text("Aportado"),
-                trailing: Text(alocacaoAtual.value.totalAportado.toString()),
+                trailing: Text(alocacaoAtual.totalAportado.toString()),
               ),
               ListTile(
                 title: Text("Investir"),
-                trailing: Text(alocacaoAtual.value.totalInvestir.toString()),
+                trailing: Text(alocacaoAtual.totalInvestir.toString()),
               ),
               Container(
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -150,8 +153,8 @@ class _SubAlocacaoPageState
                     Flexible(
                       child: RaisedButton.icon(
                         onPressed: () {
-                          Modular.to.pushNamed(
-                              "/carteira/ativo/${alocacaoAtual.value.id}");
+                          Modular.to
+                              .pushNamed("/carteira/ativo/${alocacaoAtual.id}");
                         },
                         icon: Icon(Icons.add),
                         label: Text("Ativo"),

@@ -5,8 +5,12 @@ class AlocacaoModel {
   String _idCarteira;
   String _idSuperior;
 
-  AlocacaoModel(this._id, this._descricao, this._alocacao, this._idCarteira,
-      this._idSuperior);
+  AlocacaoModel(
+      [this._id,
+      this._descricao,
+      this._alocacao,
+      this._idCarteira,
+      this._idSuperior]);
 
   AlocacaoModel.fromMap(Map map) {
     this._id = map['id'];
