@@ -50,4 +50,22 @@ class AlocacaoRepository implements IAlocacaoRepository {
           'Falha ao salvar nova alocação! ' + e.toString());
     }
   }
+
+  @override
+  Future<void> deleteByCarteira(
+      Transaction transaction, String carteiraId) async {
+    try {
+      QuerySnapshot query = await _db
+          .collection(_table)
+          .where("idCarteira", isEqualTo: carteiraId)
+          .get();
+
+      query.docs.forEach((doc) {
+        transaction.delete(doc.reference);
+      });
+    } catch (e) {
+      throw ApplicationException(
+          'Falha ao deletar alocações da carteira $carteiraId ' + e.toString());
+    }
+  }
 }

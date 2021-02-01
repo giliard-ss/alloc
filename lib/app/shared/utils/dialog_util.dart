@@ -22,4 +22,34 @@ class DialogUtil {
       },
     );
   }
+
+  static void showAlertDialog(BuildContext context,
+      {String title = "Alerta", Widget content, Function onConcluir}) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[content],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            RaisedButton(
+              child: Text("Concluir"),
+              onPressed: onConcluir,
+            )
+          ],
+        );
+      },
+    );
+  }
 }

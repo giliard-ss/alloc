@@ -35,7 +35,29 @@ class CarteiraRepository implements ICarteiraRepository {
       return carteira;
     } on Exception catch (e) {
       throw ApplicationException(
-          'Falha ao criar nova carteira! ' + e.toString());
+          'Falha ao criar nova carteira do usuário $idUsuario! ' +
+              e.toString());
+    }
+  }
+
+  @override
+  Future<void> update(CarteiraModel carteira) {
+    try {
+      _db.collection(_table).doc(carteira.id).set(carteira.toMap());
+    } on Exception catch (e) {
+      throw ApplicationException(
+          'Falha ao atualizar a carteira ${carteira.id}! ' + e.toString());
+    }
+  }
+
+  @override
+  void delete(Transaction transaction, String idCarteira) {
+    try {
+      DocumentReference ref = _db.collection(_table).doc(idCarteira);
+      transaction.delete(ref);
+    } on Exception catch (e) {
+      throw ApplicationException(
+          'Falha ao deletar carteira $idCarteira! ' + e.toString());
     }
   }
 }

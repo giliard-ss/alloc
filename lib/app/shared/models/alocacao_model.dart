@@ -30,7 +30,8 @@ class AlocacaoModel {
     };
   }
 
-  double get alocacaoDouble => this._alocacao == null ? 0 : this._alocacao;
+  double get alocacaoDouble =>
+      this._alocacao == null ? 0 : this._alocacao.toDouble();
 
   String get id => _id;
 

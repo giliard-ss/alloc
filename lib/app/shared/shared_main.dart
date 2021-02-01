@@ -33,6 +33,7 @@ class SharedMain {
     _ativoService = Modular.get<AtivoService>();
     await _loadCarteiras();
     await _loadAtivos();
+    await _loadCotacoes();
     await _startListenerCotacoes();
     _startReactionCotacoes();
     _refreshCarteiraDTO();
@@ -51,6 +52,7 @@ class SharedMain {
 
   static Future<void> refreshAtivos() async {
     await _loadAtivos();
+    await _loadCotacoes();
     _refreshCarteiraDTO();
   }
 
@@ -193,6 +195,24 @@ class SharedMain {
       throw new ApplicationException(
           'Falha ao iniciar Listener de cotações!', ex);
     }
+  }
+
+  static Future<void> _loadCotacoes() async {
+    List<String> papeis = _getPapeisAtivos();
+    if (papeis.isEmpty) {
+      return;
+    }
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection(_tableCotacoes)
+        .where("id", whereIn: papeis)
+        .get();
+    List<CotacaoModel> cotacoes = List.generate(snapshot.docs.length, (i) {
+      return CotacaoModel.fromMap(snapshot.docs[i].data());
+    });
+
+    runInAction(() async {
+      _cotacoes.value = cotacoes;
+    });
   }
 
   static Future<void> _stopListenerCotacoes() async {

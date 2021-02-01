@@ -14,15 +14,12 @@ class SplashController = _SplashControllerBase with _$SplashController;
 
 abstract class _SplashControllerBase with Store {
   IPreferenceService _preferenceService = Modular.get<PreferenceService>();
-  IUsuarioService _usuarioService = Modular.get<UsuarioService>();
 
   Future<bool> verificaExisteLogin() async {
     UsuarioModel usuario = await _preferenceService.getUsuario();
     if (usuario == null) {
       return false;
     } else {
-      var exist = await _usuarioService.getUsuario(usuario.email);
-      if (exist == null) return false;
       await SharedMain.init(usuario);
       return true;
     }

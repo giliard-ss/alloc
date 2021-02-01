@@ -2,6 +2,7 @@ import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
+import 'package:alloc/app/shared/utils/snackbar_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -20,11 +21,10 @@ class CarteiraPage extends StatefulWidget {
 
 class _CarteiraPageState
     extends ModularState<CarteiraPage, CarteiraController> {
-  //use 'controller' variable to access controller
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
-    print('initState');
     controller.setCarteira(widget.carteiraId);
     super.initState();
   }
@@ -37,8 +37,8 @@ class _CarteiraPageState
 
   @override
   Widget build(BuildContext context) {
-    print('build');
     return Scaffold(
+        key: _scaffoldKey,
         appBar: AppBar(
           title: Text(controller.title),
           actions: [
@@ -87,6 +87,11 @@ class _CarteiraPageState
                 title: Text("Saldo"),
                 trailing: Text(controller.carteira.getSaldo().toString()),
               ),
+              ListTile(
+                title: Text("Atual"),
+                trailing:
+                    Text(controller.carteira.totalAportadoAtual.toString()),
+              )
             ],
           ),
         );
@@ -126,15 +131,21 @@ class _CarteiraPageState
           children: [
             Flexible(
               child: _createButton(
-                  Icons.upload_file, "Depositar", Colors.lightGreen, () {}),
-            ),
-            Flexible(
-              child: _createButton(Icons.download_done_outlined, "Retirar",
-                  Colors.lightGreen, () {}),
+                  Icons.upload_file, "Depósito", Colors.lightGreen, () {
+                _showDepositoDialog();
+              }),
             ),
             Flexible(
               child: _createButton(
-                  Icons.delete, "Excluir Carteira", Colors.lightGreen, () {}),
+                  Icons.download_done_outlined, "Saque", Colors.lightGreen, () {
+                _showRetiradaDialog();
+              }),
+            ),
+            Flexible(
+              child: _createButton(
+                  Icons.delete, "Excluir Carteira", Colors.lightGreen, () {
+                _showExcluirCarteiraDialog();
+              }),
             )
           ],
         )
@@ -289,51 +300,87 @@ class _CarteiraPageState
     );
   }
 
-  _showNovaAlocacaoDialog() {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Nova Alocação'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Observer(
-                  builder: (_) {
-                    return TextField(
-                      onChanged: (text) => controller.novaAlocacaoDesc = text,
-                      decoration: InputDecoration(
-                          errorStyle: TextStyle(color: Colors.red),
-                          errorText: controller.novaAlocacaoError,
-                          labelText: "Título",
-                          border: const OutlineInputBorder()),
-                    );
-                  },
-                )
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            RaisedButton(
-              child: Text("Concluir"),
-              onPressed: () async {
-                bool ok = await LoadingUtil.onLoading(
-                    context, controller.salvarNovaAlocacao);
-                if (ok) {
-                  Navigator.of(context).pop();
-                }
-              },
-            )
-          ],
+  _showExcluirCarteiraDialog() {
+    DialogUtil.showAlertDialog(context,
+        title: "Excluir Carteira",
+        content: Text("Tem certeza que deseja excluir esta carteira?"),
+        onConcluir: () async {
+      String msg =
+          await LoadingUtil.onLoading(context, controller.excluirCarteira);
+      if (msg != null) {
+        Navigator.of(context).pop();
+        DialogUtil.showMessageDialog(context, msg);
+      } else {
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
+  _showRetiradaDialog() {
+    controller.limparErrorDialog();
+    DialogUtil.showAlertDialog(context, title: "Saque", content: Observer(
+      builder: (_) {
+        return TextField(
+          keyboardType: TextInputType.number,
+          onChanged: (text) => controller.valorSaque = double.parse(text),
+          decoration: InputDecoration(
+              errorStyle: TextStyle(color: Colors.red),
+              errorText: controller.errorDialog,
+              labelText: "Valor",
+              border: const OutlineInputBorder()),
         );
       },
-    );
+    ), onConcluir: () async {
+      bool ok = await LoadingUtil.onLoading(context, controller.salvarSaque);
+      if (ok) {
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
+  _showDepositoDialog() {
+    controller.limparErrorDialog();
+    DialogUtil.showAlertDialog(context, title: "Depósito", content: Observer(
+      builder: (_) {
+        return TextField(
+          keyboardType: TextInputType.number,
+          onChanged: (text) => controller.valorDeposito = double.parse(text),
+          decoration: InputDecoration(
+              errorStyle: TextStyle(color: Colors.red),
+              errorText: controller.errorDialog,
+              labelText: "Valor",
+              border: const OutlineInputBorder()),
+        );
+      },
+    ), onConcluir: () async {
+      bool ok = await LoadingUtil.onLoading(context, controller.salvarDeposito);
+      if (ok) {
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
+  _showNovaAlocacaoDialog() {
+    controller.limparErrorDialog();
+    DialogUtil.showAlertDialog(context, title: "Alocação", content: Observer(
+      builder: (_) {
+        return TextField(
+          keyboardType: TextInputType.name,
+          onChanged: (text) => controller.novaAlocacaoDesc = text,
+          decoration: InputDecoration(
+              errorStyle: TextStyle(color: Colors.red),
+              errorText: controller.errorDialog,
+              labelText: "Título",
+              border: const OutlineInputBorder()),
+        );
+      },
+    ), onConcluir: () async {
+      bool ok =
+          await LoadingUtil.onLoading(context, controller.salvarNovaAlocacao);
+      if (ok) {
+        Navigator.of(context).pop();
+      }
+    });
   }
 }

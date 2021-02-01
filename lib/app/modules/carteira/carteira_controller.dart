@@ -2,10 +2,13 @@ import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
+import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/services/ialocacao_service.dart';
 import 'package:alloc/app/shared/services/iativo_service.dart';
+import 'package:alloc/app/shared/services/icarteira_service.dart';
 import 'package:alloc/app/shared/services/impl/alocacao_service.dart';
 import 'package:alloc/app/shared/services/impl/ativo_service.dart';
+import 'package:alloc/app/shared/services/impl/carteira_service.dart';
 import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:mobx/mobx.dart';
@@ -22,10 +25,13 @@ abstract class _CarteiraControllerBase with Store {
   ReactionDisposer _carteirasReactDispose;
   IAlocacaoService _alocacaoService = Modular.get<AlocacaoService>();
   IAtivoService _ativoService = Modular.get<AtivoService>();
+  ICarteiraService _carteiraService = Modular.get<CarteiraService>();
   Observable<List<AlocacaoDTO>> allAlocacoes =
       Observable<List<AlocacaoDTO>>([]);
 
   String novaAlocacaoDesc;
+  double valorDeposito;
+  double valorSaque;
 
   @observable
   List<AlocacaoDTO> alocacoes = [];
@@ -35,7 +41,7 @@ abstract class _CarteiraControllerBase with Store {
   CarteiraDTO _carteira;
 
   @observable
-  String novaAlocacaoError;
+  String errorDialog;
 
   Future<void> init() async {
     await _loadAlocacoesOuAtivos();
@@ -50,7 +56,40 @@ abstract class _CarteiraControllerBase with Store {
       return true;
     } on Exception catch (e) {
       LoggerUtil.error(e);
-      novaAlocacaoError = "Falha ao salvar nova alocação.";
+      errorDialog = "Falha ao salvar nova alocação.";
+      return false;
+    }
+  }
+
+  Future<bool> salvarDeposito() async {
+    try {
+      CarteiraModel updated = CarteiraModel.fromMap(_carteira.toMap());
+      updated.totalDeposito = updated.totalDeposito.toDouble() + valorDeposito;
+      await _carteiraService.update(updated);
+      await SharedMain.refreshCarteiras();
+      return true;
+    } on Exception catch (e) {
+      LoggerUtil.error(e);
+      errorDialog = "Falha ao salvar nova alocação.";
+      return false;
+    }
+  }
+
+  Future<bool> salvarSaque() async {
+    try {
+      CarteiraModel updated = CarteiraModel.fromMap(_carteira.toMap());
+      updated.totalDeposito = updated.totalDeposito.toDouble() - valorSaque;
+      if (updated.totalDeposito < 0) {
+        errorDialog = "Saldo disponível ${_carteira.totalDeposito}.";
+        return false;
+      }
+
+      await _carteiraService.update(updated);
+      await SharedMain.refreshCarteiras();
+      return true;
+    } on Exception catch (e) {
+      LoggerUtil.error(e);
+      errorDialog = "Falha ao salvar nova alocação.";
       return false;
     }
   }
@@ -63,6 +102,17 @@ abstract class _CarteiraControllerBase with Store {
     } on Exception catch (e) {
       LoggerUtil.error(e);
       return "Falha ao exlcuir ativo!";
+    }
+  }
+
+  Future<String> excluirCarteira() async {
+    try {
+      await _carteiraService.delete(_carteira.id);
+      await SharedMain.refreshCarteiras();
+      return null;
+    } on Exception catch (e) {
+      LoggerUtil.error(e);
+      return "Falha ao exlcuir carteira!";
     }
   }
 
@@ -95,13 +145,17 @@ abstract class _CarteiraControllerBase with Store {
         .toList();
   }
 
+  void limparErrorDialog() {
+    errorDialog = null;
+  }
+
   Future<void> loadAlocacoes() async {
     List<AlocacaoDTO> result = [];
     List<AlocacaoModel> list =
         await _alocacaoService.getAlocacoes(_carteira.id);
     list.forEach((a) => result.add(AlocacaoDTO(a)));
     allAlocacoes.value = result;
-    alocacoes = result.where((i) => i.idSuperior == null).toList();
+    refreshAlocacoes();
   }
 
   void _startCarteirasReaction() {

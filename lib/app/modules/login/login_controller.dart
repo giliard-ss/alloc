@@ -37,9 +37,9 @@ abstract class _LoginControllerBase with Store {
     try {
       error = "";
       if (aguardaCodigo) {
-        return _concluirLogin();
+        return await _concluirLogin();
       } else {
-        return _iniciarLogin();
+        return await _iniciarLogin();
       }
     } catch (e) {
       LoggerUtil.error(e);
@@ -48,7 +48,7 @@ abstract class _LoginControllerBase with Store {
     }
   }
 
-  _iniciarLogin() async {
+  Future<bool> _iniciarLogin() async {
     _usuario = await _usuarioService.getUsuario(email);
 
     if (_usuario == null) {
@@ -65,7 +65,7 @@ abstract class _LoginControllerBase with Store {
     return false;
   }
 
-  _concluirLogin() async {
+  Future<bool> _concluirLogin() async {
     if (codigo == _codigoGerado) {
       await _preferenceService.saveUsuario(_usuario);
       return true;

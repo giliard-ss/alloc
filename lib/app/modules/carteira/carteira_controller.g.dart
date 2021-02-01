@@ -64,19 +64,18 @@ mixin _$CarteiraController on _CarteiraControllerBase, Store {
     });
   }
 
-  final _$novaAlocacaoErrorAtom =
-      Atom(name: '_CarteiraControllerBase.novaAlocacaoError');
+  final _$errorDialogAtom = Atom(name: '_CarteiraControllerBase.errorDialog');
 
   @override
-  String get novaAlocacaoError {
-    _$novaAlocacaoErrorAtom.reportRead();
-    return super.novaAlocacaoError;
+  String get errorDialog {
+    _$errorDialogAtom.reportRead();
+    return super.errorDialog;
   }
 
   @override
-  set novaAlocacaoError(String value) {
-    _$novaAlocacaoErrorAtom.reportWrite(value, super.novaAlocacaoError, () {
-      super.novaAlocacaoError = value;
+  set errorDialog(String value) {
+    _$errorDialogAtom.reportWrite(value, super.errorDialog, () {
+      super.errorDialog = value;
     });
   }
 
@@ -85,7 +84,7 @@ mixin _$CarteiraController on _CarteiraControllerBase, Store {
     return '''
 alocacoes: ${alocacoes},
 ativos: ${ativos},
-novaAlocacaoError: ${novaAlocacaoError}
+errorDialog: ${errorDialog}
     ''';
   }
 }
