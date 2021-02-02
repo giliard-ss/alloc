@@ -54,9 +54,15 @@ abstract class _SubAlocacaoControllerBase with Store {
     }
   }
 
-  Future<String> excluir(AtivoModel ativoModel) async {
+  Future<String> excluir(
+      AtivoModel ativoExcluir, List<AtivoModel> ativos) async {
     try {
-      await _ativoService.delete(ativoModel);
+      List<AtivoModel> list = List.from(ativos);
+      list = list.where((e) => e.id != ativoExcluir.id).toList();
+      double media =
+          double.parse(((100 / list.length) / 100).toStringAsFixed(2));
+      list.forEach((a) => a.alocacao = media);
+      await _ativoService.delete(ativoExcluir, list);
       await SharedMain.refreshAtivos();
 
       return null;

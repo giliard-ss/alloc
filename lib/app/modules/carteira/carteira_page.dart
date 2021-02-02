@@ -271,8 +271,8 @@ class _CarteiraPageState
                 secondaryBackground: _slideRightBackground(),
                 direction: DismissDirection.endToStart,
                 child: ListTile(
-                  subtitle:
-                      Text("Aportado: ${ativo.totalAportado.toString()} "),
+                  subtitle: Text(
+                      "Aportado: ${ativo.totalAportado.toString()} aloc: ${ativo.alocacao.toString()}"),
                   title: Text(ativo.papel),
                 ),
               );

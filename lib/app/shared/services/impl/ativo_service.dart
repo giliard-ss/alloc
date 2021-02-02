@@ -27,7 +27,15 @@ class AtivoService implements IAtivoService {
   }
 
   @override
-  Future<void> delete(AtivoModel ativoModel) {
-    return ativoRepository.delete(ativoModel);
+  Future delete(
+      AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar) async {
+    return _db.runTransaction(
+      (transaction) async {
+        ativoRepository.delete(transaction, ativoDeletar);
+        for (AtivoModel ativo in ativosAtualizar) {
+          ativoRepository.save(transaction, ativo);
+        }
+      },
+    );
   }
 }

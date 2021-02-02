@@ -199,7 +199,7 @@ class _SubAlocacaoPageState
                 key: Key(ativo.id),
                 confirmDismiss: (e) async {
                   String msg = await LoadingUtil.onLoading(context, () async {
-                    return await controller.excluir(ativo);
+                    return await controller.excluir(ativo, _ativos.value);
                   });
 
                   if (msg == null) {
@@ -212,8 +212,8 @@ class _SubAlocacaoPageState
                 secondaryBackground: _slideRightBackground(),
                 direction: DismissDirection.endToStart,
                 child: ListTile(
-                  subtitle:
-                      Text("Aportado: ${ativo.totalAportado.toString()} "),
+                  subtitle: Text(
+                      "Aportado: ${ativo.totalAportado.toString()} aloc: ${ativo.alocacao.toString()}"),
                   title: Text(ativo.papel),
                 ),
               );

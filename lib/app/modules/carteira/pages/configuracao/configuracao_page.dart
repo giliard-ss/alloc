@@ -101,7 +101,8 @@ class _ConfiguracaoPageState
               AtivoModel ativo = controller.ativos[index];
 
               return ListTile(
-                subtitle: Text("Aportado: ${ativo.totalAportado.toString()} "),
+                subtitle: Text(
+                    "Aportado: ${ativo.totalAportado.toString()} aloc: ${ativo.alocacao.toString()} "),
                 title: Text(ativo.papel),
               );
             }),
