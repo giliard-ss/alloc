@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class IAtivoRepository {
   Future<List<AtivoModel>> findAtivos(String idUsuario);
-  Future<AtivoModel> create(AtivoModel ativoModel);
+  AtivoModel save(Transaction transaction, AtivoModel ativoModel);
   Future<void> delete(AtivoModel ativoModel);
   Future<void> deleteByCarteira(Transaction transaction, String carteiraId);
 }

@@ -119,7 +119,9 @@ class _CarteiraPageState
             ),
             Flexible(
               child: _createButton(
-                  Icons.settings, "Configurar", Colors.lightGreen, () {}),
+                  Icons.settings, "Configurar", Colors.lightGreen, () {
+                Modular.to.pushNamed("/carteira/config");
+              }),
             ),
           ],
         ),
@@ -224,7 +226,7 @@ class _CarteiraPageState
                                 "/carteira/sub-alocacao/${alocacao.id}");
                           },
                           subtitle: Text(
-                              "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  "),
+                              "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  aloc:${alocacao.alocacao.toString()}"),
                           title: Text(alocacao.descricao),
                           trailing: Text(
                               " ${alocacao.totalAportadoAtual.toString()}"),

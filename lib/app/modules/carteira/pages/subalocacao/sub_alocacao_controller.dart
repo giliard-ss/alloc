@@ -1,5 +1,6 @@
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/services/ialocacao_service.dart';
 import 'package:alloc/app/shared/services/iativo_service.dart';
@@ -34,10 +35,16 @@ abstract class _SubAlocacaoControllerBase with Store {
   }
 
   @action
-  Future<bool> salvarNovaAlocacao() async {
+  Future<bool> salvarNovaAlocacao(List<AlocacaoDTO> alocacoes) async {
     try {
-      await _alocacaoService.create(
-          novaAlocacaoDesc, alocacaoAtual.idCarteira, alocacaoAtual.id);
+      List<AlocacaoModel> alocs = List.from(alocacoes);
+      alocs.add(AlocacaoModel(null, novaAlocacaoDesc, null,
+          alocacaoAtual.idCarteira, alocacaoAtual.id));
+      double media =
+          double.parse(((100 / alocs.length) / 100).toStringAsFixed(2));
+      alocs.forEach((a) => a.alocacao = media);
+
+      await _alocacaoService.save(alocs);
       await _carteiraController.loadAlocacoes();
       return true;
     } on Exception catch (e) {
@@ -59,12 +66,18 @@ abstract class _SubAlocacaoControllerBase with Store {
     }
   }
 
-  Future<String> excluirAlocacao(AlocacaoDTO alocacaoDTO) async {
+  Future<String> excluirAlocacao(
+      AlocacaoDTO alocacaoExcluir, List<AlocacaoDTO> alocacoes) async {
     try {
-      if (SharedMain.alocacaoPossuiAtivos(alocacaoDTO.id)) {
+      if (SharedMain.alocacaoPossuiAtivos(alocacaoExcluir.id)) {
         return "Alocação possui ativos!";
       }
-      await _alocacaoService.delete(alocacaoDTO.id);
+      List<AlocacaoModel> alocs = List.from(alocacoes);
+      alocs = alocs.where((e) => e.id != alocacaoExcluir.id).toList();
+      double media =
+          double.parse(((100 / alocs.length) / 100).toStringAsFixed(2));
+      alocs.forEach((a) => a.alocacao = media);
+      await _alocacaoService.delete(alocacaoExcluir.id, alocs);
       await _carteiraController.loadAlocacoes();
       return null;
     } on Exception catch (e) {

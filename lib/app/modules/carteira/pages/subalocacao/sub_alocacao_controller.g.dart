@@ -39,9 +39,9 @@ mixin _$SubAlocacaoController on _SubAlocacaoControllerBase, Store {
       AsyncAction('_SubAlocacaoControllerBase.salvarNovaAlocacao');
 
   @override
-  Future<bool> salvarNovaAlocacao() {
+  Future<bool> salvarNovaAlocacao(List<AlocacaoDTO> alocacoes) {
     return _$salvarNovaAlocacaoAsyncAction
-        .run(() => super.salvarNovaAlocacao());
+        .run(() => super.salvarNovaAlocacao(alocacoes));
   }
 
   @override

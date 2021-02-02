@@ -25,26 +25,29 @@ class AlocacaoRepository implements IAlocacaoRepository {
   }
 
   @override
-  Future<AlocacaoModel> create(
-      String descricao, String idCarteira, String idSuperior) async {
-    DocumentReference ref = _db.collection(_table).doc();
-    AlocacaoModel alocacao =
-        AlocacaoModel(ref.id, descricao, null, idCarteira, idSuperior);
+  AlocacaoModel save(Transaction transaction, AlocacaoModel alocacaoModel) {
+    try {
+      DocumentReference ref;
+      if (alocacaoModel.id == null) {
+        ref = _db.collection(_table).doc();
+        alocacaoModel.id = ref.id;
+      } else {
+        ref = _db.collection(_table).doc(alocacaoModel.id);
+      }
 
-    await _db.runTransaction((transaction) async {
-      transaction.set(ref, alocacao.toMap());
-    }).catchError((e) {
+      transaction.set(ref, alocacaoModel.toMap());
+      return alocacaoModel;
+    } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao salvar nova alocação! ' + e.toString());
-    }).then((e) {
-      return alocacao;
-    });
+    }
   }
 
   @override
-  Future<void> delete(String idAlocacao) {
+  void delete(Transaction transaction, String idAlocacao) {
     try {
-      return _db.collection(_table).doc(idAlocacao).delete();
+      DocumentReference ref = _db.collection(_table).doc(idAlocacao);
+      transaction.delete(ref);
     } catch (e) {
       throw ApplicationException(
           'Falha ao salvar nova alocação! ' + e.toString());

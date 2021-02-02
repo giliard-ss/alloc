@@ -257,7 +257,8 @@ class _SubAlocacaoPageState
               key: Key(alocacao.id),
               confirmDismiss: (e) async {
                 String msg = await LoadingUtil.onLoading(context, () async {
-                  return await controller.excluirAlocacao(alocacao);
+                  return await controller.excluirAlocacao(
+                      alocacao, _alocacoes.value);
                 });
 
                 if (msg == null) {
@@ -276,7 +277,7 @@ class _SubAlocacaoPageState
                   Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
                 },
                 subtitle: Text(
-                    "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  "),
+                    "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  aloc:${alocacao.alocacaoDouble.toString()}"),
                 title: Text(alocacao.descricao),
                 trailing: Text(" ${alocacao.totalAportadoAtual.toString()}"),
               ),
@@ -320,8 +321,9 @@ class _SubAlocacaoPageState
             RaisedButton(
               child: Text("Concluir"),
               onPressed: () async {
-                bool ok = await LoadingUtil.onLoading(
-                    context, controller.salvarNovaAlocacao);
+                bool ok = await LoadingUtil.onLoading(context, () {
+                  return controller.salvarNovaAlocacao(_alocacoes.value);
+                });
                 if (ok) {
                   //
 

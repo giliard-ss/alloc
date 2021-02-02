@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class IAlocacaoRepository {
   Future<List<AlocacaoModel>> findAlocacoes(String idCarteira);
-  Future<AlocacaoModel> create(
-      String descricao, String idCarteira, String idSuperior);
-  Future<void> delete(String idAlocacao);
+
+  AlocacaoModel save(Transaction transaction, AlocacaoModel alocacaoModel);
+  void delete(Transaction transaction, String idAlocacao);
   Future<void> deleteByCarteira(Transaction transaction, String carteiraId);
 }

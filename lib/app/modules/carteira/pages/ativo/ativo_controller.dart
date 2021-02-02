@@ -37,7 +37,20 @@ abstract class _AtivoControllerBase with Store {
       ativo.preco = preco;
       ativo.qtd = qtd;
       ativo.superiores = getIdSuperiores();
-      await _ativoService.create(ativo);
+
+      List ativos = SharedMain.ativos
+          .where(
+            (e) => _alocacaoAtual == null
+                ? e.idCarteira == _carteiraController.carteira.id
+                : e.superiores.contains(_alocacaoAtual.id),
+          )
+          .toList();
+      ativos.add(ativo);
+      double media =
+          double.parse(((100 / ativos.length) / 100).toStringAsFixed(2));
+      ativos.forEach((a) => a.alocacao = media);
+
+      await _ativoService.save(ativos);
       await SharedMain.refreshAtivos();
 
       return true;

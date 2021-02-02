@@ -51,7 +51,14 @@ abstract class _CarteiraControllerBase with Store {
 
   Future<bool> salvarNovaAlocacao() async {
     try {
-      await _alocacaoService.create(novaAlocacaoDesc, _carteira.id, null);
+      List<AlocacaoModel> alocs = List.from(alocacoes);
+      alocs
+          .add(AlocacaoModel(null, novaAlocacaoDesc, null, _carteira.id, null));
+      double media =
+          double.parse(((100 / alocs.length) / 100).toStringAsFixed(2));
+      alocs.forEach((a) => a.alocacao = media);
+
+      await _alocacaoService.save(alocs);
       await loadAlocacoes();
       return true;
     } on Exception catch (e) {
@@ -121,7 +128,13 @@ abstract class _CarteiraControllerBase with Store {
       if (SharedMain.alocacaoPossuiAtivos(alocacaoDTO.id)) {
         return "Alocação possui ativos!";
       }
-      await _alocacaoService.delete(alocacaoDTO.id);
+      List<AlocacaoModel> alocs = List.from(alocacoes);
+      alocs = alocs.where((e) => e.id != alocacaoDTO.id).toList();
+      double media =
+          double.parse(((100 / alocs.length) / 100).toStringAsFixed(2));
+      alocs.forEach((a) => a.alocacao = media);
+
+      await _alocacaoService.delete(alocacaoDTO.id, alocs);
       await loadAlocacoes();
       return null;
     } on Exception catch (e) {
