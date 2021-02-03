@@ -148,37 +148,64 @@ class _SubAlocacaoPageState
               ),
               Container(
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: RaisedButton.icon(
-                        onPressed: () {
-                          Modular.to
-                              .pushNamed("/carteira/ativo/${alocacaoAtual.id}");
-                        },
-                        icon: Icon(Icons.add),
-                        label: Text("Ativo"),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Flexible(
-                      child: RaisedButton.icon(
-                        onPressed: () {
-                          _showNovaAlocacaoDialog();
-                        },
-                        icon: Icon(Icons.add),
-                        label: Text("Alocação"),
-                      ),
-                    ),
-                  ],
-                ),
+                child: _getButtons(),
               )
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _getButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Flexible(
+          child: _createButton(Icons.add_box_rounded, "Ativo", Colors.lightBlue,
+              () {
+            Modular.to.pushNamed("/carteira/ativo/${alocacaoAtual.id}");
+          }),
+        ),
+        Flexible(
+          child: _createButton(
+              Icons.add_box_rounded, "Alocação", Colors.lightGreen, () {
+            _showNovaAlocacaoDialog();
+          }),
+        ),
+        Flexible(
+          child: _createButton(Icons.settings, "Configurar", Colors.lightGreen,
+              () {
+            Modular.to.pushNamed("/carteira/config/${alocacaoAtual.id}");
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _createButton(
+      IconData icon, String text, Color color, Function onPressed) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        color: color,
+        width: 120,
+        height: 70,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              icon,
+              size: 20,
+            ),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 

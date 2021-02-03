@@ -80,6 +80,17 @@ mixin _$ConfiguracaoController on _ConfiguracaoControllerBase, Store {
   }
 
   @override
+  void checkAtivosValues() {
+    final _$actionInfo = _$_ConfiguracaoControllerBaseActionController
+        .startAction(name: '_ConfiguracaoControllerBase.checkAtivosValues');
+    try {
+      return super.checkAtivosValues();
+    } finally {
+      _$_ConfiguracaoControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 alocacoes: ${alocacoes},

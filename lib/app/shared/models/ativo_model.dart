@@ -48,6 +48,7 @@ class AtivoModel {
   String get id => _id;
 
   set id(String value) => _id = value;
+
   String get idCarteira => _idCarteira;
 
   set idCarteira(String value) => _idCarteira = value;
@@ -60,9 +61,18 @@ class AtivoModel {
 
   set papel(String value) => _papel = value;
 
+  double get alocacaoDouble =>
+      this._alocacao == null ? 0 : this._alocacao.toDouble();
+
+  set alocacaoDouble(value) => this._alocacao = value;
+
   num get alocacao => _alocacao;
 
   set alocacao(num value) => _alocacao = value;
+
+  num get alocacaoPercent => alocacaoDouble * 100;
+
+  set alocacaoPercent(num value) => alocacao = value / 100;
 
   num get qtd => _qtd;
 

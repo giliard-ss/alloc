@@ -75,10 +75,6 @@ class _ConfiguracaoPageState
                       return Observer(
                         builder: (_) {
                           return ListTile(
-                              onTap: () {
-                                Modular.to.pushNamed(
-                                    "/carteira/sub-alocacao/${alocacao.id}");
-                              },
                               subtitle: Text(
                                   "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  "),
                               title: Text(alocacao.descricao),
@@ -132,10 +128,35 @@ class _ConfiguracaoPageState
             itemBuilder: (context, index) {
               AtivoModel ativo = controller.ativos[index];
 
-              return ListTile(
-                subtitle: Text(
-                    "Aportado: ${ativo.totalAportado.toString()} aloc: ${ativo.alocacao.toString()} "),
-                title: Text(ativo.papel),
+              return Observer(
+                builder: (_) {
+                  return ListTile(
+                    subtitle: Text(
+                        "Aportado: ${ativo.totalAportado.toString()} aloc: ${ativo.alocacao.toString()} "),
+                    title: Text(ativo.papel),
+                    trailing: Container(
+                        width: 60.0,
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          maxLength: 4,
+                          initialValue: ativo.alocacaoPercent.toString(),
+                          onChanged: (value) {
+                            if (value.isEmpty) value = "0";
+                            ativo.alocacaoPercent = double.parse(value);
+                            controller.checkAtivosValues();
+                          },
+                          decoration: InputDecoration(
+                              suffix: Text("%"),
+                              counterText: "",
+                              errorText: controller.percentualRestante < 0
+                                  ? " "
+                                  : null,
+                              hintText: controller.percentualRestante < 0
+                                  ? "0"
+                                  : controller.percentualRestante.toString()),
+                        )),
+                  );
+                },
               );
             }),
       );
