@@ -39,7 +39,14 @@ class _ConfiguracaoPageState
 
   _body() {
     return SingleChildScrollView(
-      child: Column(children: [_getAtivos(), _getAlocacoes()]),
+      child: Column(children: [_getAtivos(), _getAlocacoes(), _buttonSalvar()]),
+    );
+  }
+
+  Widget _buttonSalvar() {
+    return RaisedButton(
+      onPressed: controller.salvar,
+      child: Text('Salvar'),
     );
   }
 
@@ -65,19 +72,44 @@ class _ConfiguracaoPageState
                     itemBuilder: (context, index) {
                       AlocacaoDTO alocacao = controller.alocacoes[index];
 
-                      return ListTile(
-                          onTap: () {
-                            Modular.to.pushNamed(
-                                "/carteira/sub-alocacao/${alocacao.id}");
-                          },
-                          subtitle: Text(
-                              "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  "),
-                          title: Text(alocacao.descricao),
-                          trailing: Container(
-                              width: 60.0,
-                              child: TextField(
-                                decoration: InputDecoration(suffixText: "%"),
-                              )));
+                      return Observer(
+                        builder: (_) {
+                          return ListTile(
+                              onTap: () {
+                                Modular.to.pushNamed(
+                                    "/carteira/sub-alocacao/${alocacao.id}");
+                              },
+                              subtitle: Text(
+                                  "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  "),
+                              title: Text(alocacao.descricao),
+                              trailing: Container(
+                                  width: 60.0,
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.number,
+                                    maxLength: 4,
+                                    initialValue:
+                                        alocacao.alocacaoPercent.toString(),
+                                    onChanged: (value) {
+                                      if (value.isEmpty) value = "0";
+                                      alocacao.alocacaoPercent =
+                                          double.parse(value);
+                                      controller.checkAlocacoesValues();
+                                    },
+                                    decoration: InputDecoration(
+                                        suffix: Text("%"),
+                                        counterText: "",
+                                        errorText:
+                                            controller.percentualRestante < 0
+                                                ? " "
+                                                : null,
+                                        hintText:
+                                            controller.percentualRestante < 0
+                                                ? "0"
+                                                : controller.percentualRestante
+                                                    .toString()),
+                                  )));
+                        },
+                      );
                     }),
               ],
             ),

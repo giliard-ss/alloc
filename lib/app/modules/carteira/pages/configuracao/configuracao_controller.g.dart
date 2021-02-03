@@ -49,11 +49,42 @@ mixin _$ConfiguracaoController on _ConfiguracaoControllerBase, Store {
     });
   }
 
+  final _$percentualRestanteAtom =
+      Atom(name: '_ConfiguracaoControllerBase.percentualRestante');
+
+  @override
+  double get percentualRestante {
+    _$percentualRestanteAtom.reportRead();
+    return super.percentualRestante;
+  }
+
+  @override
+  set percentualRestante(double value) {
+    _$percentualRestanteAtom.reportWrite(value, super.percentualRestante, () {
+      super.percentualRestante = value;
+    });
+  }
+
+  final _$_ConfiguracaoControllerBaseActionController =
+      ActionController(name: '_ConfiguracaoControllerBase');
+
+  @override
+  void checkAlocacoesValues() {
+    final _$actionInfo = _$_ConfiguracaoControllerBaseActionController
+        .startAction(name: '_ConfiguracaoControllerBase.checkAlocacoesValues');
+    try {
+      return super.checkAlocacoesValues();
+    } finally {
+      _$_ConfiguracaoControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''
 alocacoes: ${alocacoes},
-ativos: ${ativos}
+ativos: ${ativos},
+percentualRestante: ${percentualRestante}
     ''';
   }
 }

@@ -45,6 +45,10 @@ class AlocacaoModel {
 
   num get alocacao => _alocacao;
 
+  num get alocacaoPercent => alocacaoDouble * 100;
+
+  set alocacaoPercent(num value) => alocacao = value / 100;
+
   set alocacao(num value) => _alocacao = value;
 
   String get idCarteira => _idCarteira;

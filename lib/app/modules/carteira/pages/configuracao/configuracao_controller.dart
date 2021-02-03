@@ -21,9 +21,12 @@ abstract class _ConfiguracaoControllerBase with Store {
   List<AlocacaoDTO> alocacoes = [];
   @observable
   List<AtivoModel> ativos = [];
+  @observable
+  double percentualRestante = 0;
 
   Future<void> init() async {
     _loadAlocacoesOuAtivos();
+    checkAlocacoesValues();
   }
 
   void _loadAlocacoesOuAtivos() {
@@ -43,6 +46,21 @@ abstract class _ConfiguracaoControllerBase with Store {
           )
           .toList();
     });
+  }
+
+  @action
+  void checkAlocacoesValues() {
+    double percentualTotal = 0;
+    alocacoes.forEach((e) {
+      percentualTotal += e.alocacaoPercent.toDouble();
+    });
+    percentualRestante =
+        double.parse(((100 - percentualTotal)).toStringAsFixed(2));
+    //percentualRestante = percentualTotal > 100 ? 0 : (100 - percentualTotal);
+  }
+
+  void salvar() {
+    print('teste00');
   }
 
   void _loadAlocacoes() {
