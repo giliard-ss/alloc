@@ -48,4 +48,9 @@ class AlocacaoService implements IAlocacaoService {
       },
     );
   }
+
+  @override
+  Future update(AlocacaoModel alocacao) {
+    return alocacaoRepository.update(alocacao);
+  }
 }

@@ -65,8 +65,35 @@ mixin _$ConfiguracaoController on _ConfiguracaoControllerBase, Store {
     });
   }
 
+  final _$autoAlocacaoAtom =
+      Atom(name: '_ConfiguracaoControllerBase.autoAlocacao');
+
+  @override
+  bool get autoAlocacao {
+    _$autoAlocacaoAtom.reportRead();
+    return super.autoAlocacao;
+  }
+
+  @override
+  set autoAlocacao(bool value) {
+    _$autoAlocacaoAtom.reportWrite(value, super.autoAlocacao, () {
+      super.autoAlocacao = value;
+    });
+  }
+
   final _$_ConfiguracaoControllerBaseActionController =
       ActionController(name: '_ConfiguracaoControllerBase');
+
+  @override
+  void changeAutoAlocacao(bool value) {
+    final _$actionInfo = _$_ConfiguracaoControllerBaseActionController
+        .startAction(name: '_ConfiguracaoControllerBase.changeAutoAlocacao');
+    try {
+      return super.changeAutoAlocacao(value);
+    } finally {
+      _$_ConfiguracaoControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void checkAlocacoesValues() {
@@ -95,7 +122,8 @@ mixin _$ConfiguracaoController on _ConfiguracaoControllerBase, Store {
     return '''
 alocacoes: ${alocacoes},
 ativos: ${ativos},
-percentualRestante: ${percentualRestante}
+percentualRestante: ${percentualRestante},
+autoAlocacao: ${autoAlocacao}
     ''';
   }
 }

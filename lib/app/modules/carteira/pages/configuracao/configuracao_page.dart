@@ -1,5 +1,6 @@
 import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
+import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,6 @@ class ConfiguracaoPage extends StatefulWidget {
 
 class _ConfiguracaoPageState
     extends ModularState<ConfiguracaoPage, ConfiguracaoController> {
-  //use 'controller' variable to access controller
   @override
   void initState() {
     controller.superiorId = widget.superiorId;
@@ -39,13 +39,46 @@ class _ConfiguracaoPageState
 
   _body() {
     return SingleChildScrollView(
-      child: Column(children: [_getAtivos(), _getAlocacoes(), _buttonSalvar()]),
+      child: Column(children: [
+        _buttonAlocacaoAutomatica(),
+        _getAtivos(),
+        _getAlocacoes(),
+        _buttonSalvar()
+      ]),
+    );
+  }
+
+  Widget _buttonAlocacaoAutomatica() {
+    return Observer(
+      builder: (_) {
+        return ListTile(
+          title: Text("Alocação Automática"),
+          trailing: Switch(
+            onChanged: (e) {
+              setState(() {
+                controller.changeAutoAlocacao(e);
+              });
+            },
+            value: controller.autoAlocacao,
+          ),
+        );
+      },
     );
   }
 
   Widget _buttonSalvar() {
     return RaisedButton(
-      onPressed: controller.salvar,
+      onPressed: () async {
+        String msg = await LoadingUtil.onLoading(context, () async {
+          return await controller.salvar();
+        });
+
+        if (msg != null) {
+          DialogUtil.showMessageDialog(context, msg);
+        } else {
+          Modular.to.pop();
+        }
+      },
       child: Text('Salvar'),
     );
   }
@@ -80,30 +113,7 @@ class _ConfiguracaoPageState
                               title: Text(alocacao.descricao),
                               trailing: Container(
                                   width: 60.0,
-                                  child: TextFormField(
-                                    keyboardType: TextInputType.number,
-                                    maxLength: 4,
-                                    initialValue:
-                                        alocacao.alocacaoPercent.toString(),
-                                    onChanged: (value) {
-                                      if (value.isEmpty) value = "0";
-                                      alocacao.alocacaoPercent =
-                                          double.parse(value);
-                                      controller.checkAlocacoesValues();
-                                    },
-                                    decoration: InputDecoration(
-                                        suffix: Text("%"),
-                                        counterText: "",
-                                        errorText:
-                                            controller.percentualRestante < 0
-                                                ? " "
-                                                : null,
-                                        hintText:
-                                            controller.percentualRestante < 0
-                                                ? "0"
-                                                : controller.percentualRestante
-                                                    .toString()),
-                                  )));
+                                  child: _percentualAlocWidget(alocacao)));
                         },
                       );
                     }),
@@ -112,6 +122,60 @@ class _ConfiguracaoPageState
           ),
         );
       },
+    );
+  }
+
+  Widget _percentualAlocWidget(AlocacaoDTO alocacao) {
+    if (controller.autoAlocacao) {
+      return Text(alocacao.alocacaoPercent.toString() + " %");
+    }
+    return _percentualAlocTextField(alocacao);
+  }
+
+  Widget _percentualAlocTextField(AlocacaoDTO alocacao) {
+    return TextFormField(
+      keyboardType: TextInputType.number,
+      maxLength: 4,
+      initialValue: alocacao.alocacaoPercent.toString(),
+      onChanged: (value) {
+        if (value.isEmpty) value = "0";
+        alocacao.alocacaoPercent = double.parse(value);
+        controller.checkAlocacoesValues();
+      },
+      decoration: InputDecoration(
+          suffix: Text("%"),
+          counterText: "",
+          errorText: controller.percentualRestante < 0 ? " " : null,
+          hintText: controller.percentualRestante < 0
+              ? "0"
+              : controller.percentualRestante.toString()),
+    );
+  }
+
+  Widget _percentualAtivoWidget(AtivoModel ativo) {
+    if (controller.autoAlocacao) {
+      return Text(ativo.alocacaoPercent.toString() + " %");
+    }
+    return _percentualAtivoTextField(ativo);
+  }
+
+  Widget _percentualAtivoTextField(AtivoModel ativo) {
+    return TextFormField(
+      keyboardType: TextInputType.number,
+      maxLength: 4,
+      initialValue: ativo.alocacaoPercent.toString(),
+      onChanged: (value) {
+        if (value.isEmpty) value = "0";
+        ativo.alocacaoPercent = double.parse(value);
+        controller.checkAtivosValues();
+      },
+      decoration: InputDecoration(
+          suffix: Text("%"),
+          counterText: "",
+          errorText: controller.percentualRestante < 0 ? " " : null,
+          hintText: controller.percentualRestante < 0
+              ? "0"
+              : controller.percentualRestante.toString()),
     );
   }
 
@@ -135,26 +199,7 @@ class _ConfiguracaoPageState
                         "Aportado: ${ativo.totalAportado.toString()} aloc: ${ativo.alocacao.toString()} "),
                     title: Text(ativo.papel),
                     trailing: Container(
-                        width: 60.0,
-                        child: TextFormField(
-                          keyboardType: TextInputType.number,
-                          maxLength: 4,
-                          initialValue: ativo.alocacaoPercent.toString(),
-                          onChanged: (value) {
-                            if (value.isEmpty) value = "0";
-                            ativo.alocacaoPercent = double.parse(value);
-                            controller.checkAtivosValues();
-                          },
-                          decoration: InputDecoration(
-                              suffix: Text("%"),
-                              counterText: "",
-                              errorText: controller.percentualRestante < 0
-                                  ? " "
-                                  : null,
-                              hintText: controller.percentualRestante < 0
-                                  ? "0"
-                                  : controller.percentualRestante.toString()),
-                        )),
+                        width: 60.0, child: _percentualAtivoWidget(ativo)),
                   );
                 },
               );

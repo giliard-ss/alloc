@@ -234,7 +234,11 @@ class SharedMain {
   }
 
   static List<CarteiraDTO> get carteiras => _carteirasDTO.value;
-  static List<AtivoModel> get ativos => _ativos.value;
+  static List<AtivoModel> get ativos {
+    List<AtivoModel> result = [];
+    _ativos.value.forEach((e) => result.add(AtivoModel.fromMap(e.toMap())));
+    return result;
+  }
 
   static UsuarioModel get usuario => _usuario;
 }

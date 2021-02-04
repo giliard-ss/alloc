@@ -5,6 +5,7 @@ abstract class IAlocacaoRepository {
   Future<List<AlocacaoModel>> findAlocacoes(String idCarteira);
 
   AlocacaoModel save(Transaction transaction, AlocacaoModel alocacaoModel);
+  Future update(AlocacaoModel alocacaoModel);
   void delete(Transaction transaction, String idAlocacao);
   Future<void> deleteByCarteira(Transaction transaction, String carteiraId);
 }

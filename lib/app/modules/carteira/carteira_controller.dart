@@ -124,11 +124,22 @@ abstract class _CarteiraControllerBase with Store {
     }
   }
 
+  bool alocacaoPossuiSubAlocacao(String idAlocacao) {
+    return allAlocacoes.value
+        .where((e) => e.idSuperior == idAlocacao)
+        .isNotEmpty;
+  }
+
   Future<String> excluirAlocacao(AlocacaoDTO alocacaoDTO) async {
     try {
       if (SharedMain.alocacaoPossuiAtivos(alocacaoDTO.id)) {
         return "Alocação possui ativos!";
       }
+
+      if (alocacaoPossuiSubAlocacao(alocacaoDTO.id)) {
+        return "Alocação possui sub-alocações!";
+      }
+
       List<AlocacaoModel> alocs = List.from(alocacoes);
       alocs = alocs.where((e) => e.id != alocacaoDTO.id).toList();
       double media =
