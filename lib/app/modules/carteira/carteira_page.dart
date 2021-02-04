@@ -1,5 +1,6 @@
 import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
+import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/snackbar_util.dart';
@@ -272,7 +273,7 @@ class _CarteiraPageState
                 direction: DismissDirection.endToStart,
                 child: ListTile(
                   subtitle: Text(
-                      "Aportado: ${ativo.totalAportado.toString()} aloc: ${ativo.alocacao.toString()}"),
+                      "Aportado: ${ativo.totalAportado.toString()} aloc: ${ativo.alocacao.toString()} data:${DateUtil.dateToString(ativo.data)}"),
                   title: Text(ativo.papel),
                 ),
               );

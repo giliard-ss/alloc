@@ -22,7 +22,7 @@ abstract class _AtivoControllerBase with Store {
   @observable
   String error = "";
 
-  DateTime data;
+  DateTime data = DateTime.now();
   String papel;
   int qtd;
   double preco;
@@ -36,6 +36,7 @@ abstract class _AtivoControllerBase with Store {
       ativo.papel = papel;
       ativo.preco = preco;
       ativo.qtd = qtd;
+      ativo.data = data;
       ativo.superiores = getIdSuperiores();
 
       List ativos = SharedMain.ativos
@@ -45,14 +46,14 @@ abstract class _AtivoControllerBase with Store {
                 : e.superiores.contains(_alocacaoAtual.id),
           )
           .toList();
+
       ativos.add(ativo);
-      double media =
-          double.parse(((100 / ativos.length) / 100).toStringAsFixed(2));
-      ativos.forEach((a) => a.alocacao = media);
-
-      await _ativoService.save(ativos);
+      await _ativoService.save(
+          ativos,
+          _alocacaoAtual == null
+              ? _carteiraController.carteira.autoAlocacao
+              : _alocacaoAtual.autoAlocacao);
       await SharedMain.refreshAtivos();
-
       return true;
     } catch (e) {
       error = "Falha ao finalizar compra!";

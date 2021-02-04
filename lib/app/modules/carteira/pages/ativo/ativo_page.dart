@@ -1,4 +1,6 @@
+import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -17,7 +19,10 @@ class AtivoPage extends StatefulWidget {
 
 class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
   //use 'controller' variable to access controller
-
+  TextEditingController _controller =
+      TextEditingController(text: DateUtil.dateToString(DateTime.now()));
+  var maskFormatter = new MaskTextInputFormatter(
+      mask: '##/##/####', filter: {"#": RegExp(r'[0-9]')});
   @override
   void initState() {
     controller.setAlocacaoAtual(widget.idAlocacao);
@@ -54,11 +59,7 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
           SizedBox(
             height: 10,
           ),
-          TextField(
-            keyboardType: TextInputType.datetime,
-            decoration: InputDecoration(
-                labelText: "Data", border: const OutlineInputBorder()),
-          ),
+          _dataTextField(),
           SizedBox(
             height: 10,
           ),
@@ -118,6 +119,24 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
           )
         ],
       ),
+    );
+  }
+
+  Widget _dataTextField() {
+    return TextField(
+      onChanged: (e) {
+        if (e.length == 10) {
+          controller.data = DateUtil.StringToDate(e);
+        }
+      },
+      controller: _controller,
+      inputFormatters: [maskFormatter],
+      keyboardType: TextInputType.number,
+      maxLength: 10,
+      decoration: InputDecoration(
+          labelText: "Data",
+          border: const OutlineInputBorder(),
+          counterText: ""),
     );
   }
 }

@@ -6,8 +6,12 @@ class CarteiraDTO extends CarteiraModel {
 
   CarteiraDTO(CarteiraModel carteiraModel, this._totalAportado,
       this._totalAportadoAtual)
-      : super(carteiraModel.id, carteiraModel.idUsuario,
-            carteiraModel.descricao, carteiraModel.totalDeposito);
+      : super(
+            carteiraModel.id,
+            carteiraModel.idUsuario,
+            carteiraModel.descricao,
+            carteiraModel.totalDeposito,
+            carteiraModel.autoAlocacao);
 
   double getSaldo() {
     return super.totalDeposito.toDouble() - _totalAportado;

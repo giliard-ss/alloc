@@ -40,11 +40,8 @@ abstract class _SubAlocacaoControllerBase with Store {
       List<AlocacaoModel> alocs = List.from(alocacoes);
       alocs.add(AlocacaoModel(null, novaAlocacaoDesc, null,
           alocacaoAtual.idCarteira, alocacaoAtual.id));
-      double media =
-          double.parse(((100 / alocs.length) / 100).toStringAsFixed(2));
-      alocs.forEach((a) => a.alocacao = media);
 
-      await _alocacaoService.save(alocs);
+      await _alocacaoService.save(alocs, alocacaoAtual.autoAlocacao);
       await _carteiraController.loadAlocacoes();
       return true;
     } on Exception catch (e) {

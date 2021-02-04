@@ -6,6 +6,7 @@ class AtivoModel {
   num _alocacao;
   num _qtd;
   num _preco;
+  DateTime _data;
 
   List _superiores;
 
@@ -17,7 +18,8 @@ class AtivoModel {
       this._alocacao,
       this._qtd,
       this._preco,
-      this._superiores]);
+      this._superiores,
+      this._data]);
 
   AtivoModel.fromMap(Map map) {
     this._id = map['id'];
@@ -27,6 +29,7 @@ class AtivoModel {
     this._alocacao = map['alocacao'];
     this._qtd = map['qtd'];
     this._preco = map['preco'];
+    this._data = DateTime.fromMillisecondsSinceEpoch(map['data']);
     this._superiores = List.generate(map['superiores'].length, (i) {
       return map['superiores'][i];
     });
@@ -41,7 +44,8 @@ class AtivoModel {
       'alocacao': this._alocacao,
       'qtd': this._qtd,
       'preco': this._preco,
-      'superiores': this._superiores
+      'superiores': this._superiores,
+      'data': this._data.millisecondsSinceEpoch
     };
   }
 
@@ -83,7 +87,12 @@ class AtivoModel {
   List get superiores => _superiores;
 
   set superiores(List value) => _superiores = value;
+
   num get preco => _preco;
 
   set preco(num value) => _preco = value;
+
+  DateTime get data => _data;
+
+  set data(DateTime value) => _data = value;
 }

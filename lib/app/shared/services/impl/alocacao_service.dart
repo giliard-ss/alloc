@@ -1,6 +1,7 @@
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/repositories/ialocacao_repository.dart';
 import 'package:alloc/app/shared/services/ialocacao_service.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -16,7 +17,16 @@ class AlocacaoService implements IAlocacaoService {
   }
 
   @override
-  Future save(List<AlocacaoModel> alocacoes) async {
+  Future save(List<AlocacaoModel> alocacoes, bool autoAlocacao) async {
+    if (autoAlocacao) {
+      double media =
+          GeralUtil.limitaCasasDecimais(((100 / alocacoes.length) / 100));
+      alocacoes.forEach((a) => a.alocacao = media);
+    } else {
+      //novas alocacoes recebem zero se a alocacao nao for automatica, usuario configura
+      alocacoes.where((e) => e.id == null).forEach((e) => e.alocacao = 0);
+    }
+
     return _db.runTransaction(
       (transaction) async {
         for (AlocacaoModel aloc in alocacoes) {
