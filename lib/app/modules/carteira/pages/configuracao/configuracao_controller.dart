@@ -100,14 +100,16 @@ abstract class _ConfiguracaoControllerBase with Store {
 
   _defineMedia() {
     if (alocacoes.isNotEmpty) {
-      double media =
-          GeralUtil.limitaCasasDecimais((100 / alocacoes.length) / 100);
+      double media = GeralUtil.limitaCasasDecimais(
+          (100 / alocacoes.length) / 100,
+          casasDecimais: 3);
 
       List<AlocacaoDTO> list = List.from(alocacoes);
       list.forEach((e) => e.alocacao = media);
       alocacoes = list;
     } else {
-      double media = GeralUtil.limitaCasasDecimais((100 / ativos.length) / 100);
+      double media = GeralUtil.limitaCasasDecimais((100 / ativos.length) / 100,
+          casasDecimais: 3);
 
       List<AtivoModel> list = List.from(ativos);
       list.forEach((e) => e.alocacao = media);

@@ -7,8 +7,10 @@ import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
+import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -99,8 +101,11 @@ class _SubAlocacaoPageState
 
   _refreshAlocacoesValues() {
     List<AlocacaoDTO> result = [];
+
     for (AlocacaoDTO aloc in _alocacoes.value) {
-      aloc.totalInvestir = alocacaoAtual.totalInvestir * aloc.alocacaoDouble;
+      aloc.totalInvestir =
+          (alocacaoAtual.totalAposInvestir * aloc.alocacao.toDouble()) -
+              aloc.totalAportadoAtual;
 
       result.add(aloc);
     }
@@ -125,61 +130,111 @@ class _SubAlocacaoPageState
   _body() {
     return SingleChildScrollView(
       child: Column(children: [
+        Container(
+          //header
+          padding: EdgeInsets.only(top: 20),
+          height: 100,
+          color: Theme.of(context).primaryColor,
+          child: _header(),
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        ListTile(
+          title: Text(
+            "RESUMO",
+            style: TextStyle(
+                color: Color(0xff103d6b),
+                fontWeight: FontWeight.bold,
+                fontSize: 16),
+          ),
+        ),
         getResumoAlocacaoPrincipal(),
-        _getAtivos(),
-        _getAlocacoes()
+        _getButtons(),
+        Padding(
+          padding: EdgeInsets.all(10),
+          child: Column(
+            children: [_getAtivos(), _getAlocacoes()],
+          ),
+        )
       ]),
+    );
+  }
+
+  _header() {
+    return Observer(
+      builder: (_) {
+        return ListTile(
+          title: Text(
+            "R\$ " + alocacaoAtual.totalAportadoAtualString,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text("Total Atualizado",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+              )),
+        );
+      },
     );
   }
 
   Widget getResumoAlocacaoPrincipal() {
     return Observer(
       builder: (_) {
-        return Card(
-          child: Column(
-            children: [
-              ListTile(
-                title: Text("Aportado"),
-                trailing: Text(alocacaoAtual.totalAportado.toString()),
-              ),
-              ListTile(
-                title: Text("Investir"),
-                trailing: Text(alocacaoAtual.totalInvestir.toString()),
-              ),
-              Container(
-                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                child: _getButtons(),
-              )
-            ],
-          ),
+        return Column(
+          children: [
+            ListTile(
+              title: Text("Aportado"),
+              trailing: Text(alocacaoAtual.totalAportadoString),
+            ),
+            ListTile(
+              title: Text("Investir"),
+              trailing: Text(alocacaoAtual.totalInvestirString),
+            ),
+          ],
         );
       },
     );
   }
 
   Widget _getButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        Flexible(
-          child: _createButton(Icons.add_box_rounded, "Ativo", Colors.lightBlue,
-              () {
-            Modular.to.pushNamed("/carteira/ativo/${alocacaoAtual.id}");
-          }),
-        ),
-        Flexible(
-          child: _createButton(
-              Icons.add_box_rounded, "Alocação", Colors.lightGreen, () {
-            _showNovaAlocacaoDialog();
-          }),
-        ),
-        Flexible(
-          child: _createButton(Icons.settings, "Configurar", Colors.lightGreen,
-              () {
-            Modular.to.pushNamed("/carteira/config/${alocacaoAtual.id}");
-          }),
-        ),
-      ],
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Visibility(
+            visible: _ativos.value.isNotEmpty,
+            child: Flexible(
+              child: _createButton(
+                  Icons.add_box_rounded, "Ativo", Colors.lightGreen, () {
+                Modular.to.pushNamed("/carteira/ativo/${alocacaoAtual.id}");
+              }),
+            ),
+          ),
+          Visibility(
+            visible: _alocacoes.value.isNotEmpty,
+            child: Flexible(
+              child: _createButton(
+                  Icons.add_box_rounded, "Alocação", Colors.lightGreen, () {
+                _showNovaAlocacaoDialog();
+              }),
+            ),
+          ),
+          SizedBox(
+            width: 50,
+          ),
+          Flexible(
+            child: _createButton(
+                Icons.settings, "Configurar", Colors.lightGreen, () {
+              Modular.to.pushNamed("/carteira/config/${alocacaoAtual.id}");
+            }),
+          ),
+        ],
+      ),
     );
   }
 
@@ -188,7 +243,10 @@ class _SubAlocacaoPageState
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        color: color,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
         width: 120,
         height: 70,
         child: Column(
@@ -198,6 +256,7 @@ class _SubAlocacaoPageState
             Icon(
               icon,
               size: 20,
+              color: Colors.white,
             ),
             Text(
               text,
@@ -214,37 +273,79 @@ class _SubAlocacaoPageState
       return Visibility(
         //mostrar ativos se tiver no ultimo nivel, ou seja, que nao haja mais alocacoes
         visible: _ativos.value.isNotEmpty && _alocacoes.value.isEmpty,
-        child: ListView.builder(
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: _ativos.value.length,
-            itemBuilder: (context, index) {
-              AtivoModel ativo = _ativos.value[index];
+        child: Column(
+          children: [
+            ListTile(
+              title: Text(
+                "ATIVOS",
+                style: TextStyle(
+                    color: Color(0xff103d6b),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16),
+              ),
+            ),
+            ListView.builder(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: _ativos.value.length,
+                itemBuilder: (context, index) {
+                  AtivoModel ativo = _ativos.value[index];
 
-              return Dismissible(
-                key: Key(ativo.id),
-                confirmDismiss: (e) async {
-                  String msg = await LoadingUtil.onLoading(context, () async {
-                    return await controller.excluir(ativo, _ativos.value);
-                  });
+                  return Dismissible(
+                    key: Key(ativo.id),
+                    confirmDismiss: (e) async {
+                      String msg =
+                          await LoadingUtil.onLoading(context, () async {
+                        return await controller.excluir(ativo, _ativos.value);
+                      });
 
-                  if (msg == null) {
-                    return true;
-                  }
-                  DialogUtil.showMessageDialog(context, msg);
-                  return false;
-                },
-                background: Container(),
-                secondaryBackground: _slideRightBackground(),
-                direction: DismissDirection.endToStart,
-                child: ListTile(
-                  subtitle: Text(
-                      "Aportado: ${ativo.totalAportado.toString()} aloc: ${ativo.alocacao.toString()}"),
-                  title: Text(ativo.papel),
-                ),
-              );
-            }),
+                      if (msg == null) {
+                        return true;
+                      }
+                      DialogUtil.showMessageDialog(context, msg);
+                      return false;
+                    },
+                    background: Container(),
+                    secondaryBackground: _slideRightBackground(),
+                    direction: DismissDirection.endToStart,
+                    child: Column(
+                      children: [
+                        ExpansionTile(
+                          title: Text(
+                            ativo.papel,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange[700]),
+                          ),
+                          leading: Icon(
+                            Icons.assessment_outlined,
+                            color: Colors.orange[700],
+                          ),
+                          trailing: Text(ativo.totalAportadoString,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange[700])),
+                          children: [
+                            ListTile(
+                              dense: true,
+                              title: Text("Total Aportado"),
+                              trailing: Text(ativo.totalAportadoString),
+                            ),
+                            ListTile(
+                              dense: true,
+                              title: Text("Alocação"),
+                              trailing:
+                                  Text(ativo.alocacaoPercent.toString() + " %"),
+                            )
+                          ],
+                        )
+                      ],
+                    ),
+                  );
+                }),
+          ],
+        ),
       );
     });
   }
@@ -272,44 +373,116 @@ class _SubAlocacaoPageState
 
   Widget _getAlocacoes() {
     return Observer(builder: (_) {
-      return ListView.builder(
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: _alocacoes.value.length,
-          itemBuilder: (context, index) {
-            AlocacaoDTO alocacao = _alocacoes.value[index];
-
-            return Dismissible(
-              key: Key(alocacao.id),
-              confirmDismiss: (e) async {
-                String msg = await LoadingUtil.onLoading(context, () async {
-                  return await controller.excluirAlocacao(
-                      alocacao, _alocacoes.value);
-                });
-
-                if (msg == null) {
-                  _loadAlocacoes();
-                  //como estou chamando o _loadAlocacoes, nao preciso que a list seja reconstruida pelo efeito do Dismissible
-                  return false;
-                }
-                DialogUtil.showMessageDialog(context, msg);
-                return false;
-              },
-              background: Container(),
-              secondaryBackground: _slideRightBackground(),
-              direction: DismissDirection.endToStart,
-              child: ListTile(
-                onTap: () {
-                  Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
-                },
-                subtitle: Text(
-                    "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  aloc:${alocacao.alocacaoDouble.toString()}"),
-                title: Text(alocacao.descricao),
-                trailing: Text(" ${alocacao.totalAportadoAtual.toString()}"),
+      return Visibility(
+        visible: _alocacoes.value.isNotEmpty,
+        child: Column(
+          children: [
+            ListTile(
+              title: Text(
+                "ALOCAÇÕES",
+                style: TextStyle(
+                    color: Color(0xff103d6b),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16),
               ),
-            );
-          });
+            ),
+            ListView.builder(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: _alocacoes.value.length,
+                itemBuilder: (context, index) {
+                  AlocacaoDTO alocacao = _alocacoes.value[index];
+
+                  return Dismissible(
+                    key: Key(alocacao.id),
+                    confirmDismiss: (e) async {
+                      String msg =
+                          await LoadingUtil.onLoading(context, () async {
+                        return await controller.excluirAlocacao(
+                            alocacao, _alocacoes.value);
+                      });
+
+                      if (msg == null) {
+                        _loadAlocacoes();
+                        //como estou chamando o _loadAlocacoes, nao preciso que a list seja reconstruida pelo efeito do Dismissible
+                        return false;
+                      }
+                      DialogUtil.showMessageDialog(context, msg);
+                      return false;
+                    },
+                    background: Container(),
+                    secondaryBackground: _slideRightBackground(),
+                    direction: DismissDirection.endToStart,
+                    child: Card(
+                      child: Column(
+                        children: [
+                          Container(
+                            color: Color(0xffe9edf4),
+                            child: ListTile(
+                              onTap: () {
+                                Modular.to.pushNamed(
+                                    "/carteira/sub-alocacao/${alocacao.id}");
+                              },
+                              leading: Icon(Icons.donut_small_rounded),
+                              title: Text(
+                                alocacao.descricao,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              trailing: Text(
+                                  " ${alocacao.totalAportadoAtualString}",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                          ListTile(
+                            leading: Icon(
+                              alocacao.totalInvestir < 0
+                                  ? Icons.remove_circle
+                                  : Icons.add_circle,
+                              color: alocacao.totalInvestir < 0
+                                  ? Colors.red
+                                  : Colors.green,
+                            ),
+                            title: Text(
+                              "${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}",
+                            ),
+                            trailing: Text(
+                              alocacao.totalInvestirString,
+                              style: TextStyle(
+                                  color: alocacao.totalInvestir < 0
+                                      ? Colors.red
+                                      : Colors.green,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          ExpansionTile(
+                            title: Text(
+                              "Mais",
+                              style: TextStyle(fontSize: 14),
+                            ),
+                            children: [
+                              ListTile(
+                                dense: true,
+                                title: Text("Total Aportado"),
+                                trailing: Text(alocacao.totalAportadoString),
+                              ),
+                              ListTile(
+                                dense: true,
+                                title: Text("Alocação "),
+                                trailing: Text(
+                                    alocacao.alocacaoPercent.toString() + "%"),
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+          ],
+        ),
+      );
     });
   }
 

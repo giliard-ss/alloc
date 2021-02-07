@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/repositories/iativo_repository.dart';
 import 'package:alloc/app/shared/services/iativo_service.dart';
@@ -18,27 +19,34 @@ class AtivoService implements IAtivoService {
 
   @override
   Future save(List<AtivoModel> ativos, bool autoAlocacao) async {
-    List<AtivoModel> list = ativos;
-    bool isAdicao = ativos.where((a) => a.id == null).isNotEmpty;
-    if (isAdicao) {
-      list = _agruparAtivos(ativos);
-    }
+    try {
+      List<AtivoModel> list = ativos;
+      bool isAdicao = ativos.where((a) => a.id == null).isNotEmpty;
+      if (isAdicao) {
+        list = _agruparAtivos(ativos);
+      }
 
-    if (autoAlocacao) {
-      double media = GeralUtil.limitaCasasDecimais((100 / list.length) / 100);
-      list.forEach((a) => a.alocacao = media);
-    } else {
-      //deixa alocacao em zero se o usuario tiver configurado a alocacao
-      list.where((e) => e.id == null).forEach((e) => e.alocacao = 0);
-    }
+      if (autoAlocacao) {
+        double media = GeralUtil.limitaCasasDecimais((100 / list.length) / 100,
+            casasDecimais: 3);
+        list.forEach((a) => a.alocacao = media);
+      } else {
+        //deixa alocacao em zero se o usuario tiver configurado a alocacao
+        list.where((e) => e.id == null).forEach((e) => e.alocacao = 0);
+      }
 
-    return _db.runTransaction(
-      (transaction) async {
-        for (AtivoModel ativo in list) {
-          ativoRepository.save(transaction, ativo);
-        }
-      },
-    );
+      return _db.runTransaction(
+        (transaction) async {
+          for (AtivoModel ativo in list) {
+            ativoRepository.save(transaction, ativo);
+          }
+        },
+      );
+    } on Exception catch (e) {
+      throw ApplicationException(
+          'Falha ao cadastrar ativos do usuario ${ativos[0].idUsuario} ' +
+              e.toString());
+    }
   }
 
   _agruparAtivos(List<AtivoModel> ativos) {
@@ -47,9 +55,12 @@ class AtivoService implements IAtivoService {
     ativos.forEach((a) {
       //se o mapa ja tiver o papel, entao mantem ele e soma os valores
       if (map.containsKey(a.papel)) {
-        double mediaPreco = GeralUtil.limitaCasasDecimais(
-            ((map[a.papel].preco.toDouble() + a.preco.toDouble()) / 2));
-        map[a.papel].preco = mediaPreco;
+        int qtdTotal = map[a.papel].qtd + a.qtd;
+        double mediaPreco =
+            (map[a.papel].totalAportado + a.totalAportado) / qtdTotal;
+
+        map[a.papel].preco =
+            GeralUtil.limitaCasasDecimais(mediaPreco, casasDecimais: 3);
         map[a.papel].qtd = map[a.papel].qtd + a.qtd;
         map[a.papel].data =
             map[a.papel].data.isAfter(a.data) ? map[a.papel].data : a.data;

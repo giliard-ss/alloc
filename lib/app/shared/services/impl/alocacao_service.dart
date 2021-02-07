@@ -19,8 +19,9 @@ class AlocacaoService implements IAlocacaoService {
   @override
   Future save(List<AlocacaoModel> alocacoes, bool autoAlocacao) async {
     if (autoAlocacao) {
-      double media =
-          GeralUtil.limitaCasasDecimais(((100 / alocacoes.length) / 100));
+      double media = GeralUtil.limitaCasasDecimais(
+          ((100 / alocacoes.length) / 100),
+          casasDecimais: 3);
       alocacoes.forEach((a) => a.alocacao = media);
     } else {
       //novas alocacoes recebem zero se a alocacao nao for automatica, usuario configura

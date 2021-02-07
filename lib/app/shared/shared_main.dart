@@ -96,8 +96,9 @@ class SharedMain {
     double totalAportado = 0;
     _ativos.value.forEach((e) {
       if (e.idCarteira == idCarteira) {
-        totalAgora += e.qtd * _getCotacao(e.papel).ultimo.toDouble();
-        totalAportado += e.totalAportado.toDouble();
+        totalAgora =
+            totalAgora + (e.qtd * _getCotacao(e.papel).ultimo.toDouble());
+        totalAportado = totalAportado + (e.totalAportado.toDouble());
       }
     });
 
@@ -180,10 +181,11 @@ class SharedMain {
 
       CollectionReference reference =
           FirebaseFirestore.instance.collection(_tableCotacoes);
-      _listenerCotacoes =
-          reference.where("id", whereIn: papeis).snapshots().listen((snapshot) {
-        List<CotacaoModel> cotacoes = List.generate(snapshot.docs.length, (i) {
-          return CotacaoModel.fromMap(snapshot.docs[i].data());
+      _listenerCotacoes = reference.snapshots().listen((snapshot) {
+        List<QueryDocumentSnapshot> cotacoesPapeis =
+            snapshot.docs.where((e) => papeis.contains(e.id)).toList();
+        List<CotacaoModel> cotacoes = List.generate(cotacoesPapeis.length, (i) {
+          return CotacaoModel.fromMap(cotacoesPapeis[i].data());
         });
 
         runInAction(() async {
@@ -202,12 +204,17 @@ class SharedMain {
     if (papeis.isEmpty) {
       return;
     }
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection(_tableCotacoes)
-        .where("id", whereIn: papeis)
-        .get();
-    List<CotacaoModel> cotacoes = List.generate(snapshot.docs.length, (i) {
-      return CotacaoModel.fromMap(snapshot.docs[i].data());
+    // QuerySnapshot snapshot = await FirebaseFirestore.instance
+    //     .collection(_tableCotacoes)
+    //     .where("id", whereIn: papeis)
+    //     .get();
+
+    QuerySnapshot query =
+        await FirebaseFirestore.instance.collection(_tableCotacoes).get();
+
+    List docs = query.docs.where((e) => papeis.contains(e.id)).toList();
+    List<CotacaoModel> cotacoes = List.generate(docs.length, (i) {
+      return CotacaoModel.fromMap(docs[i].data());
     });
 
     runInAction(() async {

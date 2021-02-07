@@ -11,6 +11,7 @@ import 'package:alloc/app/shared/services/impl/ativo_service.dart';
 import 'package:alloc/app/shared/services/impl/carteira_service.dart';
 import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
+import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -208,13 +209,30 @@ abstract class _CarteiraControllerBase with Store {
           (SharedMain.getRendimentoAtivosByAlocacao(aloc.id));
 
       double totalAposAporte =
-          _carteira.getTotalAposAporte() * aloc.alocacaoDouble;
+          _carteira.getTotalAposAporte() * getAlocacaoReal(aloc);
+
       aloc.totalInvestir = totalAposAporte - aloc.totalAportadoAtual;
 
       result.add(aloc);
     }
     allAlocacoes.value = result;
     alocacoes = result.where((i) => i.idSuperior == null).toList();
+  }
+
+  //Calcula a porcentagem real levando em conta todos as alocacoes superiores
+  // ex: aloc3 * aloc2 * aloc1 = alocacao real
+  double getAlocacaoReal(AlocacaoDTO aloc) {
+    double result = 1;
+    AlocacaoDTO prox = aloc;
+    while (true) {
+      result = result * prox.alocacao.toDouble();
+      if (StringUtil.isEmpty(prox.idSuperior)) {
+        break;
+      } else {
+        prox = allAlocacoes.value.where((e) => e.id == prox.idSuperior).first;
+      }
+    }
+    return result;
   }
 
   void setCarteira(String carteiraId) {

@@ -90,54 +90,119 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
   }
 
   Widget getCarteiras() {
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(
-              Icons.wallet_giftcard,
-              color: Color(0XFF01579B),
-            ),
-            title: Text(
-              "Carteiras",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0XFF01579B)),
-            ),
-            trailing: IconButton(
-              icon: Icon(Icons.add_box),
-              onPressed: () {
-                _showNovaCarteiraDialog();
-              },
-            ),
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Observer(builder: (_) {
-            return ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: controller.carteiras.length,
-                itemBuilder: (context, index) {
-                  CarteiraDTO carteira = controller.carteiras[index];
-
-                  return ListTile(
-                    onTap: () {
-                      Modular.to.pushNamed("/carteira/${carteira.id}");
+    return Column(
+      children: [
+        Observer(builder: (_) {
+          return Column(
+            children: [
+              ListTile(
+                  title: Text(
+                    "CARTEIRAS",
+                    style: TextStyle(
+                        color: Color(0xff103d6b),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                  trailing: IconButton(
+                    icon: Icon(
+                      Icons.add_box,
+                      color: Color(0xff103d6b),
+                    ),
+                    onPressed: () {
+                      _showNovaCarteiraDialog();
                     },
-                    subtitle: Text(
-                        "Aportado: ${carteira.totalAportado.toString()}     Aportar: ${carteira.getSaldo().toString()}  Dep: ${carteira.totalDeposito.toString()}"),
-                    title: Text(carteira.descricao),
-                    trailing:
-                        Text(" ${carteira.totalAportadoAtual.toString()}"),
-                  );
-                });
-          })
-        ],
-      ),
+                  )),
+              ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: controller.carteiras.length,
+                  itemBuilder: (context, index) {
+                    CarteiraDTO carteira = controller.carteiras[index];
+
+                    ListTile(
+                      onTap: () {
+                        Modular.to.pushNamed("/carteira/${carteira.id}");
+                      },
+                      subtitle: Text(
+                          "Aportado: ${carteira.totalAportado.toString()}     Aportar: ${carteira.getSaldo().toString()}  Dep: ${carteira.totalDeposito.toString()}"),
+                      title: Text(carteira.descricao),
+                      trailing: Text(" ${carteira.totalAportadoAtualString}"),
+                    );
+
+                    return Card(
+                      child: Column(
+                        children: [
+                          Container(
+                            //  color: Color(0xffe9edf4),
+                            child: ListTile(
+                              onTap: () {
+                                Modular.to
+                                    .pushNamed("/carteira/${carteira.id}");
+                              },
+                              leading: Icon(Icons.account_balance_wallet),
+                              title: Text(
+                                carteira.descricao,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              trailing: Text(
+                                  " ${carteira.totalAtualizadoString}",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                          ListTile(
+                            leading: Icon(
+                              carteira.getSaldo() < 0
+                                  ? Icons.remove_circle
+                                  : Icons.add_circle,
+                              color: carteira.getSaldo() < 0
+                                  ? Colors.red
+                                  : Colors.green,
+                            ),
+                            title: Text(
+                              "${carteira.getSaldo() < 0 ? 'Vender' : 'Investir'}",
+                            ),
+                            trailing: Text(
+                              carteira.saldoString,
+                              style: TextStyle(
+                                  color: carteira.getSaldo() < 0
+                                      ? Colors.red
+                                      : Colors.green,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          ExpansionTile(
+                            title: Text(
+                              "Mais",
+                              style: TextStyle(fontSize: 14),
+                            ),
+                            children: [
+                              ListTile(
+                                dense: true,
+                                title: Text("Total Aportado"),
+                                trailing: Text(carteira.totalAportadoString),
+                              ),
+                              ListTile(
+                                dense: true,
+                                title: Text("Rendimento "),
+                                trailing: Text(carteira.rendimentoTotalString),
+                              ),
+                              ListTile(
+                                dense: true,
+                                title: Text("Depositado "),
+                                trailing: Text(carteira.totalDepositoString),
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    );
+                  }),
+            ],
+          );
+        })
+      ],
     );
   }
 }

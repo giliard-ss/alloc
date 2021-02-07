@@ -1,3 +1,5 @@
+import 'package:alloc/app/shared/utils/geral_util.dart';
+
 class AtivoModel {
   String _id;
   String _idUsuario;
@@ -83,6 +85,9 @@ class AtivoModel {
   set qtd(num value) => _qtd = value;
 
   num get totalAportado => _preco * qtd;
+
+  String get totalAportadoString =>
+      GeralUtil.limitaCasasDecimais(totalAportado.toDouble()).toString();
 
   List get superiores => _superiores;
 

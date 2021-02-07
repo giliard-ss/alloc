@@ -1,4 +1,5 @@
 import 'package:alloc/app/shared/models/alocacao_model.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 
 class AlocacaoDTO extends AlocacaoModel {
   double _totalAportado;
@@ -11,15 +12,26 @@ class AlocacaoDTO extends AlocacaoModel {
       this._totalInvestir = 0])
       : super.fromMap(model.toMap());
 
+  double get totalAposInvestir => _totalAportadoAtual + _totalInvestir;
+
   double get totalAportado => _totalAportado;
+
+  String get totalAportadoString =>
+      GeralUtil.limitaCasasDecimais(_totalAportado).toString();
 
   set totalAportado(double value) => _totalAportado = value;
 
   double get totalAportadoAtual => _totalAportadoAtual;
 
+  String get totalAportadoAtualString =>
+      GeralUtil.limitaCasasDecimais(_totalAportadoAtual).toString();
+
   set totalAportadoAtual(double value) => _totalAportadoAtual = value;
 
   double get totalInvestir => _totalInvestir;
+
+  String get totalInvestirString =>
+      GeralUtil.limitaCasasDecimais(_totalInvestir).toString();
 
   set totalInvestir(double value) => _totalInvestir = value;
 }
