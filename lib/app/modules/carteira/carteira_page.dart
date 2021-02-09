@@ -70,22 +70,44 @@ class _CarteiraPageState
           Container(
             //header
             padding: EdgeInsets.only(top: 20),
-            height: 150,
-            color: Theme.of(context).primaryColor,
+            height: 200,
+
             child: _header(),
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                  Theme.of(context).primaryColor,
+                  Color(0xff132a53)
+                ])),
           ),
           Container(
             //plano de fundo
             decoration: BoxDecoration(
-                color: Color(0xfff4f6f9),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                )),
-            margin: EdgeInsets.only(top: 100),
-            padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
+              color: Color(0xfff4f6f9),
+            ),
+            margin: EdgeInsets.only(top: 175),
+            padding: EdgeInsets.only(top: 70),
             child: _content(),
           ),
+          Container(
+            //resumo carteira
+            margin: EdgeInsets.fromLTRB(10, 140, 10, 0),
+            child: Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(15),
+                ),
+              ),
+              child: Column(
+                children: [
+                  _totalInvestir(),
+                ],
+              ),
+            ),
+          )
         ],
       ),
     );
@@ -94,19 +116,98 @@ class _CarteiraPageState
   _header() {
     return Observer(
       builder: (_) {
-        return ListTile(
-          title: Text(
-            "R\$ " + controller.carteira.totalAportadoAtualString,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
-          ),
-          subtitle: Text("Total Atualizado",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-              )),
+        return Column(
+          children: [
+            ListTile(
+              title: Text(
+                "R\$ " + controller.carteira.totalAportadoAtualString,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text("Total Atualizado",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                  )),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Card(
+                  elevation: 0,
+                  color: Colors.transparent,
+                  child: Container(
+                    width: 150,
+                    height: 45,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(controller.carteira.totalAportadoString,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold)),
+                        Text(
+                          "Aplicado",
+                          style: TextStyle(color: Colors.white, fontSize: 10),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                Card(
+                  elevation: 0,
+                  color: Colors.transparent,
+                  child: Container(
+                    width: 60,
+                    height: 45,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          (controller.carteira.rendimentoTotal > 0 ? '+' : '') +
+                              controller.carteira.rendimentoTotalPercentString +
+                              "%",
+                          style: TextStyle(
+                              color: controller.carteira.rendimentoTotal < 0
+                                  ? Color(0xffff6666)
+                                  : Colors.greenAccent[700],
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Card(
+                  elevation: 0,
+                  color: Colors.transparent,
+                  child: Container(
+                    width: 150,
+                    height: 45,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(controller.carteira.rendimentoTotalString,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold)),
+                        Text(
+                          "Rendimento",
+                          style: TextStyle(color: Colors.white, fontSize: 10),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
         );
       },
     );
@@ -117,7 +218,7 @@ class _CarteiraPageState
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Visibility(
-          visible: controller.ativos.isNotEmpty,
+          visible: controller.ativos.isNotEmpty && controller.alocacoes.isEmpty,
           child: Flexible(
             child: _createButton(
                 Icons.add_box_rounded, "Ativo", Colors.lightGreen, () {
@@ -135,7 +236,8 @@ class _CarteiraPageState
           visible: controller.alocacoes.isNotEmpty,
           child: Flexible(
             child: _createButton(
-                Icons.add_box_rounded, "Alocação", Colors.lightGreen, () {
+                Icons.my_library_add_outlined, "Alocação", Colors.lightGreen,
+                () {
               _showNovaAlocacaoDialog();
             }),
           ),
@@ -147,8 +249,8 @@ class _CarteiraPageState
           ),
         ),
         Flexible(
-          child: _createButton(Icons.upload_file, "Depósito", Colors.lightGreen,
-              () {
+          child: _createButton(
+              Icons.local_atm_sharp, "Depósito", Colors.lightGreen, () {
             _showDepositoDialog();
           }),
         ),
@@ -156,8 +258,7 @@ class _CarteiraPageState
           width: 15,
         ),
         Flexible(
-          child: _createButton(
-              Icons.download_done_outlined, "Saque", Colors.lightGreen, () {
+          child: _createButton(Icons.money_off, "Saque", Colors.lightGreen, () {
             _showRetiradaDialog();
           }),
         ),
@@ -219,19 +320,6 @@ class _CarteiraPageState
               visible: controller.alocacoes.isNotEmpty ||
                   controller.ativos.isNotEmpty,
               child: Column(children: [
-                SizedBox(
-                  height: 20,
-                ),
-                ListTile(
-                  title: Text(
-                    "RESUMO",
-                    style: TextStyle(
-                        color: Color(0xff103d6b),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
-                  ),
-                ),
-                getResumoCarteira(),
                 _buttons(),
                 SizedBox(
                   height: 10,
@@ -249,25 +337,26 @@ class _CarteiraPageState
     );
   }
 
-  Widget getResumoCarteira() {
+  Widget _totalInvestir() {
     return Observer(
       builder: (_) {
         return Container(
-          child: Column(
-            children: [
-              ListTile(
-                title: Text("Aportado"),
-                trailing: Text(controller.carteira.totalAportadoString),
+          height: 80,
+          child: Center(
+            child: ListTile(
+              title: Text(
+                "Investir",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              ListTile(
-                title: Text("Saldo"),
-                trailing: Text(controller.carteira.saldoString),
+              subtitle: Text(
+                "Depositado " + controller.carteira.totalDepositoString,
+                style: TextStyle(fontSize: 12),
               ),
-              ListTile(
-                title: Text("Rendimento"),
-                trailing: Text(controller.carteira.rendimentoTotalString),
-              )
-            ],
+              trailing: Text(
+                controller.carteira.saldoString,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
         );
       },
@@ -279,26 +368,32 @@ class _CarteiraPageState
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-        ),
+        // decoration: BoxDecoration(
+        //   color: color,
+        //   borderRadius: BorderRadius.all(Radius.circular(10)),
+        // ),
         width: 120,
         height: 70,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              icon,
-              size: 20,
-              color: Colors.white,
-            ),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-            ),
-          ],
+        child: Card(
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: Colors.white70, width: 1),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          elevation: 2,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                icon,
+                size: 30,
+              ),
+              Text(
+                text,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -319,6 +414,12 @@ class _CarteiraPageState
                       fontWeight: FontWeight.bold,
                       fontSize: 16),
                 ),
+              ),
+              Divider(
+                color: Colors.grey[300],
+                height: 5,
+                indent: 15,
+                endIndent: 15,
               ),
               ListView.builder(
                   scrollDirection: Axis.vertical,
@@ -345,70 +446,52 @@ class _CarteiraPageState
                       background: Container(),
                       secondaryBackground: _slideRightBackground(),
                       direction: DismissDirection.endToStart,
-                      child: Card(
-                        child: Column(
-                          children: [
-                            Container(
-                              color: Color(0xffe9edf4),
-                              child: ListTile(
-                                onTap: () {
-                                  Modular.to.pushNamed(
-                                      "/carteira/sub-alocacao/${alocacao.id}");
-                                },
-                                leading: Icon(Icons.donut_small_rounded),
-                                title: Text(
-                                  alocacao.descricao,
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                trailing: Text(
-                                    " ${alocacao.totalAportadoAtualString}",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                            ),
-                            ListTile(
-                              leading: Icon(
-                                alocacao.totalInvestir < 0
-                                    ? Icons.remove_circle
-                                    : Icons.add_circle,
-                                color: alocacao.totalInvestir < 0
-                                    ? Colors.red
-                                    : Colors.green,
-                              ),
-                              title: Text(
-                                "${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}",
-                              ),
-                              trailing: Text(
-                                alocacao.totalInvestirString,
-                                style: TextStyle(
-                                    color: alocacao.totalInvestir < 0
-                                        ? Colors.red
-                                        : Colors.green,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            ExpansionTile(
-                              title: Text(
-                                "Mais",
-                                style: TextStyle(fontSize: 14),
-                              ),
-                              children: [
-                                ListTile(
-                                  dense: true,
-                                  title: Text("Total Aportado"),
-                                  trailing: Text(alocacao.totalAportadoString),
-                                ),
-                                ListTile(
-                                  dense: true,
-                                  title: Text("Alocação "),
-                                  trailing: Text(
-                                      alocacao.alocacaoPercent.toString() +
-                                          "%"),
-                                )
-                              ],
-                            )
-                          ],
+                      child: ExpansionTile(
+                        leading: _IconAlocacoes(alocacao),
+                        subtitle: Text(" ${alocacao.totalAportadoAtualString}",
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        title: Text(
+                          alocacao.descricao,
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
+                        children: [
+                          ListTile(
+                            onTap: () {
+                              Modular.to.pushNamed(
+                                  "/carteira/sub-alocacao/${alocacao.id}");
+                            },
+                            leading: Icon(
+                              alocacao.totalInvestir < 0
+                                  ? Icons.remove_circle
+                                  : Icons.add_circle,
+                              color: alocacao.totalInvestir < 0
+                                  ? Colors.red
+                                  : Colors.green,
+                            ),
+                            title: Text(
+                              "${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}",
+                            ),
+                            trailing: Text(
+                              alocacao.totalInvestirString,
+                              style: TextStyle(
+                                  color: alocacao.totalInvestir < 0
+                                      ? Colors.red
+                                      : Colors.green,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          ListTile(
+                            dense: true,
+                            title: Text("Total Aportado"),
+                            trailing: Text(alocacao.totalAportadoString),
+                          ),
+                          ListTile(
+                            dense: true,
+                            title: Text("Alocação "),
+                            trailing:
+                                Text(alocacao.alocacaoPercent.toString() + "%"),
+                          )
+                        ],
                       ),
                     );
                   }),
@@ -416,6 +499,35 @@ class _CarteiraPageState
           ),
         );
       },
+    );
+  }
+
+  Widget _IconAlocacoes(AlocacaoDTO aloc, {color: Colors.orange}) {
+    return Container(
+      child: Stack(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+          ),
+          Positioned(
+            top: 5,
+            left: 7,
+            child: Container(
+              width: 46,
+              height: 46,
+              child: Center(
+                  child: Text(
+                aloc.alocacaoPercentString + "%",
+                style: TextStyle(fontWeight: FontWeight.bold, color: color),
+              )),
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle, color: Color(0xfff4f6f9)),
+            ),
+          )
+        ],
+      ),
     );
   }
 

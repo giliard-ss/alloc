@@ -172,29 +172,6 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
                                   fontWeight: FontWeight.bold),
                             ),
                           ),
-                          ExpansionTile(
-                            title: Text(
-                              "Mais",
-                              style: TextStyle(fontSize: 14),
-                            ),
-                            children: [
-                              ListTile(
-                                dense: true,
-                                title: Text("Total Aportado"),
-                                trailing: Text(carteira.totalAportadoString),
-                              ),
-                              ListTile(
-                                dense: true,
-                                title: Text("Rendimento "),
-                                trailing: Text(carteira.rendimentoTotalString),
-                              ),
-                              ListTile(
-                                dense: true,
-                                title: Text("Depositado "),
-                                trailing: Text(carteira.totalDepositoString),
-                              )
-                            ],
-                          )
                         ],
                       ),
                     );
