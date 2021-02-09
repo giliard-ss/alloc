@@ -16,6 +16,11 @@ class AlocacaoDTO extends AlocacaoModel {
 
   double get totalAportado => _totalAportado;
 
+  double get rendimentoPercent => (rendimento * 100) / _totalAportado;
+
+  String get rendimentoPercentString =>
+      GeralUtil.limitaCasasDecimais(rendimentoPercent).toString();
+
   double get rendimento => _totalAportadoAtual - totalAportado;
 
   String get rendimentoString =>

@@ -1,6 +1,7 @@
 import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,8 @@ class _CarteiraPageState
     extends ModularState<CarteiraPage, CarteiraController> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  List colors = [0xff504f63, 0xffa18799, 0xff606664, 0xffa9a3b2];
+  List colors = [0xff818099, 0xffa18799, 0xff7c8381, 0xffa9a3b2];
+  List colorsBlack = [0xff504f63, 0xff725a6b, 0xff575c5a, 0xff71687d];
 
   @override
   void initState() {
@@ -71,6 +73,17 @@ class _CarteiraPageState
         value = value - colors.length;
       else
         return colors[value];
+    }
+  }
+
+  _getColorDark(int index) {
+    if (index < colorsBlack.length - 1) return colorsBlack[index];
+    int value = index;
+    while (true) {
+      if (value > colorsBlack.length - 1)
+        value = value - colorsBlack.length;
+      else
+        return colorsBlack[value];
     }
   }
 
@@ -174,7 +187,7 @@ class _CarteiraPageState
                   elevation: 0,
                   color: Colors.transparent,
                   child: Container(
-                    width: 60,
+                    width: 80,
                     height: 45,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -203,7 +216,11 @@ class _CarteiraPageState
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(controller.carteira.rendimentoTotalString,
+                        Text(
+                            (controller.carteira.rendimentoTotal > 0
+                                    ? '+'
+                                    : '') +
+                                controller.carteira.rendimentoTotalString,
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -226,16 +243,14 @@ class _CarteiraPageState
 
   _buttons() {
     return Container(
-      margin: EdgeInsets.only(right: 10),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Visibility(
             visible:
                 controller.ativos.isNotEmpty && controller.alocacoes.isEmpty,
             child: Flexible(
-              child: _createButton(
-                  Icons.add_box_rounded, "Ativo", Colors.lightGreen, () {
+              child: _createButton(Icons.add_chart, "Ativo", () {
                 Modular.to.pushNamed("/carteira/ativo");
               }),
             ),
@@ -243,22 +258,19 @@ class _CarteiraPageState
           Visibility(
             visible: controller.alocacoes.isNotEmpty,
             child: Flexible(
-              child: _createButton(
-                  Icons.my_library_add_outlined, "Alocação", Colors.lightGreen,
-                  () {
+              child:
+                  _createButton(Icons.my_library_add_outlined, "Alocação", () {
                 _showNovaAlocacaoDialog();
               }),
             ),
           ),
           Flexible(
-            child: _createButton(
-                Icons.local_atm_sharp, "Depósito", Colors.lightGreen, () {
+            child: _createButton(Icons.local_atm_sharp, "Depósito", () {
               _showDepositoDialog();
             }),
           ),
           Flexible(
-            child:
-                _createButton(Icons.money_off, "Saque", Colors.lightGreen, () {
+            child: _createButton(Icons.monetization_on_outlined, "Saque", () {
               _showRetiradaDialog();
             }),
           ),
@@ -286,14 +298,12 @@ class _CarteiraPageState
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Flexible(
-              child: _createButton(
-                  Icons.add_box_rounded, "Ativo", Colors.lightGreen, () {
+              child: _createButton(Icons.add_chart, "Ativo", () {
                 Modular.to.pushNamed("/carteira/ativo");
               }),
             ),
             Flexible(
-              child: _createButton(
-                  Icons.add_box_rounded, "Alocação", Colors.lightGreen, () {
+              child: _createButton(Icons.add_box_rounded, "Alocação", () {
                 _showNovaAlocacaoDialog();
               }),
             ),
@@ -344,7 +354,10 @@ class _CarteiraPageState
             child: ListTile(
               title: Text(
                 "Investir",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff132a53)),
               ),
               subtitle: Text(
                 "Depositado " + controller.carteira.totalDepositoString,
@@ -352,7 +365,10 @@ class _CarteiraPageState
               ),
               trailing: Text(
                 controller.carteira.saldoString,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff132a53)),
               ),
             ),
           ),
@@ -361,8 +377,8 @@ class _CarteiraPageState
     );
   }
 
-  Widget _createButton(
-      IconData icon, String text, Color color, Function onPressed) {
+  Widget _createButton(IconData icon, String text, Function onPressed,
+      {color: Colors.orange}) {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
@@ -384,6 +400,7 @@ class _CarteiraPageState
             children: <Widget>[
               Icon(
                 icon,
+                color: color,
                 size: 30,
               ),
               Text(
@@ -446,14 +463,21 @@ class _CarteiraPageState
                       direction: DismissDirection.endToStart,
                       child: ExpansionTile(
                         leading: _iconAlocacoes(alocacao,
-                            color: Color(_getColor(index))),
+                            color: Color(
+                              _getColor(index),
+                            ),
+                            colorDark: Color(
+                              _getColorDark(index),
+                            )),
                         subtitle: Text(
-                            alocacao.totalInvestir < 0
-                                ? 'Vender'
-                                : 'Investir' +
-                                    " ${alocacao.totalInvestirString}",
+                            (alocacao.totalInvestir < 0
+                                ? ('Vender ' +
+                                    (GeralUtil.limitaCasasDecimais(
+                                            alocacao.totalInvestir * -1))
+                                        .toString())
+                                : 'Investir ' + alocacao.totalInvestirString),
                             style: TextStyle(
-                                color: alocacao.totalAposInvestir < 0
+                                color: alocacao.totalInvestir < 0
                                     ? Colors.red
                                     : Colors.green)),
                         title: Text(
@@ -478,6 +502,20 @@ class _CarteiraPageState
                           ),
                           ListTile(
                             dense: true,
+                            title: Text("Rendimento Percentual"),
+                            trailing: Text(
+                              (alocacao.rendimento > 0 ? '+' : '') +
+                                  alocacao.rendimentoPercentString +
+                                  "%",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: alocacao.rendimento < 0
+                                      ? Colors.red
+                                      : Colors.green),
+                            ),
+                          ),
+                          ListTile(
+                            dense: true,
                             title: Text("Total Aportado"),
                             trailing: Text(alocacao.totalAportadoString),
                           ),
@@ -485,14 +523,29 @@ class _CarteiraPageState
                             dense: true,
                             title: Text("Alocação "),
                             trailing:
-                                Text(alocacao.alocacaoPercent.toString() + "%"),
+                                Text(alocacao.alocacaoPercentString + "%"),
                           ),
-                          RaisedButton(
-                            child: Text("Investir"),
-                            onPressed: () {
-                              Modular.to.pushNamed(
-                                  "/carteira/sub-alocacao/${alocacao.id}");
-                            },
+                          Container(
+                            color: Color(0xffe7ecf4),
+                            child: ListTile(
+                              dense: true,
+                              onTap: () {
+                                Modular.to.pushNamed(
+                                    "/carteira/sub-alocacao/${alocacao.id}");
+                              },
+                              title: Text(
+                                alocacao.totalInvestir < 0
+                                    ? 'Vender'
+                                    : 'Investir',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              trailing: Text(alocacao.totalInvestirString,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: (alocacao.totalInvestir < 0
+                                          ? Colors.red
+                                          : Colors.green))),
+                            ),
                           )
                         ],
                       ),
@@ -505,14 +558,20 @@ class _CarteiraPageState
     );
   }
 
-  Widget _iconAlocacoes(AlocacaoDTO aloc, {color: Colors.orange}) {
+  Widget _iconAlocacoes(AlocacaoDTO aloc,
+      {color: Colors.orange, colorDark: Colors.black}) {
     return Container(
       child: Stack(
         children: [
           Container(
             width: 60,
             height: 60,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [color, colorDark])),
           ),
           Positioned(
             top: 5,
@@ -523,7 +582,7 @@ class _CarteiraPageState
               child: Center(
                   child: Text(
                 aloc.alocacaoPercentString + "%",
-                style: TextStyle(fontWeight: FontWeight.bold, color: color),
+                style: TextStyle(fontWeight: FontWeight.bold, color: colorDark),
               )),
               decoration: BoxDecoration(
                   shape: BoxShape.circle, color: Color(0xfff4f6f9)),
@@ -700,7 +759,8 @@ class _CarteiraPageState
 
   _showNovaAlocacaoDialog() {
     controller.limparErrorDialog();
-    DialogUtil.showAlertDialog(context, title: "Alocação", content: Observer(
+    DialogUtil.showAlertDialog(context, title: "Nova Alocação",
+        content: Observer(
       builder: (_) {
         return TextField(
           keyboardType: TextInputType.name,
