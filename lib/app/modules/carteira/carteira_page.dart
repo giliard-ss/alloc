@@ -1,9 +1,7 @@
 import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
-import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
-import 'package:alloc/app/shared/utils/snackbar_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -23,6 +21,8 @@ class CarteiraPage extends StatefulWidget {
 class _CarteiraPageState
     extends ModularState<CarteiraPage, CarteiraController> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  List colors = [0xff504f63, 0xffa18799, 0xff606664, 0xffa9a3b2];
 
   @override
   void initState() {
@@ -61,6 +61,17 @@ class _CarteiraPageState
           ],
         ),
         body: WidgetUtil.futureBuild(controller.init, _body));
+  }
+
+  _getColor(int index) {
+    if (index < colors.length - 1) return colors[index];
+    int value = index;
+    while (true) {
+      if (value > colors.length - 1)
+        value = value - colors.length;
+      else
+        return colors[value];
+    }
   }
 
   _body() {
@@ -214,55 +225,45 @@ class _CarteiraPageState
   }
 
   _buttons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Visibility(
-          visible: controller.ativos.isNotEmpty && controller.alocacoes.isEmpty,
-          child: Flexible(
+    return Container(
+      margin: EdgeInsets.only(right: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Visibility(
+            visible:
+                controller.ativos.isNotEmpty && controller.alocacoes.isEmpty,
+            child: Flexible(
+              child: _createButton(
+                  Icons.add_box_rounded, "Ativo", Colors.lightGreen, () {
+                Modular.to.pushNamed("/carteira/ativo");
+              }),
+            ),
+          ),
+          Visibility(
+            visible: controller.alocacoes.isNotEmpty,
+            child: Flexible(
+              child: _createButton(
+                  Icons.my_library_add_outlined, "Alocação", Colors.lightGreen,
+                  () {
+                _showNovaAlocacaoDialog();
+              }),
+            ),
+          ),
+          Flexible(
             child: _createButton(
-                Icons.add_box_rounded, "Ativo", Colors.lightGreen, () {
-              Modular.to.pushNamed("/carteira/ativo");
+                Icons.local_atm_sharp, "Depósito", Colors.lightGreen, () {
+              _showDepositoDialog();
             }),
           ),
-        ),
-        Visibility(
-          visible: controller.ativos.isNotEmpty,
-          child: SizedBox(
-            width: 15,
-          ),
-        ),
-        Visibility(
-          visible: controller.alocacoes.isNotEmpty,
-          child: Flexible(
-            child: _createButton(
-                Icons.my_library_add_outlined, "Alocação", Colors.lightGreen,
-                () {
-              _showNovaAlocacaoDialog();
+          Flexible(
+            child:
+                _createButton(Icons.money_off, "Saque", Colors.lightGreen, () {
+              _showRetiradaDialog();
             }),
           ),
-        ),
-        Visibility(
-          visible: controller.alocacoes.isNotEmpty,
-          child: SizedBox(
-            width: 15,
-          ),
-        ),
-        Flexible(
-          child: _createButton(
-              Icons.local_atm_sharp, "Depósito", Colors.lightGreen, () {
-            _showDepositoDialog();
-          }),
-        ),
-        SizedBox(
-          width: 15,
-        ),
-        Flexible(
-          child: _createButton(Icons.money_off, "Saque", Colors.lightGreen, () {
-            _showRetiradaDialog();
-          }),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -322,10 +323,7 @@ class _CarteiraPageState
               child: Column(children: [
                 _buttons(),
                 SizedBox(
-                  height: 10,
-                ),
-                SizedBox(
-                  height: 10,
+                  height: 20,
                 ),
                 _getAtivos(),
                 _getAlocacoes()
@@ -447,37 +445,35 @@ class _CarteiraPageState
                       secondaryBackground: _slideRightBackground(),
                       direction: DismissDirection.endToStart,
                       child: ExpansionTile(
-                        leading: _IconAlocacoes(alocacao),
-                        subtitle: Text(" ${alocacao.totalAportadoAtualString}",
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        leading: _iconAlocacoes(alocacao,
+                            color: Color(_getColor(index))),
+                        subtitle: Text(
+                            alocacao.totalInvestir < 0
+                                ? 'Vender'
+                                : 'Investir' +
+                                    " ${alocacao.totalInvestirString}",
+                            style: TextStyle(
+                                color: alocacao.totalAposInvestir < 0
+                                    ? Colors.red
+                                    : Colors.green)),
                         title: Text(
                           alocacao.descricao,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[700]),
                         ),
                         children: [
                           ListTile(
-                            onTap: () {
-                              Modular.to.pushNamed(
-                                  "/carteira/sub-alocacao/${alocacao.id}");
-                            },
-                            leading: Icon(
-                              alocacao.totalInvestir < 0
-                                  ? Icons.remove_circle
-                                  : Icons.add_circle,
-                              color: alocacao.totalInvestir < 0
-                                  ? Colors.red
-                                  : Colors.green,
-                            ),
-                            title: Text(
-                              "${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}",
-                            ),
+                            dense: true,
+                            title: Text("Rendimento"),
                             trailing: Text(
-                              alocacao.totalInvestirString,
+                              (alocacao.rendimento > 0 ? '+' : '') +
+                                  alocacao.rendimentoString,
                               style: TextStyle(
-                                  color: alocacao.totalInvestir < 0
+                                  fontWeight: FontWeight.bold,
+                                  color: alocacao.rendimento < 0
                                       ? Colors.red
-                                      : Colors.green,
-                                  fontWeight: FontWeight.bold),
+                                      : Colors.green),
                             ),
                           ),
                           ListTile(
@@ -490,6 +486,13 @@ class _CarteiraPageState
                             title: Text("Alocação "),
                             trailing:
                                 Text(alocacao.alocacaoPercent.toString() + "%"),
+                          ),
+                          RaisedButton(
+                            child: Text("Investir"),
+                            onPressed: () {
+                              Modular.to.pushNamed(
+                                  "/carteira/sub-alocacao/${alocacao.id}");
+                            },
                           )
                         ],
                       ),
@@ -502,7 +505,7 @@ class _CarteiraPageState
     );
   }
 
-  Widget _IconAlocacoes(AlocacaoDTO aloc, {color: Colors.orange}) {
+  Widget _iconAlocacoes(AlocacaoDTO aloc, {color: Colors.orange}) {
     return Container(
       child: Stack(
         children: [
