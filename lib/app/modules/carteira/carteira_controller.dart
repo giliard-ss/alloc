@@ -3,6 +3,7 @@ import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
+import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/services/ialocacao_service.dart';
 import 'package:alloc/app/shared/services/iativo_service.dart';
 import 'package:alloc/app/shared/services/icarteira_service.dart';
@@ -217,6 +218,10 @@ abstract class _CarteiraControllerBase with Store {
     }
     allAlocacoes.value = result;
     alocacoes = result.where((i) => i.idSuperior == null).toList();
+  }
+
+  CotacaoModel getCotacao(String papel) {
+    return SharedMain.getCotacao(papel);
   }
 
   //Calcula a porcentagem real levando em conta todos as alocacoes superiores

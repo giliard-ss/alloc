@@ -56,7 +56,7 @@ class SharedMain {
     _refreshCarteiraDTO();
   }
 
-  static CotacaoModel _getCotacao(String id) {
+  static CotacaoModel getCotacao(String id) {
     for (CotacaoModel cm in _cotacoes.value) {
       if (cm.id == id) {
         return cm;
@@ -97,7 +97,7 @@ class SharedMain {
     _ativos.value.forEach((e) {
       if (e.idCarteira == idCarteira) {
         totalAgora =
-            totalAgora + (e.qtd * _getCotacao(e.papel).ultimo.toDouble());
+            totalAgora + (e.qtd * getCotacao(e.papel).ultimo.toDouble());
         totalAportado = totalAportado + (e.totalAportado.toDouble());
       }
     });
@@ -110,7 +110,7 @@ class SharedMain {
     double totalAportado = 0;
     _ativos.value.forEach((e) {
       if (e.superiores.contains(idAlocacao)) {
-        totalAgora += e.qtd * _getCotacao(e.papel).ultimo.toDouble();
+        totalAgora += e.qtd * getCotacao(e.papel).ultimo.toDouble();
         totalAportado += e.totalAportado.toDouble();
       }
     });

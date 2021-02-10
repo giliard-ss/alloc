@@ -1,5 +1,6 @@
 import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
+import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
@@ -65,7 +66,7 @@ class _CarteiraPageState
         body: WidgetUtil.futureBuild(controller.init, _body));
   }
 
-  _getColor(int index) {
+  _getColor(int index, List colors) {
     if (index < colors.length - 1) return colors[index];
     int value = index;
     while (true) {
@@ -73,17 +74,6 @@ class _CarteiraPageState
         value = value - colors.length;
       else
         return colors[value];
-    }
-  }
-
-  _getColorDark(int index) {
-    if (index < colorsBlack.length - 1) return colorsBlack[index];
-    int value = index;
-    while (true) {
-      if (value > colorsBlack.length - 1)
-        value = value - colorsBlack.length;
-      else
-        return colorsBlack[value];
     }
   }
 
@@ -244,7 +234,7 @@ class _CarteiraPageState
   _buttons() {
     return Container(
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Visibility(
             visible:
@@ -264,10 +254,16 @@ class _CarteiraPageState
               }),
             ),
           ),
+          SizedBox(
+            width: 15,
+          ),
           Flexible(
             child: _createButton(Icons.local_atm_sharp, "Depósito", () {
               _showDepositoDialog();
             }),
+          ),
+          SizedBox(
+            width: 15,
           ),
           Flexible(
             child: _createButton(Icons.monetization_on_outlined, "Saque", () {
@@ -464,10 +460,10 @@ class _CarteiraPageState
                       child: ExpansionTile(
                         leading: _iconAlocacoes(alocacao,
                             color: Color(
-                              _getColor(index),
+                              _getColor(index, colors),
                             ),
                             colorDark: Color(
-                              _getColorDark(index),
+                              _getColor(index, colorsBlack),
                             )),
                         subtitle: Text(
                             (alocacao.totalInvestir < 0
@@ -482,9 +478,7 @@ class _CarteiraPageState
                                     : Colors.green)),
                         title: Text(
                           alocacao.descricao,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey[700]),
+                          style: TextStyle(color: Colors.grey[700]),
                         ),
                         children: [
                           ListTile(
@@ -537,7 +531,11 @@ class _CarteiraPageState
                                 alocacao.totalInvestir < 0
                                     ? 'Vender'
                                     : 'Investir',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: alocacao.totalInvestir < 0
+                                        ? Colors.red
+                                        : Colors.green),
                               ),
                               trailing: Text(alocacao.totalInvestirString,
                                   style: TextStyle(
@@ -616,6 +614,10 @@ class _CarteiraPageState
                 itemCount: controller.ativos.length,
                 itemBuilder: (context, index) {
                   AtivoModel ativo = controller.ativos[index];
+                  CotacaoModel cotacao = controller.getCotacao(ativo.papel);
+                  String totalAportadoAtual = GeralUtil.limitaCasasDecimais(
+                          ativo.qtd.toInt() * cotacao.ultimo.toDouble())
+                      .toString();
 
                   return Dismissible(
                     key: Key(ativo.id),
@@ -639,18 +641,12 @@ class _CarteiraPageState
                         ExpansionTile(
                           title: Text(
                             ativo.papel,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange[700]),
+                            style: TextStyle(color: Colors.grey[800]),
                           ),
-                          leading: Icon(
-                            Icons.assessment_outlined,
-                            color: Colors.orange[700],
-                          ),
-                          trailing: Text(ativo.totalAportadoString,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.orange[700])),
+                          subtitle: Text(
+                              controller.getCotacao(ativo.papel).ultimoString),
+                          trailing: Text(totalAportadoAtual,
+                              style: TextStyle(color: Colors.grey[800])),
                           children: [
                             ListTile(
                               dense: true,
@@ -664,6 +660,9 @@ class _CarteiraPageState
                                   Text(ativo.alocacaoPercent.toString() + " %"),
                             )
                           ],
+                        ),
+                        Divider(
+                          height: 5,
                         )
                       ],
                     ),

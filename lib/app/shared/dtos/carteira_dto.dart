@@ -44,8 +44,14 @@ class CarteiraDTO extends CarteiraModel {
 
   double get rendimentoTotalPercent => (rendimentoTotal * 100) / totalAportado;
 
-  String get rendimentoTotalPercentString =>
-      GeralUtil.limitaCasasDecimais(rendimentoTotalPercent).toString();
+  String get rendimentoTotalPercentString {
+    String value =
+        GeralUtil.limitaCasasDecimais(rendimentoTotalPercent).toString();
+    if (value.split('.')[1] == '0') {
+      return value.split('.')[0];
+    }
+    return value;
+  }
 
   double get totalAportado => _totalAportado;
 
