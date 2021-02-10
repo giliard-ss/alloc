@@ -78,6 +78,14 @@ class AtivoModel {
 
   num get alocacaoPercent => alocacaoDouble * 100;
 
+  String get alocacaoPercentString {
+    String aloc = alocacaoPercent.toString();
+    if (aloc.split('.')[1] == '0') {
+      return aloc.split('.')[0];
+    }
+    return aloc;
+  }
+
   set alocacaoPercent(num value) => alocacao = value / 100;
 
   num get qtd => _qtd;

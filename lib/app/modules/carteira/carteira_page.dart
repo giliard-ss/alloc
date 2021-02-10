@@ -374,7 +374,7 @@ class _CarteiraPageState
   }
 
   Widget _createButton(IconData icon, String text, Function onPressed,
-      {color: Colors.orange}) {
+      {color: Colors.grey}) {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
@@ -481,17 +481,19 @@ class _CarteiraPageState
                           style: TextStyle(color: Colors.grey[700]),
                         ),
                         children: [
-                          ListTile(
-                            dense: true,
-                            title: Text("Rendimento"),
-                            trailing: Text(
-                              (alocacao.rendimento > 0 ? '+' : '') +
-                                  alocacao.rendimentoString,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: alocacao.rendimento < 0
-                                      ? Colors.red
-                                      : Colors.green),
+                          Container(
+                            color: Color(0xffe7ecf4),
+                            child: ListTile(
+                              dense: true,
+                              title: Text("Rendimento"),
+                              trailing: Text(
+                                (alocacao.rendimento > 0 ? '+' : '') +
+                                    alocacao.rendimentoString,
+                                style: TextStyle(
+                                    color: alocacao.rendimento < 0
+                                        ? Colors.red
+                                        : Colors.green),
+                              ),
                             ),
                           ),
                           ListTile(
@@ -502,7 +504,6 @@ class _CarteiraPageState
                                   alocacao.rendimentoPercentString +
                                   "%",
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold,
                                   color: alocacao.rendimento < 0
                                       ? Colors.red
                                       : Colors.green),
@@ -527,22 +528,18 @@ class _CarteiraPageState
                                 Modular.to.pushNamed(
                                     "/carteira/sub-alocacao/${alocacao.id}");
                               },
-                              title: Text(
-                                alocacao.totalInvestir < 0
-                                    ? 'Vender'
-                                    : 'Investir',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: alocacao.totalInvestir < 0
-                                        ? Colors.red
-                                        : Colors.green),
+                              title: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    alocacao.totalInvestir < 0
+                                        ? 'Vender'
+                                        : 'Investir',
+                                  ),
+                                ],
                               ),
-                              trailing: Text(alocacao.totalInvestirString,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: (alocacao.totalInvestir < 0
-                                          ? Colors.red
-                                          : Colors.green))),
+                              trailing: Icon(Icons.arrow_forward_ios_outlined),
                             ),
                           )
                         ],
@@ -615,9 +612,21 @@ class _CarteiraPageState
                 itemBuilder: (context, index) {
                   AtivoModel ativo = controller.ativos[index];
                   CotacaoModel cotacao = controller.getCotacao(ativo.papel);
-                  String totalAportadoAtual = GeralUtil.limitaCasasDecimais(
-                          ativo.qtd.toInt() * cotacao.ultimo.toDouble())
-                      .toString();
+                  double totalAportadoAtual =
+                      ativo.qtd.toInt() * cotacao.ultimo.toDouble();
+                  String totalAportadoAtualString =
+                      GeralUtil.limitaCasasDecimais(totalAportadoAtual)
+                          .toString();
+
+                  double rendimento =
+                      totalAportadoAtual - ativo.totalAportado.toDouble();
+                  String rendimentoString =
+                      GeralUtil.limitaCasasDecimais(rendimento).toString();
+
+                  String rendimentoPercentString =
+                      GeralUtil.limitaCasasDecimais((rendimento * 100) /
+                              ativo.totalAportado.toDouble())
+                          .toString();
 
                   return Dismissible(
                     key: Key(ativo.id),
@@ -641,13 +650,50 @@ class _CarteiraPageState
                         ExpansionTile(
                           title: Text(
                             ativo.papel,
-                            style: TextStyle(color: Colors.grey[800]),
                           ),
-                          subtitle: Text(
-                              controller.getCotacao(ativo.papel).ultimoString),
-                          trailing: Text(totalAportadoAtual,
-                              style: TextStyle(color: Colors.grey[800])),
+                          subtitle: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                cotacao.ultimoString,
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyText2
+                                        .color),
+                              ),
+                              Text(
+                                (rendimento > 0 ? '+' : '') +
+                                    rendimentoPercentString +
+                                    "%",
+                                style: TextStyle(
+                                    color: rendimento < 0
+                                        ? Colors.red
+                                        : Colors.green),
+                              ),
+                              Text(
+                                totalAportadoAtualString,
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyText2
+                                        .color),
+                              )
+                            ],
+                          ),
                           children: [
+                            Container(
+                              color: Color(0xffe7ecf4),
+                              child: ListTile(
+                                dense: true,
+                                title: Text("Rendimento"),
+                                trailing: Text(rendimentoString,
+                                    style: TextStyle(
+                                        color: rendimento < 0
+                                            ? Colors.red
+                                            : Colors.green)),
+                              ),
+                            ),
                             ListTile(
                               dense: true,
                               title: Text("Total Aportado"),
@@ -657,7 +703,7 @@ class _CarteiraPageState
                               dense: true,
                               title: Text("Alocação"),
                               trailing:
-                                  Text(ativo.alocacaoPercent.toString() + " %"),
+                                  Text(ativo.alocacaoPercentString + " %"),
                             )
                           ],
                         ),
