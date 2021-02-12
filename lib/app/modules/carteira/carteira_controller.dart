@@ -11,6 +11,7 @@ import 'package:alloc/app/shared/services/impl/alocacao_service.dart';
 import 'package:alloc/app/shared/services/impl/ativo_service.dart';
 import 'package:alloc/app/shared/services/impl/carteira_service.dart';
 import 'package:alloc/app/shared/shared_main.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:mobx/mobx.dart';
@@ -162,6 +163,13 @@ abstract class _CarteiraControllerBase with Store {
     if (alocacoes.isEmpty) {
       _loadAtivos();
     }
+  }
+
+  String getPercentualAtualAloc(AlocacaoDTO aloc) {
+    double total = 0;
+    alocacoes.forEach((e) => total = total + e.totalAportadoAtual);
+    double percent = (aloc.totalAportadoAtual * 100) / total;
+    return GeralUtil.limitaCasasDecimais(percent, casasDecimais: 1).toString();
   }
 
   void _loadAtivos() {

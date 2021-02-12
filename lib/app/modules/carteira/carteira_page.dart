@@ -458,7 +458,8 @@ class _CarteiraPageState
                       secondaryBackground: _slideRightBackground(),
                       direction: DismissDirection.endToStart,
                       child: ExpansionTile(
-                        leading: _iconAlocacoes(alocacao,
+                        leading: _iconAlocacoes(
+                            controller.getPercentualAtualAloc(alocacao),
                             color: Color(
                               _getColor(index, colors),
                             ),
@@ -516,7 +517,7 @@ class _CarteiraPageState
                           ),
                           ListTile(
                             dense: true,
-                            title: Text("Alocação "),
+                            title: Text("Alocação Indicada"),
                             trailing:
                                 Text(alocacao.alocacaoPercentString + "%"),
                           ),
@@ -553,7 +554,7 @@ class _CarteiraPageState
     );
   }
 
-  Widget _iconAlocacoes(AlocacaoDTO aloc,
+  Widget _iconAlocacoes(String value,
       {color: Colors.orange, colorDark: Colors.black}) {
     return Container(
       child: Stack(
@@ -576,7 +577,7 @@ class _CarteiraPageState
               height: 46,
               child: Center(
                   child: Text(
-                aloc.alocacaoPercentString + "%",
+                value + "%",
                 style: TextStyle(fontWeight: FontWeight.bold, color: colorDark),
               )),
               decoration: BoxDecoration(
@@ -648,6 +649,13 @@ class _CarteiraPageState
                     child: Column(
                       children: [
                         ExpansionTile(
+                          leading: _iconAlocacoes("10.8",
+                              color: Color(
+                                _getColor(index, colors),
+                              ),
+                              colorDark: Color(
+                                _getColor(index, colorsBlack),
+                              )),
                           title: Text(
                             ativo.papel,
                           ),
@@ -701,7 +709,7 @@ class _CarteiraPageState
                             ),
                             ListTile(
                               dense: true,
-                              title: Text("Alocação"),
+                              title: Text("Alocação Indicada"),
                               trailing:
                                   Text(ativo.alocacaoPercentString + " %"),
                             )
