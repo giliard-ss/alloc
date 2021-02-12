@@ -1,4 +1,4 @@
-import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';

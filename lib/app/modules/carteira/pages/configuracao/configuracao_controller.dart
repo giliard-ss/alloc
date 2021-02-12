@@ -1,6 +1,6 @@
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
-import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
-import 'package:alloc/app/shared/models/ativo_model.dart';
+import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/services/ialocacao_service.dart';
 import 'package:alloc/app/shared/services/iativo_service.dart';
@@ -31,7 +31,7 @@ abstract class _ConfiguracaoControllerBase with Store {
   @observable
   List<AlocacaoDTO> alocacoes = [];
   @observable
-  List<AtivoModel> ativos = [];
+  List<AtivoDTO> ativos = [];
   @observable
   double percentualRestante = 0;
   @observable
@@ -58,22 +58,14 @@ abstract class _ConfiguracaoControllerBase with Store {
     if (StringUtil.isEmpty(superiorId)) {
       autoAlocacao = _carteiraController.carteira.autoAlocacao;
     } else {
-      autoAlocacao = _carteiraController.allAlocacoes.value
-          .where((e) => e.id == superiorId)
-          .first
-          .autoAlocacao;
+      autoAlocacao =
+          SharedMain.getAlocacoesByIdSuperior(superiorId).first.autoAlocacao;
     }
   }
 
   void _loadAtivos() {
     runInAction(() {
-      ativos = SharedMain.ativos
-          .where(
-            (e) => StringUtil.isEmpty(superiorId)
-                ? e.superiores.isEmpty
-                : e.superiores.contains(superiorId),
-          )
-          .toList();
+      ativos = SharedMain.getAtivosByIdSuperior(superiorId);
     });
   }
 
@@ -92,7 +84,7 @@ abstract class _ConfiguracaoControllerBase with Store {
       list.forEach((e) => e.alocacao = 0);
       alocacoes = list;
     } else {
-      List<AtivoModel> list = List.from(ativos);
+      List<AtivoDTO> list = List.from(ativos);
       list.forEach((e) => e.alocacao = 0);
       ativos = list;
     }
@@ -111,7 +103,7 @@ abstract class _ConfiguracaoControllerBase with Store {
       double media = GeralUtil.limitaCasasDecimais((100 / ativos.length) / 100,
           casasDecimais: 3);
 
-      List<AtivoModel> list = List.from(ativos);
+      List<AtivoDTO> list = List.from(ativos);
       list.forEach((e) => e.alocacao = media);
       ativos = list;
     }
@@ -144,11 +136,11 @@ abstract class _ConfiguracaoControllerBase with Store {
       await _atualizaCarteiraOuAlocacao();
       if (alocacoes.isNotEmpty) {
         await _alocacaoService.save(alocacoes, autoAlocacao);
+        await SharedMain.notifyUpdateAlocacao();
       } else if (ativos.isNotEmpty) {
         await _ativoService.save(ativos, autoAlocacao);
-        await SharedMain.refreshAtivos();
+        await SharedMain.notifyUpdateAtivo();
       }
-      await SharedMain.refreshCarteiras();
       return null;
     } catch (e) {
       LoggerUtil.error(e);
@@ -158,24 +150,21 @@ abstract class _ConfiguracaoControllerBase with Store {
 
   _atualizaCarteiraOuAlocacao() async {
     if (!StringUtil.isEmpty(superiorId)) {
-      AlocacaoDTO aloc = _carteiraController.allAlocacoes.value
-          .where((e) => e.id == superiorId)
-          .first;
+      AlocacaoDTO aloc = SharedMain.getAlocacoesByIdSuperior(superiorId).first;
       aloc.autoAlocacao = autoAlocacao;
       await _alocacaoService.update(aloc);
+      await SharedMain.notifyUpdateAlocacao(); //! TODO reparar isso aqui
     } else {
       CarteiraModel carteira =
           CarteiraModel.fromMap(_carteiraController.carteira.toMap());
       carteira.autoAlocacao = autoAlocacao;
       await _carteiraService.update(carteira);
+      await SharedMain.notifyUpdateCarteira(); //! TODO reparar isso aqui
     }
   }
 
   void _loadAlocacoes() {
-    alocacoes = List.castFrom(_carteiraController.allAlocacoes.value
-        .where(
-          (e) => e.idSuperior == superiorId,
-        )
-        .toList());
+    alocacoes = SharedMain.getAlocacoesByCarteiraId(
+        _carteiraController.carteira.id, superiorId);
   }
 }

@@ -1,5 +1,6 @@
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
-import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/services/iativo_service.dart';
 import 'package:alloc/app/shared/services/impl/ativo_service.dart';
@@ -39,13 +40,12 @@ abstract class _AtivoControllerBase with Store {
       ativo.data = data;
       ativo.superiores = getIdSuperiores();
 
-      List ativos = SharedMain.ativos
-          .where(
-            (e) => _alocacaoAtual == null
-                ? e.idCarteira == _carteiraController.carteira.id
-                : e.superiores.contains(_alocacaoAtual.id),
-          )
-          .toList();
+      List<AtivoDTO> dtos = _alocacaoAtual == null
+          ? SharedMain.getAtivosByCarteira(_carteiraController.carteira.id)
+          : SharedMain.getAtivosByIdSuperior(_alocacaoAtual.id);
+
+      List<AtivoModel> ativos = [];
+      dtos.forEach((e) => ativos.add(AtivoModel.fromMap(e.toMap())));
 
       ativos.add(ativo);
       await _ativoService.save(
@@ -53,7 +53,7 @@ abstract class _AtivoControllerBase with Store {
           _alocacaoAtual == null
               ? _carteiraController.carteira.autoAlocacao
               : _alocacaoAtual.autoAlocacao);
-      await SharedMain.refreshAtivos();
+      await SharedMain.notifyAddDelAtivo();
       return true;
     } catch (e) {
       error = "Falha ao finalizar compra!";
@@ -85,7 +85,7 @@ abstract class _AtivoControllerBase with Store {
   Future<bool> vender() {}
 
   AlocacaoDTO _getAlocacaoDTO(String id) {
-    return _carteiraController.allAlocacoes.value.firstWhere((e) => e.id == id);
+    return SharedMain.getAlocacaoById(id);
   }
 
   void setAlocacaoAtual(String idAlocacao) {

@@ -1,6 +1,7 @@
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/repositories/ialocacao_repository.dart';
 import 'package:alloc/app/shared/services/ialocacao_service.dart';
+import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -10,11 +11,6 @@ class AlocacaoService implements IAlocacaoService {
   final IAlocacaoRepository alocacaoRepository;
 
   AlocacaoService({@required this.alocacaoRepository});
-
-  @override
-  Future<List<AlocacaoModel>> getAlocacoes(String idCarteira) {
-    return alocacaoRepository.findAlocacoes(idCarteira);
-  }
 
   @override
   Future save(List<AlocacaoModel> alocacoes, bool autoAlocacao) async {
@@ -53,5 +49,10 @@ class AlocacaoService implements IAlocacaoService {
   @override
   Future update(AlocacaoModel alocacao) {
     return alocacaoRepository.update(alocacao);
+  }
+
+  @override
+  Future<List<AlocacaoModel>> getAllAlocacoes() {
+    return alocacaoRepository.findAlocacoes(SharedMain.usuario.id);
   }
 }

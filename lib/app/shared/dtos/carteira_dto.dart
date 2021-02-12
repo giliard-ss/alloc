@@ -5,14 +5,19 @@ class CarteiraDTO extends CarteiraModel {
   double _totalAportado;
   double _totalAportadoAtual;
 
-  CarteiraDTO(CarteiraModel carteiraModel, this._totalAportado,
-      this._totalAportadoAtual)
+  CarteiraDTO(CarteiraModel carteiraModel,
+      [this._totalAportado = 0, this._totalAportadoAtual = 0])
       : super(
             carteiraModel.id,
             carteiraModel.idUsuario,
             carteiraModel.descricao,
             carteiraModel.totalDeposito,
             carteiraModel.autoAlocacao);
+
+  CarteiraDTO clone() {
+    return CarteiraDTO(CarteiraModel.fromMap(super.toMap()),
+        this._totalAportado, this._totalAportadoAtual);
+  }
 
   double getSaldo() {
     return super.totalDeposito.toDouble() - _totalAportado;

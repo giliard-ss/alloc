@@ -8,18 +8,18 @@ class AlocacaoRepository implements IAlocacaoRepository {
   FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
-  Future<List<AlocacaoModel>> findAlocacoes(String idCarteira) async {
+  Future<List<AlocacaoModel>> findAlocacoes(String idUsuario) async {
     try {
       QuerySnapshot snapshot = await _db
           .collection(_table)
-          .where("idCarteira", isEqualTo: idCarteira)
+          .where("idUsuario", isEqualTo: idUsuario)
           .get();
       return List.generate(snapshot.docs.length, (i) {
         return AlocacaoModel.fromMap(snapshot.docs[i].data());
       });
     } catch (e) {
       throw ApplicationException(
-          'Falha ao consultar alocacoes da carteira $idCarteira! ' +
+          'Falha ao consultar alocacoes do usuario $idUsuario! ' +
               e.toString());
     }
   }

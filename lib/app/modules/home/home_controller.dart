@@ -46,7 +46,7 @@ abstract class _HomeControllerBase with Store {
   Future<bool> salvarNovaCarteira() async {
     try {
       await _carteiraService.create(descricao);
-      await SharedMain.refreshCarteiras();
+      await SharedMain.notifyAddDelCarteira();
       return true;
     } on Exception catch (e) {
       LoggerUtil.error(e);
@@ -60,9 +60,8 @@ abstract class _HomeControllerBase with Store {
       _carteirasReactDispose();
     }
 
-    _carteirasReactDispose =
-        SharedMain.createCarteirasReact((List<CarteiraDTO> carteiras) {
-      this.carteiras = carteiras;
+    _carteirasReactDispose = SharedMain.createCarteirasReact((e) {
+      this.carteiras = SharedMain.carteiras;
     });
   }
 

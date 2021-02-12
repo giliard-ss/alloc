@@ -5,12 +5,23 @@ class AlocacaoDTO extends AlocacaoModel {
   double _totalAportado;
   double _totalAportadoAtual;
   double _totalInvestir;
+  double _percentualNaAlocacao;
 
   AlocacaoDTO(AlocacaoModel model,
       [this._totalAportado = 0,
       this._totalAportadoAtual = 0,
-      this._totalInvestir = 0])
+      this._totalInvestir = 0,
+      this._percentualNaAlocacao = 0])
       : super.fromMap(model.toMap());
+
+  AlocacaoDTO clone() {
+    return AlocacaoDTO(
+        AlocacaoModel.fromMap(super.toMap()),
+        this._totalAportado,
+        this._totalAportadoAtual,
+        this._totalInvestir,
+        this.percentualNaAlocacao);
+  }
 
   double get totalAposInvestir => _totalAportadoAtual + _totalInvestir;
 
@@ -44,4 +55,12 @@ class AlocacaoDTO extends AlocacaoModel {
       GeralUtil.limitaCasasDecimais(_totalInvestir).toString();
 
   set totalInvestir(double value) => _totalInvestir = value;
+
+  double get percentualNaAlocacao => _percentualNaAlocacao;
+
+  String get percentualNaAlocacaoString =>
+      GeralUtil.limitaCasasDecimais(percentualNaAlocacao, casasDecimais: 1)
+          .toString();
+
+  set percentualNaAlocacao(double value) => _percentualNaAlocacao = value;
 }

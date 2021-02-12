@@ -1,5 +1,5 @@
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
-import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/services/ialocacao_service.dart';
@@ -38,11 +38,11 @@ abstract class _SubAlocacaoControllerBase with Store {
   Future<bool> salvarNovaAlocacao(List<AlocacaoDTO> alocacoes) async {
     try {
       List<AlocacaoModel> alocs = List.from(alocacoes);
-      alocs.add(AlocacaoModel(null, novaAlocacaoDesc, null,
-          alocacaoAtual.idCarteira, alocacaoAtual.id));
+      alocs.add(AlocacaoModel(null, SharedMain.usuario.id, novaAlocacaoDesc,
+          null, alocacaoAtual.idCarteira, alocacaoAtual.id));
 
       await _alocacaoService.save(alocs, alocacaoAtual.autoAlocacao);
-      await _carteiraController.loadAlocacoes();
+      await SharedMain.notifyAddDelAlocacao();
       return true;
     } on Exception catch (e) {
       LoggerUtil.error(e);
@@ -60,7 +60,7 @@ abstract class _SubAlocacaoControllerBase with Store {
           double.parse(((100 / list.length) / 100).toStringAsFixed(2));
       list.forEach((a) => a.alocacao = media);
       await _ativoService.delete(ativoExcluir, list);
-      await SharedMain.refreshAtivos();
+      await SharedMain.notifyAddDelAtivo();
 
       return null;
     } on Exception catch (e) {
@@ -81,7 +81,7 @@ abstract class _SubAlocacaoControllerBase with Store {
           double.parse(((100 / alocs.length) / 100).toStringAsFixed(2));
       alocs.forEach((a) => a.alocacao = media);
       await _alocacaoService.delete(alocacaoExcluir.id, alocs);
-      await _carteiraController.loadAlocacoes();
+      await SharedMain.notifyAddDelAlocacao();
       return null;
     } on Exception catch (e) {
       LoggerUtil.error(e);

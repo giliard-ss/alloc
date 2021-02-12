@@ -1,4 +1,5 @@
-import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
@@ -349,7 +350,7 @@ class _CarteiraPageState
           child: Center(
             child: ListTile(
               title: Text(
-                "Investir",
+                "Saldo",
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -458,14 +459,14 @@ class _CarteiraPageState
                       secondaryBackground: _slideRightBackground(),
                       direction: DismissDirection.endToStart,
                       child: ExpansionTile(
-                        leading: _iconAlocacoes(
-                            controller.getPercentualAtualAloc(alocacao),
-                            color: Color(
-                              _getColor(index, colors),
-                            ),
-                            colorDark: Color(
-                              _getColor(index, colorsBlack),
-                            )),
+                        leading:
+                            _iconAlocacoes(alocacao.percentualNaAlocacaoString,
+                                color: Color(
+                                  _getColor(index, colors),
+                                ),
+                                colorDark: Color(
+                                  _getColor(index, colorsBlack),
+                                )),
                         subtitle: Text(
                             (alocacao.totalInvestir < 0
                                 ? ('Vender ' +
@@ -611,7 +612,7 @@ class _CarteiraPageState
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: controller.ativos.length,
                 itemBuilder: (context, index) {
-                  AtivoModel ativo = controller.ativos[index];
+                  AtivoDTO ativo = controller.ativos[index];
                   CotacaoModel cotacao = controller.getCotacao(ativo.papel);
                   double totalAportadoAtual =
                       ativo.qtd.toInt() * cotacao.ultimo.toDouble();
@@ -649,13 +650,14 @@ class _CarteiraPageState
                     child: Column(
                       children: [
                         ExpansionTile(
-                          leading: _iconAlocacoes("10.8",
-                              color: Color(
-                                _getColor(index, colors),
-                              ),
-                              colorDark: Color(
-                                _getColor(index, colorsBlack),
-                              )),
+                          leading:
+                              _iconAlocacoes(ativo.percentualNaAlocacaoString,
+                                  color: Color(
+                                    _getColor(index, colors),
+                                  ),
+                                  colorDark: Color(
+                                    _getColor(index, colorsBlack),
+                                  )),
                           title: Text(
                             ativo.papel,
                           ),

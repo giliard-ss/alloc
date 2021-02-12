@@ -37,13 +37,13 @@ mixin _$CarteiraController on _CarteiraControllerBase, Store {
   final _$ativosAtom = Atom(name: '_CarteiraControllerBase.ativos');
 
   @override
-  List<AtivoModel> get ativos {
+  List<AtivoDTO> get ativos {
     _$ativosAtom.reportRead();
     return super.ativos;
   }
 
   @override
-  set ativos(List<AtivoModel> value) {
+  set ativos(List<AtivoDTO> value) {
     _$ativosAtom.reportWrite(value, super.ativos, () {
       super.ativos = value;
     });

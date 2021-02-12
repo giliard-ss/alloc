@@ -1,5 +1,7 @@
 class AlocacaoModel {
   String _id;
+  String _idUsuario;
+
   String _descricao;
   num _alocacao;
   String _idCarteira;
@@ -8,6 +10,7 @@ class AlocacaoModel {
 
   AlocacaoModel(
       [this._id,
+      this._idUsuario,
       this._descricao,
       this._alocacao,
       this._idCarteira,
@@ -16,6 +19,7 @@ class AlocacaoModel {
 
   AlocacaoModel.fromMap(Map map) {
     this._id = map['id'];
+    this.idUsuario = map['idUsuario'];
     this._descricao = map['descricao'];
     this._alocacao = map['alocacao'];
     this._idCarteira = map['idCarteira'];
@@ -26,6 +30,7 @@ class AlocacaoModel {
   Map<String, dynamic> toMap() {
     return {
       'id': _id,
+      'idUsuario': _idUsuario,
       'descricao': _descricao,
       'alocacao': _alocacao,
       'idCarteira': _idCarteira,
@@ -33,6 +38,10 @@ class AlocacaoModel {
       'autoAlocacao': _autoAlocacao
     };
   }
+
+  String get idUsuario => _idUsuario;
+
+  set idUsuario(String value) => _idUsuario = value;
 
   double get alocacaoDouble =>
       this._alocacao == null ? 0 : this._alocacao.toDouble();

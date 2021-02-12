@@ -1,16 +1,12 @@
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
-
-import 'package:alloc/app/modules/carteira/dtos/alocacao_dto.dart';
 import 'package:alloc/app/modules/carteira/pages/subalocacao/sub_alocacao_controller.dart';
+import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
-import 'package:alloc/app/shared/models/alocacao_model.dart';
-import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
-import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
-import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -30,9 +26,9 @@ class SubAlocacaoPage extends StatefulWidget {
 class _SubAlocacaoPageState
     extends ModularState<SubAlocacaoPage, SubAlocacaoController> {
   //use 'controller' variable to access controller
-  CarteiraController _carteiraController = Modular.get();
+
   Observable<List<AlocacaoDTO>> _alocacoes = Observable<List<AlocacaoDTO>>([]);
-  Observable<List<AtivoModel>> _ativos = Observable<List<AtivoModel>>([]);
+  Observable<List<AtivoDTO>> _ativos = Observable<List<AtivoDTO>>([]);
   Observable<List<AlocacaoDTO>> _alocAtual = Observable<List<AlocacaoDTO>>([]);
 
   ReactionDisposer _alocacaoReactDispose;
@@ -54,18 +50,13 @@ class _SubAlocacaoPageState
   set alocacaoAtual(e) => _alocAtual.value = [e];
 
   void _loadAlocacaoAtual() {
-    alocacaoAtual = _carteiraController.allAlocacoes.value
-        .firstWhere((e) => e.id == widget.id);
+    alocacaoAtual = SharedMain.getAlocacaoById(widget.id);
     controller.alocacaoAtual = alocacaoAtual;
   }
 
   void _loadAlocacoes() {
     runInAction(() {
-      _alocacoes.value = _carteiraController.allAlocacoes.value
-          .where(
-            (e) => e.idSuperior == widget.id,
-          )
-          .toList();
+      _alocacoes.value = SharedMain.getAlocacoesByIdSuperior(widget.id);
 
       if (_alocacoes.value.isEmpty) {
         _loadAtivos();
@@ -78,11 +69,7 @@ class _SubAlocacaoPageState
 
   void _loadAtivos() {
     runInAction(() {
-      _ativos.value = SharedMain.ativos
-          .where(
-            (e) => e.superiores.contains(widget.id),
-          )
-          .toList();
+      _ativos.value = SharedMain.getAtivosByIdSuperior(widget.id);
     });
   }
 
@@ -91,8 +78,7 @@ class _SubAlocacaoPageState
       _alocacaoReactDispose();
     }
 
-    _alocacaoReactDispose =
-        SharedMain.createCarteirasReact((List<CarteiraDTO> carteiras) {
+    _alocacaoReactDispose = SharedMain.createCarteirasReact((e) {
       _refreshAlocacoesValues();
       _loadAtivos();
       _loadAlocacaoAtual();
@@ -290,7 +276,7 @@ class _SubAlocacaoPageState
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: _ativos.value.length,
                 itemBuilder: (context, index) {
-                  AtivoModel ativo = _ativos.value[index];
+                  AtivoDTO ativo = _ativos.value[index];
 
                   return Dismissible(
                     key: Key(ativo.id),
