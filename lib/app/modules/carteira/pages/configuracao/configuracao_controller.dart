@@ -8,12 +8,13 @@ import 'package:alloc/app/shared/services/icarteira_service.dart';
 import 'package:alloc/app/shared/services/impl/alocacao_service.dart';
 import 'package:alloc/app/shared/services/impl/ativo_service.dart';
 import 'package:alloc/app/shared/services/impl/carteira_service.dart';
-import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+
+import '../../../../app_core.dart';
 
 part 'configuracao_controller.g.dart';
 
@@ -58,13 +59,13 @@ abstract class _ConfiguracaoControllerBase with Store {
     if (StringUtil.isEmpty(superiorId)) {
       autoAlocacao = _carteiraController.carteira.autoAlocacao;
     } else {
-      autoAlocacao = SharedMain.getAlocacaoById(superiorId).autoAlocacao;
+      autoAlocacao = AppCore.getAlocacaoById(superiorId).autoAlocacao;
     }
   }
 
   void _loadAtivos() {
     runInAction(() {
-      ativos = SharedMain.getAtivosByIdSuperior(superiorId);
+      ativos = AppCore.getAtivosByIdSuperior(superiorId);
     });
   }
 
@@ -135,10 +136,10 @@ abstract class _ConfiguracaoControllerBase with Store {
       await _atualizaCarteiraOuAlocacao();
       if (alocacoes.isNotEmpty) {
         await _alocacaoService.save(alocacoes, autoAlocacao);
-        await SharedMain.notifyUpdateAlocacao();
+        await AppCore.notifyUpdateAlocacao();
       } else if (ativos.isNotEmpty) {
         await _ativoService.save(ativos, autoAlocacao);
-        await SharedMain.notifyUpdateAtivo();
+        await AppCore.notifyUpdateAtivo();
       }
       return null;
     } catch (e) {
@@ -149,21 +150,21 @@ abstract class _ConfiguracaoControllerBase with Store {
 
   _atualizaCarteiraOuAlocacao() async {
     if (!StringUtil.isEmpty(superiorId)) {
-      AlocacaoDTO aloc = SharedMain.getAlocacoesByIdSuperior(superiorId).first;
+      AlocacaoDTO aloc = AppCore.getAlocacoesByIdSuperior(superiorId).first;
       aloc.autoAlocacao = autoAlocacao;
       await _alocacaoService.update(aloc);
-      await SharedMain.notifyUpdateAlocacao(); //! TODO reparar isso aqui
+      await AppCore.notifyUpdateAlocacao(); //! TODO reparar isso aqui
     } else {
       CarteiraModel carteira =
           CarteiraModel.fromMap(_carteiraController.carteira.toMap());
       carteira.autoAlocacao = autoAlocacao;
       await _carteiraService.update(carteira);
-      await SharedMain.notifyUpdateCarteira(); //! TODO reparar isso aqui
+      await AppCore.notifyUpdateCarteira(); //! TODO reparar isso aqui
     }
   }
 
   void _loadAlocacoes() {
-    alocacoes = SharedMain.getAlocacoesByCarteiraId(
+    alocacoes = AppCore.getAlocacoesByCarteiraId(
         _carteiraController.carteira.id, superiorId);
   }
 }

@@ -47,8 +47,5 @@ class CarteiraModel {
 
   num get totalDeposito => _totalDeposito;
 
-  String get totalDepositoString =>
-      GeralUtil.limitaCasasDecimais(_totalDeposito.toDouble()).toString();
-
   set totalDeposito(num value) => _totalDeposito = value;
 }

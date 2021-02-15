@@ -21,9 +21,6 @@ class AtivoDTO extends AtivoModel {
 
   double get ultimaCotacao => _ultimaCotacao;
 
-  String get ultimaCotacaoString =>
-      GeralUtil.limitaCasasDecimais(ultimaCotacao).toString();
-
   set ultimaCotacao(double value) => _ultimaCotacao = value;
 
   double get percentualNaAlocacao => _percentualNaAlocacao;

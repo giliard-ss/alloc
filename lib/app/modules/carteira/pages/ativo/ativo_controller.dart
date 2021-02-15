@@ -1,10 +1,10 @@
+import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/services/iativo_service.dart';
 import 'package:alloc/app/shared/services/impl/ativo_service.dart';
-import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:mobx/mobx.dart';
@@ -33,7 +33,7 @@ abstract class _AtivoControllerBase with Store {
     try {
       AtivoModel ativo = AtivoModel();
       ativo.idCarteira = _carteiraController.carteira.id;
-      ativo.idUsuario = SharedMain.usuario.id;
+      ativo.idUsuario = AppCore.usuario.id;
       ativo.papel = papel;
       ativo.preco = preco;
       ativo.qtd = qtd;
@@ -41,8 +41,8 @@ abstract class _AtivoControllerBase with Store {
       ativo.superiores = getIdSuperiores();
 
       List<AtivoDTO> dtos = _alocacaoAtual == null
-          ? SharedMain.getAtivosByCarteira(_carteiraController.carteira.id)
-          : SharedMain.getAtivosByIdSuperior(_alocacaoAtual.id);
+          ? AppCore.getAtivosByCarteira(_carteiraController.carteira.id)
+          : AppCore.getAtivosByIdSuperior(_alocacaoAtual.id);
 
       List<AtivoModel> ativos = [];
       dtos.forEach((e) => ativos.add(AtivoModel.fromMap(e.toMap())));
@@ -53,7 +53,7 @@ abstract class _AtivoControllerBase with Store {
           _alocacaoAtual == null
               ? _carteiraController.carteira.autoAlocacao
               : _alocacaoAtual.autoAlocacao);
-      await SharedMain.notifyAddDelAtivo();
+      await AppCore.notifyAddDelAtivo();
       return true;
     } catch (e) {
       error = "Falha ao finalizar compra!";
@@ -85,7 +85,7 @@ abstract class _AtivoControllerBase with Store {
   Future<bool> vender() {}
 
   AlocacaoDTO _getAlocacaoDTO(String id) {
-    return SharedMain.getAlocacaoById(id);
+    return AppCore.getAlocacaoById(id);
   }
 
   void setAlocacaoAtual(String idAlocacao) {

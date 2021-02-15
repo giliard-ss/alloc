@@ -94,9 +94,6 @@ class AtivoModel {
 
   num get totalAportado => _preco * qtd;
 
-  String get totalAportadoString =>
-      GeralUtil.limitaCasasDecimais(totalAportado.toDouble()).toString();
-
   List get superiores => _superiores;
 
   set superiores(List value) => _superiores = value;

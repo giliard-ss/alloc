@@ -37,25 +37,13 @@ class AlocacaoDTO extends AlocacaoModel {
 
   double get rendimento => _totalAportadoAtual - totalAportado;
 
-  String get rendimentoString =>
-      GeralUtil.limitaCasasDecimais(rendimento).toString();
-
-  String get totalAportadoString =>
-      GeralUtil.limitaCasasDecimais(_totalAportado).toString();
-
   set totalAportado(double value) => _totalAportado = value;
 
   double get totalAportadoAtual => _totalAportadoAtual;
 
-  String get totalAportadoAtualString =>
-      GeralUtil.limitaCasasDecimais(_totalAportadoAtual).toString();
-
   set totalAportadoAtual(double value) => _totalAportadoAtual = value;
 
   double get totalInvestir => _totalInvestir;
-
-  String get totalInvestirString =>
-      GeralUtil.limitaCasasDecimais(_totalInvestir).toString();
 
   set totalInvestir(double value) => _totalInvestir = value;
 

@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class AlocacoesWidget extends StatelessWidget {
+  final double _textSize1 = 17;
+  final double _textSize2 = 13;
   List<AlocacaoDTO> alocacoes;
   Future<String> Function(AlocacaoDTO) fncExcluir;
   Future<String> Function(AlocacaoDTO, List<AlocacaoDTO>) fncExcluirSecundario;
@@ -75,14 +77,17 @@ class AlocacoesWidget extends StatelessWidget {
                               (GeralUtil.limitaCasasDecimais(
                                       alocacao.totalInvestir * -1))
                                   .toString())
-                          : 'Investir ' + alocacao.totalInvestirString),
+                          : 'Investir ' +
+                              GeralUtil.doubleToMoney(alocacao.totalInvestir)),
                       style: TextStyle(
+                          fontSize: _textSize2,
                           color: alocacao.totalInvestir < 0
                               ? Colors.red
                               : Colors.green)),
                   title: Text(
                     alocacao.descricao,
-                    style: TextStyle(color: Colors.grey[700]),
+                    style: TextStyle(
+                        color: Colors.grey[700], fontSize: _textSize1),
                   ),
                   children: [
                     Container(
@@ -91,7 +96,8 @@ class AlocacoesWidget extends StatelessWidget {
                         dense: true,
                         title: Row(
                           children: [
-                            Text("Rendimento"),
+                            Text("Rendimento",
+                                style: TextStyle(fontSize: _textSize2)),
                             SizedBox(
                               width: 100,
                             ),
@@ -100,6 +106,7 @@ class AlocacoesWidget extends StatelessWidget {
                                   alocacao.rendimentoPercentString +
                                   "%",
                               style: TextStyle(
+                                  fontSize: _textSize2,
                                   color: alocacao.rendimento < 0
                                       ? Colors.red
                                       : Colors.green),
@@ -107,8 +114,10 @@ class AlocacoesWidget extends StatelessWidget {
                           ],
                         ),
                         trailing: Text(
-                          alocacao.rendimentoString,
+                          GeralUtil.doubleToMoney(alocacao.rendimento,
+                              leftSymbol: ""),
                           style: TextStyle(
+                              fontSize: _textSize2,
                               color: alocacao.rendimento < 0
                                   ? Colors.red
                                   : Colors.green),
@@ -117,18 +126,28 @@ class AlocacoesWidget extends StatelessWidget {
                     ),
                     ListTile(
                       dense: true,
-                      title: Text("Total Aportado"),
-                      trailing: Text(alocacao.totalAportadoString),
+                      title: Text("Total Aportado",
+                          style: TextStyle(fontSize: _textSize2)),
+                      trailing: Text(
+                          GeralUtil.doubleToMoney(alocacao.totalAportado,
+                              leftSymbol: ""),
+                          style: TextStyle(fontSize: _textSize2)),
                     ),
                     ListTile(
                       dense: true,
-                      title: Text("Total Aportado c/ Rend."),
-                      trailing: Text(alocacao.totalAportadoAtualString),
+                      title: Text("Total Aportado c/ Rend.",
+                          style: TextStyle(fontSize: _textSize2)),
+                      trailing: Text(
+                          GeralUtil.doubleToMoney(alocacao.totalAportadoAtual,
+                              leftSymbol: ""),
+                          style: TextStyle(fontSize: _textSize2)),
                     ),
                     ListTile(
                       dense: true,
-                      title: Text("Alocação Indicada"),
-                      trailing: Text(alocacao.alocacaoPercentString + "%"),
+                      title: Text("Alocação Indicada",
+                          style: TextStyle(fontSize: _textSize2)),
+                      trailing: Text(alocacao.alocacaoPercentString + "%",
+                          style: TextStyle(fontSize: _textSize2)),
                     ),
                     Container(
                       color: Color(0xffe7ecf4),

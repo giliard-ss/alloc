@@ -2,6 +2,7 @@ import 'package:alloc/app/modules/carteira/widgets/alocacoes_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/ativos_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/custom_button_widget.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
@@ -84,8 +85,8 @@ class _CarteiraPageState
           Container(
             //plano de fundo
             decoration: BoxDecoration(
-              color: Color(0xfff4f6f9),
-            ),
+                //color: Color(0xfff4f6f9),
+                ),
             margin: EdgeInsets.only(top: 175),
             padding: EdgeInsets.only(top: 70),
             child: _content(),
@@ -119,7 +120,7 @@ class _CarteiraPageState
           children: [
             ListTile(
               title: Text(
-                "R\$ " + controller.carteira.totalAportadoAtualString,
+                GeralUtil.doubleToMoney(controller.carteira.totalAportadoAtual),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Colors.white,
@@ -145,7 +146,10 @@ class _CarteiraPageState
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(controller.carteira.totalAportadoString,
+                        Text(
+                            GeralUtil.doubleToMoney(
+                                controller.carteira.totalAportado,
+                                leftSymbol: ""),
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -195,7 +199,9 @@ class _CarteiraPageState
                             (controller.carteira.rendimentoTotal > 0
                                     ? '+'
                                     : '') +
-                                controller.carteira.rendimentoTotalString,
+                                GeralUtil.doubleToMoney(
+                                    controller.carteira.rendimentoTotal,
+                                    leftSymbol: ""),
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -358,11 +364,12 @@ class _CarteiraPageState
                     color: Color(0xff132a53)),
               ),
               subtitle: Text(
-                "Depositado " + controller.carteira.totalDepositoString,
+                "Depositado " +
+                    GeralUtil.doubleToMoney(controller.carteira.totalDeposito),
                 style: TextStyle(fontSize: 12),
               ),
               trailing: Text(
-                controller.carteira.saldoString,
+                GeralUtil.doubleToMoney(controller.carteira.saldo),
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

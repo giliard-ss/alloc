@@ -1,3 +1,4 @@
+import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
@@ -6,7 +7,6 @@ import 'package:alloc/app/shared/services/ialocacao_service.dart';
 import 'package:alloc/app/shared/services/iativo_service.dart';
 import 'package:alloc/app/shared/services/impl/alocacao_service.dart';
 import 'package:alloc/app/shared/services/impl/ativo_service.dart';
-import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -38,11 +38,11 @@ abstract class _SubAlocacaoControllerBase with Store {
   Future<bool> salvarNovaAlocacao(List<AlocacaoDTO> alocacoes) async {
     try {
       List<AlocacaoModel> alocs = List.from(alocacoes);
-      alocs.add(AlocacaoModel(null, SharedMain.usuario.id, novaAlocacaoDesc,
-          null, alocacaoAtual.idCarteira, alocacaoAtual.id));
+      alocs.add(AlocacaoModel(null, AppCore.usuario.id, novaAlocacaoDesc, null,
+          alocacaoAtual.idCarteira, alocacaoAtual.id));
 
       await _alocacaoService.save(alocs, alocacaoAtual.autoAlocacao);
-      await SharedMain.notifyAddDelAlocacao();
+      await AppCore.notifyAddDelAlocacao();
       return true;
     } on Exception catch (e) {
       LoggerUtil.error(e);
@@ -59,7 +59,7 @@ abstract class _SubAlocacaoControllerBase with Store {
 
       await _ativoService.delete(
           ativoExcluir, list, alocacaoAtual.autoAlocacao);
-      await SharedMain.notifyAddDelAtivo();
+      await AppCore.notifyAddDelAtivo();
 
       return null;
     } on Exception catch (e) {
@@ -71,7 +71,7 @@ abstract class _SubAlocacaoControllerBase with Store {
   Future<String> excluirAlocacao(
       AlocacaoDTO alocacaoExcluir, List<AlocacaoDTO> alocacoes) async {
     try {
-      if (SharedMain.alocacaoPossuiAtivos(alocacaoExcluir.id)) {
+      if (AppCore.alocacaoPossuiAtivos(alocacaoExcluir.id)) {
         return "Alocação possui ativos!";
       }
       List<AlocacaoModel> alocs = List.from(alocacoes);
@@ -79,7 +79,7 @@ abstract class _SubAlocacaoControllerBase with Store {
 
       await _alocacaoService.delete(
           alocacaoExcluir.id, alocs, alocacaoAtual.autoAlocacao);
-      await SharedMain.notifyAddDelAlocacao();
+      await AppCore.notifyAddDelAlocacao();
       return null;
     } on Exception catch (e) {
       LoggerUtil.error(e);

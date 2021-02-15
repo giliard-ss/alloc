@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
-import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/exception_util.dart';
 import 'package:alloc/app/shared/utils/logger_app.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

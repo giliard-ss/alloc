@@ -1,13 +1,11 @@
-import 'package:alloc/app/modules/carteira/carteira_controller.dart';
+import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/pages/subalocacao/sub_alocacao_controller.dart';
 import 'package:alloc/app/modules/carteira/widgets/alocacoes_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/ativos_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/custom_button_widget.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
-import 'package:alloc/app/shared/dtos/carteira_dto.dart';
-import 'package:alloc/app/shared/shared_main.dart';
-import 'package:alloc/app/shared/utils/dialog_util.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
@@ -53,13 +51,13 @@ class _SubAlocacaoPageState
   set alocacaoAtual(e) => _alocAtual.value = [e];
 
   void _loadAlocacaoAtual() {
-    alocacaoAtual = SharedMain.getAlocacaoById(widget.id);
+    alocacaoAtual = AppCore.getAlocacaoById(widget.id);
     controller.alocacaoAtual = alocacaoAtual;
   }
 
   void _loadAlocacoes() {
     runInAction(() {
-      List<AlocacaoDTO> list = SharedMain.getAlocacoesByIdSuperior(widget.id);
+      List<AlocacaoDTO> list = AppCore.getAlocacoesByIdSuperior(widget.id);
       list.forEach(
           (e) => e.percentualNaAlocacao = _getPercentualAtualAloc(e, list));
       list.sort((e1, e2) =>
@@ -76,7 +74,7 @@ class _SubAlocacaoPageState
 
   void _loadAtivos() {
     runInAction(() {
-      List<AtivoDTO> list = SharedMain.getAtivosByIdSuperior(widget.id);
+      List<AtivoDTO> list = AppCore.getAtivosByIdSuperior(widget.id);
       list.forEach(
           (e) => e.percentualNaAlocacao = _getPercentualAtualAtivo(e, list));
 
@@ -108,7 +106,7 @@ class _SubAlocacaoPageState
       _alocacaoReactDispose();
     }
 
-    _alocacaoReactDispose = SharedMain.createCarteirasReact((e) {
+    _alocacaoReactDispose = AppCore.createCarteirasReact((e) {
       _loadAlocacaoAtual();
       _loadAlocacoes();
     });
@@ -181,7 +179,7 @@ class _SubAlocacaoPageState
       builder: (_) {
         return ListTile(
           title: Text(
-            "R\$ " + alocacaoAtual.totalAportadoAtualString,
+            GeralUtil.doubleToMoney(alocacaoAtual.totalAportadoAtual),
             textAlign: TextAlign.center,
             style: TextStyle(
                 color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
@@ -204,11 +202,13 @@ class _SubAlocacaoPageState
           children: [
             ListTile(
               title: Text("Aportado"),
-              trailing: Text(alocacaoAtual.totalAportadoString),
+              trailing:
+                  Text(GeralUtil.doubleToMoney(alocacaoAtual.totalAportado)),
             ),
             ListTile(
               title: Text("Investir"),
-              trailing: Text(alocacaoAtual.totalInvestirString),
+              trailing:
+                  Text(GeralUtil.doubleToMoney(alocacaoAtual.totalInvestir)),
             ),
           ],
         );

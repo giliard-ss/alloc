@@ -1,7 +1,5 @@
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
-import 'package:alloc/app/shared/listener_firestore.dart';
-import 'package:alloc/app/shared/models/carteira_model.dart';
-import 'package:alloc/app/shared/shared_main.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
@@ -120,16 +118,6 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
                   itemBuilder: (context, index) {
                     CarteiraDTO carteira = controller.carteiras[index];
 
-                    ListTile(
-                      onTap: () {
-                        Modular.to.pushNamed("/carteira/${carteira.id}");
-                      },
-                      subtitle: Text(
-                          "Aportado: ${carteira.totalAportado.toString()}     Aportar: ${carteira.getSaldo().toString()}  Dep: ${carteira.totalDeposito.toString()}"),
-                      title: Text(carteira.descricao),
-                      trailing: Text(" ${carteira.totalAportadoAtualString}"),
-                    );
-
                     return Card(
                       child: Column(
                         children: [
@@ -146,27 +134,28 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               trailing: Text(
-                                  " ${carteira.totalAtualizadoString}",
+                                  GeralUtil.doubleToMoney(
+                                      carteira.totalAtualizado),
                                   style:
                                       TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
                           ListTile(
                             leading: Icon(
-                              carteira.getSaldo() < 0
+                              carteira.saldo < 0
                                   ? Icons.remove_circle
                                   : Icons.add_circle,
-                              color: carteira.getSaldo() < 0
+                              color: carteira.saldo < 0
                                   ? Colors.red
                                   : Colors.green,
                             ),
                             title: Text(
-                              "${carteira.getSaldo() < 0 ? 'Vender' : 'Investir'}",
+                              "${carteira.saldo < 0 ? 'Vender' : 'Investir'}",
                             ),
                             trailing: Text(
-                              carteira.saldoString,
+                              GeralUtil.doubleToMoney(carteira.saldo),
                               style: TextStyle(
-                                  color: carteira.getSaldo() < 0
+                                  color: carteira.saldo < 0
                                       ? Colors.red
                                       : Colors.green,
                                   fontWeight: FontWeight.bold),

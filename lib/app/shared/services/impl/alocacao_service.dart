@@ -1,7 +1,7 @@
+import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/repositories/ialocacao_repository.dart';
 import 'package:alloc/app/shared/services/ialocacao_service.dart';
-import 'package:alloc/app/shared/shared_main.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -60,6 +60,6 @@ class AlocacaoService implements IAlocacaoService {
 
   @override
   Future<List<AlocacaoModel>> getAllAlocacoes() {
-    return alocacaoRepository.findAlocacoes(SharedMain.usuario.id);
+    return alocacaoRepository.findAlocacoes(AppCore.usuario.id);
   }
 }

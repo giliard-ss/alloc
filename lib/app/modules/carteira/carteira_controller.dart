@@ -1,10 +1,9 @@
+import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
-import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
-
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/services/ialocacao_service.dart';
@@ -13,8 +12,6 @@ import 'package:alloc/app/shared/services/icarteira_service.dart';
 import 'package:alloc/app/shared/services/impl/alocacao_service.dart';
 import 'package:alloc/app/shared/services/impl/ativo_service.dart';
 import 'package:alloc/app/shared/services/impl/carteira_service.dart';
-import 'package:alloc/app/shared/shared_main.dart';
-import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 
 import 'package:mobx/mobx.dart';
@@ -56,8 +53,8 @@ abstract class _CarteiraControllerBase with Store {
       _carteirasReactDispose();
     }
 
-    _carteirasReactDispose = SharedMain.createCarteirasReact((e) {
-      _carteira = SharedMain.getCarteira(_carteira.id);
+    _carteirasReactDispose = AppCore.createCarteirasReact((e) {
+      _carteira = AppCore.getCarteira(_carteira.id);
       refreshAlocacoes();
       _loadAtivos();
     });
@@ -66,10 +63,10 @@ abstract class _CarteiraControllerBase with Store {
   Future<bool> salvarNovaAlocacao() async {
     try {
       List<AlocacaoModel> alocs = List.from(alocacoes);
-      alocs.add(AlocacaoModel(null, SharedMain.usuario.id, novaAlocacaoDesc,
-          null, _carteira.id, null));
+      alocs.add(AlocacaoModel(null, AppCore.usuario.id, novaAlocacaoDesc, null,
+          _carteira.id, null));
       await _alocacaoService.save(alocs, _carteira.autoAlocacao);
-      await SharedMain.notifyAddDelAlocacao();
+      await AppCore.notifyAddDelAlocacao();
       return true;
     } on Exception catch (e) {
       LoggerUtil.error(e);
@@ -79,7 +76,7 @@ abstract class _CarteiraControllerBase with Store {
   }
 
   void refreshAlocacoes() {
-    List<AlocacaoDTO> list = SharedMain.getAlocacoesByCarteiraId(carteira.id);
+    List<AlocacaoDTO> list = AppCore.getAlocacoesByCarteiraId(carteira.id);
     list.forEach(
         (e) => e.percentualNaAlocacao = _getPercentualAtualAloc(e, list));
     list.sort(
@@ -92,7 +89,7 @@ abstract class _CarteiraControllerBase with Store {
       CarteiraModel updated = CarteiraModel.fromMap(_carteira.toMap());
       updated.totalDeposito = updated.totalDeposito.toDouble() + valorDeposito;
       await _carteiraService.update(updated);
-      await SharedMain.notifyUpdateCarteira();
+      await AppCore.notifyUpdateCarteira();
       return true;
     } on Exception catch (e) {
       LoggerUtil.error(e);
@@ -111,7 +108,7 @@ abstract class _CarteiraControllerBase with Store {
       }
 
       await _carteiraService.update(updated);
-      await SharedMain.notifyUpdateCarteira();
+      await AppCore.notifyUpdateCarteira();
       return true;
     } on Exception catch (e) {
       LoggerUtil.error(e);
@@ -129,7 +126,7 @@ abstract class _CarteiraControllerBase with Store {
       list.forEach((e) => models.add(e.getModel()));
       await _ativoService.delete(
           ativoDTO.getModel(), models, _carteira.autoAlocacao);
-      await SharedMain.notifyAddDelAtivo();
+      await AppCore.notifyAddDelAtivo();
       return null;
     } on Exception catch (e) {
       LoggerUtil.error(e);
@@ -140,7 +137,7 @@ abstract class _CarteiraControllerBase with Store {
   Future<String> excluirCarteira() async {
     try {
       await _carteiraService.delete(_carteira.id);
-      await SharedMain.notifyAddDelCarteira();
+      await AppCore.notifyAddDelCarteira();
       return null;
     } on Exception catch (e) {
       LoggerUtil.error(e);
@@ -150,11 +147,11 @@ abstract class _CarteiraControllerBase with Store {
 
   Future<String> excluirAlocacao(AlocacaoDTO alocacaoDTO) async {
     try {
-      if (SharedMain.alocacaoPossuiAtivos(alocacaoDTO.id)) {
+      if (AppCore.alocacaoPossuiAtivos(alocacaoDTO.id)) {
         return "Alocação possui ativos!";
       }
 
-      if (SharedMain.alocacaoPossuiSubAlocacao(alocacaoDTO.id)) {
+      if (AppCore.alocacaoPossuiSubAlocacao(alocacaoDTO.id)) {
         return "Alocação possui sub-alocações!";
       }
 
@@ -163,7 +160,7 @@ abstract class _CarteiraControllerBase with Store {
 
       await _alocacaoService.delete(
           alocacaoDTO.id, alocs, _carteira.autoAlocacao);
-      await SharedMain.notifyAddDelAlocacao();
+      await AppCore.notifyAddDelAlocacao();
       refreshAlocacoes();
       return null;
     } on Exception catch (e) {
@@ -197,7 +194,7 @@ abstract class _CarteiraControllerBase with Store {
   }
 
   void _loadAtivos() {
-    List<AtivoDTO> list = SharedMain.getAtivosByCarteira(_carteira.id);
+    List<AtivoDTO> list = AppCore.getAtivosByCarteira(_carteira.id);
     list.forEach(
         (e) => e.percentualNaAlocacao = _getPercentualAtualAtivo(e, list));
 
@@ -211,11 +208,11 @@ abstract class _CarteiraControllerBase with Store {
   }
 
   CotacaoModel getCotacao(String papel) {
-    return SharedMain.getCotacao(papel);
+    return AppCore.getCotacao(papel);
   }
 
   void setCarteira(String carteiraId) {
-    _carteira = SharedMain.getCarteira(carteiraId);
+    _carteira = AppCore.getCarteira(carteiraId);
   }
 
   String get title => _carteira.descricao;

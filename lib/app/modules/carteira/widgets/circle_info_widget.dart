@@ -13,8 +13,8 @@ class CircleInfoWidget extends StatelessWidget {
       child: Stack(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 45,
+            height: 45,
             decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
@@ -26,16 +26,17 @@ class CircleInfoWidget extends StatelessWidget {
                     ])),
           ),
           Positioned(
-            top: 5,
-            left: 7,
+            top: 2.5,
+            left: 2.5,
             child: Container(
-              width: 46,
-              height: 46,
+              width: 40,
+              height: 40,
               child: Center(
                   child: Text(
                 value + "%",
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
+                    fontSize: 10,
                     color: _getColor(indexColor, true)),
               )),
               decoration: BoxDecoration(

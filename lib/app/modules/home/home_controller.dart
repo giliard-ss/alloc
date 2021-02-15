@@ -1,16 +1,7 @@
+import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
-import 'package:alloc/app/shared/exceptions/application_exception.dart';
-import 'package:alloc/app/shared/listener_firestore.dart';
-import 'package:alloc/app/shared/models/ativo_model.dart';
-import 'package:alloc/app/shared/models/carteira_model.dart';
-import 'package:alloc/app/shared/models/cotacao_model.dart';
-import 'package:alloc/app/shared/models/usuario_model.dart';
-import 'package:alloc/app/shared/services/ialocacao_service.dart';
 import 'package:alloc/app/shared/services/icarteira_service.dart';
-import 'package:alloc/app/shared/services/impl/alocacao_service.dart';
 import 'package:alloc/app/shared/services/impl/carteira_service.dart';
-import 'package:alloc/app/shared/shared_main.dart';
-import 'package:alloc/app/shared/utils/exception_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 
 import 'package:mobx/mobx.dart';
@@ -35,7 +26,7 @@ abstract class _HomeControllerBase with Store {
   @action
   Future<void> init() async {
     try {
-      carteiras = SharedMain.carteiras;
+      carteiras = AppCore.carteiras;
       _startCarteirasReaction();
     } catch (e) {
       LoggerUtil.error(e);
@@ -46,7 +37,7 @@ abstract class _HomeControllerBase with Store {
   Future<bool> salvarNovaCarteira() async {
     try {
       await _carteiraService.create(descricao);
-      await SharedMain.notifyAddDelCarteira();
+      await AppCore.notifyAddDelCarteira();
       return true;
     } on Exception catch (e) {
       LoggerUtil.error(e);
@@ -60,8 +51,8 @@ abstract class _HomeControllerBase with Store {
       _carteirasReactDispose();
     }
 
-    _carteirasReactDispose = SharedMain.createCarteirasReact((e) {
-      this.carteiras = SharedMain.carteiras;
+    _carteirasReactDispose = AppCore.createCarteirasReact((e) {
+      this.carteiras = AppCore.carteiras;
     });
   }
 

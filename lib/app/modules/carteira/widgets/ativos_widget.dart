@@ -6,6 +6,9 @@ import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:flutter/material.dart';
 
 class AtivosWidget extends StatelessWidget {
+  static final double _textSize1 = 14;
+  static final double _textSize2 = 12;
+
   List<AtivoDTO> ativos;
   Function(AtivoDTO) fncExcluir;
   Function(AtivoDTO, List<AtivoDTO>) fncExcluirSecundario;
@@ -36,13 +39,9 @@ class AtivosWidget extends StatelessWidget {
 
               double totalAportadoAtual =
                   ativo.qtd.toInt() * ativo.ultimaCotacao.toDouble();
-              String totalAportadoAtualString =
-                  GeralUtil.limitaCasasDecimais(totalAportadoAtual).toString();
 
               double rendimento =
                   totalAportadoAtual - ativo.totalAportado.toDouble();
-              String rendimentoString =
-                  GeralUtil.limitaCasasDecimais(rendimento).toString();
 
               String rendimentoPercentString = GeralUtil.limitaCasasDecimais(
                       (rendimento * 100) / ativo.totalAportado.toDouble())
@@ -77,13 +76,15 @@ class AtivosWidget extends StatelessWidget {
                           ativo.percentualNaAlocacaoString, index),
                       title: Text(
                         ativo.papel,
+                        style: TextStyle(fontSize: _textSize1),
                       ),
                       subtitle: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            ativo.ultimaCotacaoString,
+                            GeralUtil.doubleToMoney(ativo.ultimaCotacao),
                             style: TextStyle(
+                                fontSize: _textSize2,
                                 color: Theme.of(context)
                                     .textTheme
                                     .bodyText2
@@ -94,12 +95,15 @@ class AtivosWidget extends StatelessWidget {
                                 rendimentoPercentString +
                                 "%",
                             style: TextStyle(
+                                fontSize: _textSize2,
                                 color:
                                     rendimento < 0 ? Colors.red : Colors.green),
                           ),
                           Text(
-                            totalAportadoAtualString,
+                            GeralUtil.doubleToMoney(totalAportadoAtual,
+                                leftSymbol: ""),
                             style: TextStyle(
+                                fontSize: _textSize2,
                                 color: Theme.of(context)
                                     .textTheme
                                     .bodyText2
@@ -112,9 +116,15 @@ class AtivosWidget extends StatelessWidget {
                           color: Color(0xffe7ecf4),
                           child: ListTile(
                             dense: true,
-                            title: Text("Rendimento"),
-                            trailing: Text(rendimentoString,
+                            title: Text(
+                              "Rendimento",
+                              style: TextStyle(fontSize: _textSize2),
+                            ),
+                            trailing: Text(
+                                GeralUtil.doubleToMoney(rendimento,
+                                    leftSymbol: ""),
                                 style: TextStyle(
+                                    fontSize: _textSize2,
                                     color: rendimento < 0
                                         ? Colors.red
                                         : Colors.green)),
@@ -122,13 +132,21 @@ class AtivosWidget extends StatelessWidget {
                         ),
                         ListTile(
                           dense: true,
-                          title: Text("Total Aportado"),
-                          trailing: Text(ativo.totalAportadoString),
+                          title: Text(
+                              "Total Aportado - ${ativo.qtd} x ${GeralUtil.doubleToMoney(
+                                ativo.preco,
+                              )}",
+                              style: TextStyle(fontSize: _textSize2)),
+                          trailing: Text(
+                              GeralUtil.doubleToMoney(ativo.totalAportado,
+                                  leftSymbol: ""),
+                              style: TextStyle(fontSize: _textSize2)),
                         ),
                         ListTile(
                           dense: true,
                           title: Text("Alocação Indicada"),
-                          trailing: Text(ativo.alocacaoPercentString + " %"),
+                          trailing: Text(ativo.alocacaoPercentString + " %",
+                              style: TextStyle(fontSize: _textSize2)),
                         )
                       ],
                     ),
