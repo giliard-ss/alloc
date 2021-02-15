@@ -58,8 +58,7 @@ abstract class _ConfiguracaoControllerBase with Store {
     if (StringUtil.isEmpty(superiorId)) {
       autoAlocacao = _carteiraController.carteira.autoAlocacao;
     } else {
-      autoAlocacao =
-          SharedMain.getAlocacoesByIdSuperior(superiorId).first.autoAlocacao;
+      autoAlocacao = SharedMain.getAlocacaoById(superiorId).autoAlocacao;
     }
   }
 
