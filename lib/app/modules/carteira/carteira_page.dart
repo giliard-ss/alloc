@@ -40,30 +40,109 @@ class _CarteiraPageState
   Widget build(BuildContext context) {
     return Scaffold(
         key: _scaffoldKey,
-        appBar: AppBar(
-          title: Text(controller.title),
-          actions: [
-            PopupMenuButton(
-              itemBuilder: (BuildContext bc) => [
-                PopupMenuItem(child: Text("Configuração"), value: "config"),
-                PopupMenuItem(
-                    child: Text("Excluir Carteira"), value: "excluirCarteira"),
-              ],
-              onSelected: (e) {
-                if (e == 'excluirCarteira') {
-                  _showExcluirCarteiraDialog();
-                }
-                if (e == 'config') {
-                  Modular.to.pushNamed("/carteira/config");
-                }
-              },
-            )
-          ],
-        ),
         body: WidgetUtil.futureBuild(controller.init, _body));
   }
 
   _body() {
+    return SingleChildScrollView(
+      child: Container(
+        margin: EdgeInsets.all(15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 50,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  controller.title,
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                ),
+                PopupMenuButton(
+                  icon: Icon(Icons.menu),
+                  itemBuilder: (BuildContext bc) => [
+                    PopupMenuItem(child: Text("Configurar"), value: "config"),
+                    PopupMenuItem(
+                        child: Text("Excluir Carteira"),
+                        value: "excluirCarteira"),
+                  ],
+                  onSelected: (e) {
+                    if (e == 'excluirCarteira') {
+                      _showExcluirCarteiraDialog();
+                    }
+                    if (e == 'config') {
+                      Modular.to.pushNamed("/carteira/config");
+                    }
+                  },
+                )
+              ],
+            ),
+            SizedBox(
+              height: 50,
+            ),
+            Text("TOTAL ATUALIZADO"),
+            Text(
+              GeralUtil.doubleToMoney(controller.carteira.totalAportadoAtual),
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              (controller.carteira.rendimentoTotal > 0 ? '+' : '') +
+                  controller.carteira.rendimentoTotalPercentString +
+                  "%",
+              style: TextStyle(
+                color: controller.carteira.rendimentoTotal < 0
+                    ? Color(0xffff6666)
+                    : Colors.greenAccent[700],
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            _resumo(),
+            SizedBox(
+              height: 50,
+            ),
+            _content()
+          ],
+        ),
+      ),
+    );
+  }
+
+  _resumo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 20,
+        ),
+        _resumoRow("Total Depositado", controller.carteira.totalDeposito),
+        Divider(
+          height: 5,
+        ),
+        _resumoRow("Total Aplicado", controller.carteira.totalAportado),
+        Divider(
+          height: 5,
+        ),
+        _resumoRow("Saldo", controller.carteira.saldo),
+      ],
+    );
+  }
+
+  _resumoRow(String descricao, double valor) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(descricao),
+        Text(GeralUtil.doubleToMoney(valor, leftSymbol: ""))
+      ],
+    );
+  }
+
+  _body2() {
     return SingleChildScrollView(
       child: Stack(
         children: [
@@ -79,7 +158,7 @@ class _CarteiraPageState
                     end: Alignment.bottomCenter,
                     colors: [
                   Theme.of(context).primaryColor,
-                  Color(0xff132a53)
+                  Color(0xff132a53),
                 ])),
           ),
           Container(
@@ -335,7 +414,7 @@ class _CarteiraPageState
               visible: controller.alocacoes.isNotEmpty ||
                   controller.ativos.isNotEmpty,
               child: Column(children: [
-                _buttons(),
+                // _buttons(),
                 SizedBox(
                   height: 20,
                 ),
@@ -390,6 +469,9 @@ class _CarteiraPageState
             child: AlocacoesWidget(
               alocacoes: controller.alocacoes,
               fncExcluir: controller.excluirAlocacao,
+              fncConfig: () {
+                Modular.to.pushNamed("/carteira/config");
+              },
             ));
       },
     );

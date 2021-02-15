@@ -19,10 +19,13 @@ class AppWidget extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Slidy',
       theme: ThemeData(
-          textTheme: TextTheme(bodyText2: TextStyle(color: Colors.grey[800])),
+          //  textTheme: TextTheme(bodyText2: TextStyle(color: Colors.grey[800])),
           primaryColor: Color(0xff24509d),
           primarySwatch: Colors.blue,
-          appBarTheme: AppBarTheme(elevation: 0),
+          backgroundColor: Colors.white,
+          appBarTheme: AppBarTheme(
+            elevation: 0,
+          ),
           buttonTheme: ButtonThemeData(
               minWidth: double.infinity, buttonColor: Color(0xff24509d))),
       initialRoute: '/',

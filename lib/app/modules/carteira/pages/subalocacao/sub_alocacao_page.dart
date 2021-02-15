@@ -286,6 +286,9 @@ class _SubAlocacaoPageState
             child: AlocacoesWidget(
               alocacoes: _alocacoes.value,
               fncExcluirSecundario: controller.excluirAlocacao,
+              fncConfig: () {
+                Modular.to.pushNamed("/carteira/config/${alocacaoAtual.id}");
+              },
               title: "SUB-ALOCAÇÕES",
             ));
       },
