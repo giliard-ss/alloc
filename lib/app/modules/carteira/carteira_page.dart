@@ -53,51 +53,7 @@ class _CarteiraPageState
             SizedBox(
               height: 50,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  controller.title,
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                ),
-                PopupMenuButton(
-                  icon: Icon(Icons.menu),
-                  itemBuilder: (BuildContext bc) => [
-                    PopupMenuItem(child: Text("Configurar"), value: "config"),
-                    PopupMenuItem(
-                        child: Text("Excluir Carteira"),
-                        value: "excluirCarteira"),
-                  ],
-                  onSelected: (e) {
-                    if (e == 'excluirCarteira') {
-                      _showExcluirCarteiraDialog();
-                    }
-                    if (e == 'config') {
-                      Modular.to.pushNamed("/carteira/config");
-                    }
-                  },
-                )
-              ],
-            ),
-            SizedBox(
-              height: 50,
-            ),
-            Text("TOTAL ATUALIZADO"),
-            Text(
-              GeralUtil.doubleToMoney(controller.carteira.totalAportadoAtual),
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              (controller.carteira.rendimentoTotal > 0 ? '+' : '') +
-                  controller.carteira.rendimentoTotalPercentString +
-                  "%",
-              style: TextStyle(
-                color: controller.carteira.rendimentoTotal < 0
-                    ? Color(0xffff6666)
-                    : Colors.greenAccent[700],
-                fontSize: 16,
-              ),
-            ),
+            _header(),
             SizedBox(
               height: 30,
             ),
@@ -127,68 +83,22 @@ class _CarteiraPageState
         Divider(
           height: 5,
         ),
-        _resumoRow("Saldo", controller.carteira.saldo),
+        _resumoRow("Saldo", controller.carteira.saldo,
+            valorFW: FontWeight.bold),
       ],
     );
   }
 
-  _resumoRow(String descricao, double valor) {
+  _resumoRow(String descricao, double valor, {valorFW: FontWeight.normal}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(descricao),
-        Text(GeralUtil.doubleToMoney(valor, leftSymbol: ""))
+        Text(
+          GeralUtil.doubleToMoney(valor, leftSymbol: ""),
+          style: TextStyle(fontWeight: valorFW),
+        )
       ],
-    );
-  }
-
-  _body2() {
-    return SingleChildScrollView(
-      child: Stack(
-        children: [
-          Container(
-            //header
-            padding: EdgeInsets.only(top: 20),
-            height: 200,
-
-            child: _header(),
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                  Theme.of(context).primaryColor,
-                  Color(0xff132a53),
-                ])),
-          ),
-          Container(
-            //plano de fundo
-            decoration: BoxDecoration(
-                //color: Color(0xfff4f6f9),
-                ),
-            margin: EdgeInsets.only(top: 175),
-            padding: EdgeInsets.only(top: 70),
-            child: _content(),
-          ),
-          Container(
-            //resumo carteira
-            margin: EdgeInsets.fromLTRB(10, 140, 10, 0),
-            child: Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(15),
-                ),
-              ),
-              child: Column(
-                children: [
-                  _totalInvestir(),
-                ],
-              ),
-            ),
-          )
-        ],
-      ),
     );
   }
 
@@ -196,163 +106,79 @@ class _CarteiraPageState
     return Observer(
       builder: (_) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ListTile(
-              title: Text(
-                GeralUtil.doubleToMoney(controller.carteira.totalAportadoAtual),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text("Total Atualizado",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                  )),
-            ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Card(
-                  elevation: 0,
-                  color: Colors.transparent,
-                  child: Container(
-                    width: 150,
-                    height: 45,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                            GeralUtil.doubleToMoney(
-                                controller.carteira.totalAportado,
-                                leftSymbol: ""),
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold)),
-                        Text(
-                          "Aplicado",
-                          style: TextStyle(color: Colors.white, fontSize: 10),
-                        )
-                      ],
-                    ),
-                  ),
+                Text(
+                  controller.title,
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
-                Card(
-                  elevation: 0,
-                  color: Colors.transparent,
-                  child: Container(
-                    width: 80,
-                    height: 45,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          (controller.carteira.rendimentoTotal > 0 ? '+' : '') +
-                              controller.carteira.rendimentoTotalPercentString +
-                              "%",
-                          style: TextStyle(
-                              color: controller.carteira.rendimentoTotal < 0
-                                  ? Color(0xffff6666)
-                                  : Colors.greenAccent[700],
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Card(
-                  elevation: 0,
-                  color: Colors.transparent,
-                  child: Container(
-                    width: 150,
-                    height: 45,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                            (controller.carteira.rendimentoTotal > 0
-                                    ? '+'
-                                    : '') +
-                                GeralUtil.doubleToMoney(
-                                    controller.carteira.rendimentoTotal,
-                                    leftSymbol: ""),
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold)),
-                        Text(
-                          "Rendimento",
-                          style: TextStyle(color: Colors.white, fontSize: 10),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
+                PopupMenuButton(
+                  icon: Icon(Icons.menu),
+                  itemBuilder: (BuildContext bc) => [
+                    PopupMenuItem(child: Text("Depósito"), value: "deposito"),
+                    PopupMenuItem(child: Text("Saque"), value: "saque"),
+                    PopupMenuItem(
+                        child: Text("Excluir Carteira"),
+                        value: "excluirCarteira"),
+                  ],
+                  onSelected: (e) {
+                    if (e == 'excluirCarteira') {
+                      _showExcluirCarteiraDialog();
+                    }
+                    if (e == 'config') {
+                      Modular.to.pushNamed("/carteira/config");
+                    }
+
+                    switch (e) {
+                      case 'excluirCarteira':
+                        {
+                          _showExcluirCarteiraDialog();
+                        }
+                        break;
+
+                      case "deposito":
+                        {
+                          _showDepositoDialog();
+                        }
+                        break;
+                      case "saque":
+                        {
+                          _showRetiradaDialog();
+                        }
+                        break;
+
+                      default:
+                        break;
+                    }
+                  },
+                )
               ],
+            ),
+            SizedBox(
+              height: 50,
+            ),
+            Text("TOTAL ATUALIZADO"),
+            Text(
+              GeralUtil.doubleToMoney(controller.carteira.totalAportadoAtual),
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              (controller.carteira.rendimentoTotal > 0 ? '+' : '') +
+                  controller.carteira.rendimentoTotalPercentString +
+                  "%",
+              style: TextStyle(
+                color: controller.carteira.rendimentoTotal < 0
+                    ? Colors.red
+                    : Colors.green,
+                fontSize: 16,
+              ),
             )
           ],
         );
       },
-    );
-  }
-
-  _buttons() {
-    return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Visibility(
-            visible:
-                controller.ativos.isNotEmpty && controller.alocacoes.isEmpty,
-            child: Flexible(
-              child: CustomButtonWidget(
-                  icon: Icons.add_chart,
-                  text: "Ativo",
-                  onPressed: () {
-                    Modular.to.pushNamed("/carteira/ativo");
-                  }),
-            ),
-          ),
-          Visibility(
-            visible: controller.alocacoes.isNotEmpty,
-            child: Flexible(
-              child: CustomButtonWidget(
-                  icon: Icons.my_library_add_outlined,
-                  text: "Alocação",
-                  onPressed: () {
-                    _showNovaAlocacaoDialog();
-                  }),
-            ),
-          ),
-          SizedBox(
-            width: 15,
-          ),
-          Flexible(
-            child: CustomButtonWidget(
-                icon: Icons.local_atm_sharp,
-                text: "Depósito",
-                onPressed: () {
-                  _showDepositoDialog();
-                }),
-          ),
-          SizedBox(
-            width: 15,
-          ),
-          Flexible(
-            child: CustomButtonWidget(
-                icon: Icons.monetization_on_outlined,
-                text: "Saque",
-                onPressed: () {
-                  _showRetiradaDialog();
-                }),
-          ),
-        ],
-      ),
     );
   }
 
@@ -414,7 +240,6 @@ class _CarteiraPageState
               visible: controller.alocacoes.isNotEmpty ||
                   controller.ativos.isNotEmpty,
               child: Column(children: [
-                // _buttons(),
                 SizedBox(
                   height: 20,
                 ),
@@ -425,39 +250,6 @@ class _CarteiraPageState
           },
         )
       ],
-    );
-  }
-
-  Widget _totalInvestir() {
-    return Observer(
-      builder: (_) {
-        return Container(
-          height: 80,
-          child: Center(
-            child: ListTile(
-              title: Text(
-                "Saldo",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xff132a53)),
-              ),
-              subtitle: Text(
-                "Depositado " +
-                    GeralUtil.doubleToMoney(controller.carteira.totalDeposito),
-                style: TextStyle(fontSize: 12),
-              ),
-              trailing: Text(
-                GeralUtil.doubleToMoney(controller.carteira.saldo),
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xff132a53)),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -472,6 +264,7 @@ class _CarteiraPageState
               fncConfig: () {
                 Modular.to.pushNamed("/carteira/config");
               },
+              fncAdd: _showNovaAlocacaoDialog,
             ));
       },
     );
@@ -485,6 +278,12 @@ class _CarteiraPageState
         child: AtivosWidget(
           ativos: controller.ativos,
           fncExcluir: controller.excluir,
+          fncAdd: () {
+            Modular.to.pushNamed("/carteira/ativo");
+          },
+          fncConfig: () {
+            Modular.to.pushNamed("/carteira/config");
+          },
         ),
       );
     });

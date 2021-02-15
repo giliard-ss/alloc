@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
 class CircleInfoWidget extends StatelessWidget {
-  List colorsHex = [0xff818099, 0xffa18799, 0xff7c8381, 0xffa9a3b2];
+  List colorsHex = [
+    0xfff78c08,
+    0xff5784a3,
+    0xffb4a797,
+    0xff7e0ac0,
+    0xfff5b200,
+    0xff0085c0
+  ];
   List colorDarkHex = [0xff504f63, 0xff725a6b, 0xff575c5a, 0xff71687d];
   int indexColor;
   String value;
@@ -13,34 +20,45 @@ class CircleInfoWidget extends StatelessWidget {
       child: Stack(
         children: [
           Container(
-            width: 45,
-            height: 45,
+            width: 50,
+            height: 50,
             decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      _getColor(indexColor, false),
-                      _getColor(indexColor, true)
-                    ])),
+              color: _getColor(indexColor, false),
+              shape: BoxShape.circle,
+              // gradient: LinearGradient(
+              //     begin: Alignment.topCenter,
+              //     end: Alignment.bottomCenter,
+              //     colors: [
+              //       _getColor(indexColor, false),
+              //       _getColor(indexColor, true)
+              //     ]),
+            ),
+            /*  child: Center(
+              child: Text(
+                value + "%",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    color: Colors.white),
+              ),
+            ),*/
           ),
           Positioned(
-            top: 2.5,
-            left: 2.5,
+            top: 4.5,
+            left: 4.5,
             child: Container(
-              width: 40,
-              height: 40,
+              width: 41,
+              height: 41,
               child: Center(
                   child: Text(
                 value + "%",
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 10,
-                    color: _getColor(indexColor, true)),
+                    fontSize: 11,
+                    color: _getColor(indexColor, false)),
               )),
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle, color: Color(0xfff4f6f9)),
+              decoration:
+                  BoxDecoration(shape: BoxShape.circle, color: Colors.white),
             ),
           )
         ],

@@ -142,56 +142,57 @@ class _SubAlocacaoPageState
 
   _body() {
     return SingleChildScrollView(
-      child: Column(children: [
-        Container(
-          //header
-          padding: EdgeInsets.only(top: 20),
-          height: 100,
-          color: Theme.of(context).primaryColor,
-          child: _header(),
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        ListTile(
-          title: Text(
-            "RESUMO",
-            style: TextStyle(
-                color: Color(0xff103d6b),
-                fontWeight: FontWeight.bold,
-                fontSize: 16),
+      child: Container(
+        padding: EdgeInsets.all(15),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _header(),
+          getResumoAlocacaoPrincipal(),
+          SizedBox(
+            height: 50,
           ),
-        ),
-        getResumoAlocacaoPrincipal(),
-        _getButtons(),
-        Padding(
-          padding: EdgeInsets.all(10),
-          child: Column(
-            children: [_getAtivos(), _getAlocacoes()],
-          ),
-        )
-      ]),
+          _getAtivos(),
+          _getAlocacoes()
+        ]),
+      ),
     );
   }
 
   _header() {
     return Observer(
       builder: (_) {
-        return ListTile(
-          title: Text(
-            GeralUtil.doubleToMoney(alocacaoAtual.totalAportadoAtual),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
-          ),
-          subtitle: Text("Total Atualizado",
-              textAlign: TextAlign.center,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("TOTAL ATUALIZADO"),
+            Text(
+              GeralUtil.doubleToMoney(alocacaoAtual.totalAportadoAtual),
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              (alocacaoAtual.rendimento > 0 ? '+' : '') +
+                  alocacaoAtual.rendimentoPercentString +
+                  "%",
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-              )),
+                color: alocacaoAtual.rendimento < 0 ? Colors.red : Colors.green,
+                fontSize: 16,
+              ),
+            )
+          ],
         );
       },
+    );
+  }
+
+  _resumoRow(String descricao, double valor, {valorFW: FontWeight.normal}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(descricao),
+        Text(
+          GeralUtil.doubleToMoney(valor, leftSymbol: ""),
+          style: TextStyle(fontWeight: valorFW),
+        )
+      ],
     );
   }
 
@@ -199,67 +200,18 @@ class _SubAlocacaoPageState
     return Observer(
       builder: (_) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ListTile(
-              title: Text("Aportado"),
-              trailing:
-                  Text(GeralUtil.doubleToMoney(alocacaoAtual.totalAportado)),
+            SizedBox(
+              height: 20,
             ),
-            ListTile(
-              title: Text("Investir"),
-              trailing:
-                  Text(GeralUtil.doubleToMoney(alocacaoAtual.totalInvestir)),
+            _resumoRow("Total Aplicado", alocacaoAtual.totalAportado),
+            Divider(
+              height: 5,
             ),
+            _resumoRow("Saldo", alocacaoAtual.totalInvestir,
+                valorFW: FontWeight.bold),
           ],
-        );
-      },
-    );
-  }
-
-  Widget _getButtons() {
-    return Observer(
-      builder: (_) {
-        return Container(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Visibility(
-                visible: _alocacoes.value.isEmpty,
-                child: Flexible(
-                  child: CustomButtonWidget(
-                      icon: Icons.add_box_rounded,
-                      text: "Ativo",
-                      onPressed: () {
-                        Modular.to
-                            .pushNamed("/carteira/ativo/${alocacaoAtual.id}");
-                      }),
-                ),
-              ),
-              Visibility(
-                visible: _ativos.value.isEmpty,
-                child: Flexible(
-                  child: CustomButtonWidget(
-                      icon: Icons.add_box_rounded,
-                      text: "Alocação",
-                      onPressed: () {
-                        _showNovaAlocacaoDialog();
-                      }),
-                ),
-              ),
-              SizedBox(
-                width: 15,
-              ),
-              Flexible(
-                child: CustomButtonWidget(
-                    icon: Icons.settings,
-                    text: "Configurar",
-                    onPressed: () {
-                      Modular.to
-                          .pushNamed("/carteira/config/${alocacaoAtual.id}");
-                    }),
-              ),
-            ],
-          ),
         );
       },
     );
@@ -273,6 +225,12 @@ class _SubAlocacaoPageState
         child: AtivosWidget(
           ativos: _ativos.value,
           fncExcluirSecundario: controller.excluir,
+          fncConfig: () {
+            Modular.to.pushNamed("/carteira/config/${alocacaoAtual.id}");
+          },
+          fncAdd: () {
+            Modular.to.pushNamed("/carteira/ativo/${alocacaoAtual.id}");
+          },
         ),
       );
     });
@@ -289,7 +247,8 @@ class _SubAlocacaoPageState
               fncConfig: () {
                 Modular.to.pushNamed("/carteira/config/${alocacaoAtual.id}");
               },
-              title: "SUB-ALOCAÇÕES",
+              fncAdd: _showNovaAlocacaoDialog,
+              title: "Sub-Alocações",
             ));
       },
     );

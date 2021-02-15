@@ -12,22 +12,45 @@ class AtivosWidget extends StatelessWidget {
   List<AtivoDTO> ativos;
   Function(AtivoDTO) fncExcluir;
   Function(AtivoDTO, List<AtivoDTO>) fncExcluirSecundario;
+  Function fncConfig;
+  Function fncAdd;
 
   AtivosWidget(
-      {@required this.ativos, this.fncExcluir, this.fncExcluirSecundario});
+      {@required this.ativos,
+      this.fncExcluir,
+      this.fncExcluirSecundario,
+      @required this.fncConfig,
+      @required this.fncAdd});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ListTile(
-          title: Text(
-            "ATIVOS",
-            style: TextStyle(
-                color: Color(0xff103d6b),
-                fontWeight: FontWeight.bold,
-                fontSize: 16),
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Ativos",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.add_circle_outline_sharp,
+                  ),
+                  onPressed: fncAdd,
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.dashboard_outlined,
+                  ),
+                  onPressed: fncConfig,
+                )
+              ],
+            )
+          ],
         ),
         ListView.builder(
             scrollDirection: Axis.vertical,
@@ -72,6 +95,7 @@ class AtivosWidget extends StatelessWidget {
                 child: Column(
                   children: [
                     ExpansionTile(
+                      tilePadding: EdgeInsets.only(left: 0),
                       leading: CircleInfoWidget(
                           ativo.percentualNaAlocacaoString, index),
                       title: Text(

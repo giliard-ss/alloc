@@ -13,6 +13,7 @@ class AlocacoesWidget extends StatelessWidget {
   Future<String> Function(AlocacaoDTO) fncExcluir;
   Future<String> Function(AlocacaoDTO, List<AlocacaoDTO>) fncExcluirSecundario;
   Function fncConfig;
+  Function fncAdd;
   String title;
 
   AlocacoesWidget(
@@ -20,7 +21,8 @@ class AlocacoesWidget extends StatelessWidget {
       this.fncExcluir,
       this.fncExcluirSecundario,
       this.title = "Alocações da carteira",
-      @required this.fncConfig});
+      @required this.fncConfig,
+      @required this.fncAdd});
 
   @override
   Widget build(BuildContext context) {
@@ -34,13 +36,27 @@ class AlocacoesWidget extends StatelessWidget {
               title,
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
-            IconButton(
-              icon: Icon(
-                Icons.dashboard_outlined,
-              ),
-              onPressed: fncConfig,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.add_circle_outline_sharp,
+                  ),
+                  onPressed: fncAdd,
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.dashboard_outlined,
+                  ),
+                  onPressed: fncConfig,
+                )
+              ],
             )
           ],
+        ),
+        SizedBox(
+          height: 10,
         ),
         ListView.builder(
             scrollDirection: Axis.vertical,
@@ -71,15 +87,17 @@ class AlocacoesWidget extends StatelessWidget {
                 background: Container(),
                 secondaryBackground: _slideRightBackground(),
                 direction: DismissDirection.endToStart,
-                child: _createTile(alocacao, index),
+                child: _createTile(context, alocacao, index),
               );
             }),
       ],
     );
   }
 
-  _createTile(AlocacaoDTO alocacao, int index) {
+  _createTile(context, AlocacaoDTO alocacao, int index) {
     return Card(
+      elevation: 2,
+      shadowColor: Colors.grey[300],
       margin: EdgeInsets.only(bottom: 25),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
@@ -125,29 +143,32 @@ class AlocacoesWidget extends StatelessWidget {
             Text(
                 (alocacao.totalInvestir < 0
                     ? ('Vender ' +
-                        (GeralUtil.limitaCasasDecimais(
-                                alocacao.totalInvestir * -1))
+                        (GeralUtil.doubleToMoney(alocacao.totalInvestir * -1))
                             .toString())
                     : 'Aplicar ' +
                         GeralUtil.doubleToMoney(alocacao.totalInvestir)),
                 style: TextStyle(
-                    color:
-                        alocacao.totalInvestir < 0 ? Colors.red : Colors.green))
+                    color: alocacao.totalInvestir < 0
+                        ? Colors.red
+                        : Colors.green)),
+            SizedBox(
+              height: 15,
+            )
           ],
         ),
         children: [
-          Container(
-            color: Color(0xffe7ecf4),
-            child: ListTile(
-              dense: true,
-              title: Text("Rendimento", style: TextStyle(fontSize: _textSize2)),
-              trailing: Text(
-                GeralUtil.doubleToMoney(alocacao.rendimento, leftSymbol: ""),
-                style: TextStyle(
-                    fontSize: _textSize2,
-                    color: alocacao.rendimento < 0 ? Colors.red : Colors.green),
-              ),
+          ListTile(
+            dense: true,
+            title: Text("Rendimento", style: TextStyle(fontSize: _textSize2)),
+            trailing: Text(
+              GeralUtil.doubleToMoney(alocacao.rendimento, leftSymbol: ""),
+              style: TextStyle(
+                  fontSize: _textSize2,
+                  color: alocacao.rendimento < 0 ? Colors.red : Colors.green),
             ),
+          ),
+          Divider(
+            height: 5,
           ),
           ListTile(
             dense: true,
@@ -157,6 +178,9 @@ class AlocacoesWidget extends StatelessWidget {
                 GeralUtil.doubleToMoney(alocacao.totalAportado, leftSymbol: ""),
                 style: TextStyle(fontSize: _textSize2)),
           ),
+          Divider(
+            height: 5,
+          ),
           ListTile(
             dense: true,
             title: Text("Alocação Indicada",
@@ -164,41 +188,23 @@ class AlocacoesWidget extends StatelessWidget {
             trailing: Text(alocacao.alocacaoPercentString + "%",
                 style: TextStyle(fontSize: _textSize2)),
           ),
-          RaisedButton.icon(
-            elevation: 0,
-            icon: Icon(Icons.arrow_forward_ios_outlined),
-            label: Text(
-              alocacao.totalInvestir < 0 ? 'Vender' : 'Aplicar',
-            ),
-            onPressed: () {
+          GestureDetector(
+            onTap: () {
               Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
             },
-          ),
-          SizedBox(
-            height: 20,
+            child: Container(
+              height: 40,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                  color: Color(0xffe7ecf4),
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(23),
+                      bottomRight: Radius.circular(23))),
+              child: Icon(Icons.search),
+            ),
           )
         ],
       ),
-    );
-  }
-
-  _createTile2(AlocacaoDTO alocacao, int index) {
-    return ExpansionTile(
-      leading: CircleInfoWidget(alocacao.percentualNaAlocacaoString, index),
-      subtitle: Text(
-          (alocacao.totalInvestir < 0
-              ? ('Vender ' +
-                  (GeralUtil.limitaCasasDecimais(alocacao.totalInvestir * -1))
-                      .toString())
-              : 'Investir ' + GeralUtil.doubleToMoney(alocacao.totalInvestir)),
-          style: TextStyle(
-              fontSize: _textSize2,
-              color: alocacao.totalInvestir < 0 ? Colors.red : Colors.green)),
-      title: Text(
-        alocacao.descricao,
-        style: TextStyle(color: Colors.grey[700], fontSize: _textSize1),
-      ),
-      children: [],
     );
   }
 
