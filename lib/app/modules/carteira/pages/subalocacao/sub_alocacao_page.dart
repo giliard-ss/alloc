@@ -1,5 +1,8 @@
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/modules/carteira/pages/subalocacao/sub_alocacao_controller.dart';
+import 'package:alloc/app/modules/carteira/widgets/alocacoes_widget.dart';
+import 'package:alloc/app/modules/carteira/widgets/ativos_widget.dart';
+import 'package:alloc/app/modules/carteira/widgets/custom_button_widget.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
@@ -56,12 +59,16 @@ class _SubAlocacaoPageState
 
   void _loadAlocacoes() {
     runInAction(() {
-      _alocacoes.value = SharedMain.getAlocacoesByIdSuperior(widget.id);
-
+      List<AlocacaoDTO> list = SharedMain.getAlocacoesByIdSuperior(widget.id);
+      list.forEach(
+          (e) => e.percentualNaAlocacao = _getPercentualAtualAloc(e, list));
+      list.sort((e1, e2) =>
+          e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));
+      _alocacoes.value = list;
       if (_alocacoes.value.isEmpty) {
         _loadAtivos();
         return;
-      }
+      } else {}
 
       _refreshAlocacoesValues();
     });
@@ -69,8 +76,31 @@ class _SubAlocacaoPageState
 
   void _loadAtivos() {
     runInAction(() {
-      _ativos.value = SharedMain.getAtivosByIdSuperior(widget.id);
+      List<AtivoDTO> list = SharedMain.getAtivosByIdSuperior(widget.id);
+      list.forEach(
+          (e) => e.percentualNaAlocacao = _getPercentualAtualAtivo(e, list));
+
+      list.sort((e1, e2) =>
+          e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));
+      _ativos.value = list;
     });
+  }
+
+  double _getPercentualAtualAloc(
+      AlocacaoDTO aloc, List<AlocacaoDTO> alocacoes) {
+    if (aloc.totalAportadoAtual == 0) return 0;
+    double total = 0;
+    alocacoes.forEach((e) => total = total + e.totalAportadoAtual);
+    double percent = (aloc.totalAportadoAtual * 100) / total;
+    return percent;
+  }
+
+  double _getPercentualAtualAtivo(AtivoDTO ativo, List<AtivoDTO> ativos) {
+    if (ativo.totalAportadoAtual == 0) return 0;
+    double total = 0;
+    ativos.forEach((e) => total = total + e.totalAportadoAtual);
+    double percent = (ativo.totalAportadoAtual * 100) / total;
+    return percent;
   }
 
   void _startCarteirasReaction() {
@@ -79,9 +109,8 @@ class _SubAlocacaoPageState
     }
 
     _alocacaoReactDispose = SharedMain.createCarteirasReact((e) {
-      _refreshAlocacoesValues();
-      _loadAtivos();
       _loadAlocacaoAtual();
+      _loadAlocacoes();
     });
   }
 
@@ -188,288 +217,79 @@ class _SubAlocacaoPageState
   }
 
   Widget _getButtons() {
-    return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Visibility(
-            visible: _ativos.value.isNotEmpty,
-            child: Flexible(
-              child: _createButton(
-                  Icons.add_box_rounded, "Ativo", Colors.lightGreen, () {
-                Modular.to.pushNamed("/carteira/ativo/${alocacaoAtual.id}");
-              }),
-            ),
+    return Observer(
+      builder: (_) {
+        return Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Visibility(
+                visible: _alocacoes.value.isEmpty,
+                child: Flexible(
+                  child: CustomButtonWidget(
+                      icon: Icons.add_box_rounded,
+                      text: "Ativo",
+                      onPressed: () {
+                        Modular.to
+                            .pushNamed("/carteira/ativo/${alocacaoAtual.id}");
+                      }),
+                ),
+              ),
+              Visibility(
+                visible: _ativos.value.isEmpty,
+                child: Flexible(
+                  child: CustomButtonWidget(
+                      icon: Icons.add_box_rounded,
+                      text: "Alocação",
+                      onPressed: () {
+                        _showNovaAlocacaoDialog();
+                      }),
+                ),
+              ),
+              SizedBox(
+                width: 15,
+              ),
+              Flexible(
+                child: CustomButtonWidget(
+                    icon: Icons.settings,
+                    text: "Configurar",
+                    onPressed: () {
+                      Modular.to
+                          .pushNamed("/carteira/config/${alocacaoAtual.id}");
+                    }),
+              ),
+            ],
           ),
-          Visibility(
-            visible: _alocacoes.value.isNotEmpty,
-            child: Flexible(
-              child: _createButton(
-                  Icons.add_box_rounded, "Alocação", Colors.lightGreen, () {
-                _showNovaAlocacaoDialog();
-              }),
-            ),
-          ),
-          SizedBox(
-            width: 50,
-          ),
-          Flexible(
-            child: _createButton(
-                Icons.settings, "Configurar", Colors.lightGreen, () {
-              Modular.to.pushNamed("/carteira/config/${alocacaoAtual.id}");
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _createButton(
-      IconData icon, String text, Color color, Function onPressed) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-        ),
-        width: 120,
-        height: 70,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              icon,
-              size: 20,
-              color: Colors.white,
-            ),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _getAtivos() {
     return Observer(builder: (_) {
       return Visibility(
-        //mostrar ativos se tiver no ultimo nivel, ou seja, que nao haja mais alocacoes
+        //mostrar ativos somente se nao houve subalocacoes , ou seja, se estiver no ultimo nivel
         visible: _ativos.value.isNotEmpty && _alocacoes.value.isEmpty,
-        child: Column(
-          children: [
-            ListTile(
-              title: Text(
-                "ATIVOS",
-                style: TextStyle(
-                    color: Color(0xff103d6b),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-              ),
-            ),
-            ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: _ativos.value.length,
-                itemBuilder: (context, index) {
-                  AtivoDTO ativo = _ativos.value[index];
-
-                  return Dismissible(
-                    key: Key(ativo.id),
-                    confirmDismiss: (e) async {
-                      String msg =
-                          await LoadingUtil.onLoading(context, () async {
-                        return await controller.excluir(ativo, _ativos.value);
-                      });
-
-                      if (msg == null) {
-                        return true;
-                      }
-                      DialogUtil.showMessageDialog(context, msg);
-                      return false;
-                    },
-                    background: Container(),
-                    secondaryBackground: _slideRightBackground(),
-                    direction: DismissDirection.endToStart,
-                    child: Column(
-                      children: [
-                        ExpansionTile(
-                          title: Text(
-                            ativo.papel,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange[700]),
-                          ),
-                          leading: Icon(
-                            Icons.assessment_outlined,
-                            color: Colors.orange[700],
-                          ),
-                          trailing: Text(ativo.totalAportadoString,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.orange[700])),
-                          children: [
-                            ListTile(
-                              dense: true,
-                              title: Text("Total Aportado"),
-                              trailing: Text(ativo.totalAportadoString),
-                            ),
-                            ListTile(
-                              dense: true,
-                              title: Text("Alocação"),
-                              trailing:
-                                  Text(ativo.alocacaoPercent.toString() + " %"),
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                  );
-                }),
-          ],
+        child: AtivosWidget(
+          ativos: _ativos.value,
+          fncExcluirSecundario: controller.excluir,
         ),
       );
     });
-  }
-
-  Widget _slideRightBackground() {
-    return Container(
-      color: Colors.red,
-      child: Align(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Icon(
-              Icons.delete,
-              color: Colors.white,
-            ),
-            SizedBox(
-              width: 15,
-            )
-          ],
-        ),
-        alignment: Alignment.centerRight,
-      ),
-    );
   }
 
   Widget _getAlocacoes() {
-    return Observer(builder: (_) {
-      return Visibility(
-        visible: _alocacoes.value.isNotEmpty,
-        child: Column(
-          children: [
-            ListTile(
-              title: Text(
-                "ALOCAÇÕES",
-                style: TextStyle(
-                    color: Color(0xff103d6b),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-              ),
-            ),
-            ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: _alocacoes.value.length,
-                itemBuilder: (context, index) {
-                  AlocacaoDTO alocacao = _alocacoes.value[index];
-
-                  return Dismissible(
-                    key: Key(alocacao.id),
-                    confirmDismiss: (e) async {
-                      String msg =
-                          await LoadingUtil.onLoading(context, () async {
-                        return await controller.excluirAlocacao(
-                            alocacao, _alocacoes.value);
-                      });
-
-                      if (msg == null) {
-                        _loadAlocacoes();
-                        //como estou chamando o _loadAlocacoes, nao preciso que a list seja reconstruida pelo efeito do Dismissible
-                        return false;
-                      }
-                      DialogUtil.showMessageDialog(context, msg);
-                      return false;
-                    },
-                    background: Container(),
-                    secondaryBackground: _slideRightBackground(),
-                    direction: DismissDirection.endToStart,
-                    child: Card(
-                      child: Column(
-                        children: [
-                          Container(
-                            color: Color(0xffe9edf4),
-                            child: ListTile(
-                              onTap: () {
-                                Modular.to.pushNamed(
-                                    "/carteira/sub-alocacao/${alocacao.id}");
-                              },
-                              leading: Icon(Icons.donut_small_rounded),
-                              title: Text(
-                                alocacao.descricao,
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              trailing: Text(
-                                  " ${alocacao.totalAportadoAtualString}",
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                            ),
-                          ),
-                          ListTile(
-                            leading: Icon(
-                              alocacao.totalInvestir < 0
-                                  ? Icons.remove_circle
-                                  : Icons.add_circle,
-                              color: alocacao.totalInvestir < 0
-                                  ? Colors.red
-                                  : Colors.green,
-                            ),
-                            title: Text(
-                              "${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}",
-                            ),
-                            trailing: Text(
-                              alocacao.totalInvestirString,
-                              style: TextStyle(
-                                  color: alocacao.totalInvestir < 0
-                                      ? Colors.red
-                                      : Colors.green,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          ExpansionTile(
-                            title: Text(
-                              "Mais",
-                              style: TextStyle(fontSize: 14),
-                            ),
-                            children: [
-                              ListTile(
-                                dense: true,
-                                title: Text("Total Aportado"),
-                                trailing: Text(alocacao.totalAportadoString),
-                              ),
-                              ListTile(
-                                dense: true,
-                                title: Text("Alocação "),
-                                trailing: Text(
-                                    alocacao.alocacaoPercent.toString() + "%"),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-          ],
-        ),
-      );
-    });
+    return Observer(
+      builder: (_) {
+        return Visibility(
+            visible: _alocacoes.value.isNotEmpty,
+            child: AlocacoesWidget(
+              alocacoes: _alocacoes.value,
+              fncExcluirSecundario: controller.excluirAlocacao,
+              title: "SUB-ALOCAÇÕES",
+            ));
+      },
+    );
   }
 
   _showNovaAlocacaoDialog() {

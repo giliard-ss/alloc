@@ -1,9 +1,7 @@
-import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
-import 'package:alloc/app/shared/dtos/ativo_dto.dart';
-import 'package:alloc/app/shared/models/ativo_model.dart';
-import 'package:alloc/app/shared/models/cotacao_model.dart';
+import 'package:alloc/app/modules/carteira/widgets/alocacoes_widget.dart';
+import 'package:alloc/app/modules/carteira/widgets/ativos_widget.dart';
+import 'package:alloc/app/modules/carteira/widgets/custom_button_widget.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
-import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
@@ -24,9 +22,6 @@ class CarteiraPage extends StatefulWidget {
 class _CarteiraPageState
     extends ModularState<CarteiraPage, CarteiraController> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
-  List colors = [0xff818099, 0xffa18799, 0xff7c8381, 0xffa9a3b2];
-  List colorsBlack = [0xff504f63, 0xff725a6b, 0xff575c5a, 0xff71687d];
 
   @override
   void initState() {
@@ -65,17 +60,6 @@ class _CarteiraPageState
           ],
         ),
         body: WidgetUtil.futureBuild(controller.init, _body));
-  }
-
-  _getColor(int index, List colors) {
-    if (index < colors.length - 1) return colors[index];
-    int value = index;
-    while (true) {
-      if (value > colors.length - 1)
-        value = value - colors.length;
-      else
-        return colors[value];
-    }
   }
 
   _body() {
@@ -241,35 +225,46 @@ class _CarteiraPageState
             visible:
                 controller.ativos.isNotEmpty && controller.alocacoes.isEmpty,
             child: Flexible(
-              child: _createButton(Icons.add_chart, "Ativo", () {
-                Modular.to.pushNamed("/carteira/ativo");
-              }),
+              child: CustomButtonWidget(
+                  icon: Icons.add_chart,
+                  text: "Ativo",
+                  onPressed: () {
+                    Modular.to.pushNamed("/carteira/ativo");
+                  }),
             ),
           ),
           Visibility(
             visible: controller.alocacoes.isNotEmpty,
             child: Flexible(
-              child:
-                  _createButton(Icons.my_library_add_outlined, "Alocação", () {
-                _showNovaAlocacaoDialog();
-              }),
+              child: CustomButtonWidget(
+                  icon: Icons.my_library_add_outlined,
+                  text: "Alocação",
+                  onPressed: () {
+                    _showNovaAlocacaoDialog();
+                  }),
             ),
           ),
           SizedBox(
             width: 15,
           ),
           Flexible(
-            child: _createButton(Icons.local_atm_sharp, "Depósito", () {
-              _showDepositoDialog();
-            }),
+            child: CustomButtonWidget(
+                icon: Icons.local_atm_sharp,
+                text: "Depósito",
+                onPressed: () {
+                  _showDepositoDialog();
+                }),
           ),
           SizedBox(
             width: 15,
           ),
           Flexible(
-            child: _createButton(Icons.monetization_on_outlined, "Saque", () {
-              _showRetiradaDialog();
-            }),
+            child: CustomButtonWidget(
+                icon: Icons.monetization_on_outlined,
+                text: "Saque",
+                onPressed: () {
+                  _showRetiradaDialog();
+                }),
           ),
         ],
       ),
@@ -295,14 +290,20 @@ class _CarteiraPageState
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Flexible(
-              child: _createButton(Icons.add_chart, "Ativo", () {
-                Modular.to.pushNamed("/carteira/ativo");
-              }),
+              child: CustomButtonWidget(
+                  icon: Icons.add_chart,
+                  text: "Ativo",
+                  onPressed: () {
+                    Modular.to.pushNamed("/carteira/ativo");
+                  }),
             ),
             Flexible(
-              child: _createButton(Icons.add_box_rounded, "Alocação", () {
-                _showNovaAlocacaoDialog();
-              }),
+              child: CustomButtonWidget(
+                  icon: Icons.add_box_rounded,
+                  text: "Alocação",
+                  onPressed: () {
+                    _showNovaAlocacaoDialog();
+                  }),
             ),
           ],
         )
@@ -374,219 +375,16 @@ class _CarteiraPageState
     );
   }
 
-  Widget _createButton(IconData icon, String text, Function onPressed,
-      {color: Colors.grey}) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        // decoration: BoxDecoration(
-        //   color: color,
-        //   borderRadius: BorderRadius.all(Radius.circular(10)),
-        // ),
-        width: 120,
-        height: 70,
-        child: Card(
-          shape: RoundedRectangleBorder(
-            side: BorderSide(color: Colors.white70, width: 1),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          elevation: 2,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(
-                icon,
-                color: color,
-                size: 30,
-              ),
-              Text(
-                text,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _getAlocacoes() {
     return Observer(
       builder: (_) {
         return Visibility(
-          visible: controller.alocacoes.isNotEmpty,
-          child: Column(
-            children: [
-              ListTile(
-                title: Text(
-                  "ALOCAÇÕES",
-                  style: TextStyle(
-                      color: Color(0xff103d6b),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16),
-                ),
-              ),
-              Divider(
-                color: Colors.grey[300],
-                height: 5,
-                indent: 15,
-                endIndent: 15,
-              ),
-              ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: controller.alocacoes.length,
-                  itemBuilder: (context, index) {
-                    AlocacaoDTO alocacao = controller.alocacoes[index];
-
-                    return Dismissible(
-                      key: Key(alocacao.id),
-                      confirmDismiss: (e) async {
-                        String msg =
-                            await LoadingUtil.onLoading(context, () async {
-                          return await controller.excluirAlocacao(alocacao);
-                        });
-
-                        if (msg == null) {
-                          return true;
-                        }
-                        DialogUtil.showMessageDialog(context, msg);
-                        return false;
-                      },
-                      background: Container(),
-                      secondaryBackground: _slideRightBackground(),
-                      direction: DismissDirection.endToStart,
-                      child: ExpansionTile(
-                        leading:
-                            _iconAlocacoes(alocacao.percentualNaAlocacaoString,
-                                color: Color(
-                                  _getColor(index, colors),
-                                ),
-                                colorDark: Color(
-                                  _getColor(index, colorsBlack),
-                                )),
-                        subtitle: Text(
-                            (alocacao.totalInvestir < 0
-                                ? ('Vender ' +
-                                    (GeralUtil.limitaCasasDecimais(
-                                            alocacao.totalInvestir * -1))
-                                        .toString())
-                                : 'Investir ' + alocacao.totalInvestirString),
-                            style: TextStyle(
-                                color: alocacao.totalInvestir < 0
-                                    ? Colors.red
-                                    : Colors.green)),
-                        title: Text(
-                          alocacao.descricao,
-                          style: TextStyle(color: Colors.grey[700]),
-                        ),
-                        children: [
-                          Container(
-                            color: Color(0xffe7ecf4),
-                            child: ListTile(
-                              dense: true,
-                              title: Text("Rendimento"),
-                              trailing: Text(
-                                (alocacao.rendimento > 0 ? '+' : '') +
-                                    alocacao.rendimentoString,
-                                style: TextStyle(
-                                    color: alocacao.rendimento < 0
-                                        ? Colors.red
-                                        : Colors.green),
-                              ),
-                            ),
-                          ),
-                          ListTile(
-                            dense: true,
-                            title: Text("Rendimento Percentual"),
-                            trailing: Text(
-                              (alocacao.rendimento > 0 ? '+' : '') +
-                                  alocacao.rendimentoPercentString +
-                                  "%",
-                              style: TextStyle(
-                                  color: alocacao.rendimento < 0
-                                      ? Colors.red
-                                      : Colors.green),
-                            ),
-                          ),
-                          ListTile(
-                            dense: true,
-                            title: Text("Total Aportado"),
-                            trailing: Text(alocacao.totalAportadoString),
-                          ),
-                          ListTile(
-                            dense: true,
-                            title: Text("Alocação Indicada"),
-                            trailing:
-                                Text(alocacao.alocacaoPercentString + "%"),
-                          ),
-                          Container(
-                            color: Color(0xffe7ecf4),
-                            child: ListTile(
-                              dense: true,
-                              onTap: () {
-                                Modular.to.pushNamed(
-                                    "/carteira/sub-alocacao/${alocacao.id}");
-                              },
-                              title: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    alocacao.totalInvestir < 0
-                                        ? 'Vender'
-                                        : 'Investir',
-                                  ),
-                                ],
-                              ),
-                              trailing: Icon(Icons.arrow_forward_ios_outlined),
-                            ),
-                          )
-                        ],
-                      ),
-                    );
-                  }),
-            ],
-          ),
-        );
+            visible: controller.alocacoes.isNotEmpty,
+            child: AlocacoesWidget(
+              alocacoes: controller.alocacoes,
+              fncExcluir: controller.excluirAlocacao,
+            ));
       },
-    );
-  }
-
-  Widget _iconAlocacoes(String value,
-      {color: Colors.orange, colorDark: Colors.black}) {
-    return Container(
-      child: Stack(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [color, colorDark])),
-          ),
-          Positioned(
-            top: 5,
-            left: 7,
-            child: Container(
-              width: 46,
-              height: 46,
-              child: Center(
-                  child: Text(
-                value + "%",
-                style: TextStyle(fontWeight: FontWeight.bold, color: colorDark),
-              )),
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle, color: Color(0xfff4f6f9)),
-            ),
-          )
-        ],
-      ),
     );
   }
 
@@ -595,160 +393,12 @@ class _CarteiraPageState
       return Visibility(
         //mostrar ativos somente se nao houve subalocacoes , ou seja, se estiver no ultimo nivel
         visible: controller.ativos.isNotEmpty && controller.alocacoes.isEmpty,
-        child: Column(
-          children: [
-            ListTile(
-              title: Text(
-                "ATIVOS",
-                style: TextStyle(
-                    color: Color(0xff103d6b),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-              ),
-            ),
-            ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: controller.ativos.length,
-                itemBuilder: (context, index) {
-                  AtivoDTO ativo = controller.ativos[index];
-                  CotacaoModel cotacao = controller.getCotacao(ativo.papel);
-                  double totalAportadoAtual =
-                      ativo.qtd.toInt() * cotacao.ultimo.toDouble();
-                  String totalAportadoAtualString =
-                      GeralUtil.limitaCasasDecimais(totalAportadoAtual)
-                          .toString();
-
-                  double rendimento =
-                      totalAportadoAtual - ativo.totalAportado.toDouble();
-                  String rendimentoString =
-                      GeralUtil.limitaCasasDecimais(rendimento).toString();
-
-                  String rendimentoPercentString =
-                      GeralUtil.limitaCasasDecimais((rendimento * 100) /
-                              ativo.totalAportado.toDouble())
-                          .toString();
-
-                  return Dismissible(
-                    key: Key(ativo.id),
-                    confirmDismiss: (e) async {
-                      String msg =
-                          await LoadingUtil.onLoading(context, () async {
-                        return await controller.excluir(ativo);
-                      });
-
-                      if (msg == null) {
-                        return true;
-                      }
-                      DialogUtil.showMessageDialog(context, msg);
-                      return false;
-                    },
-                    background: Container(),
-                    secondaryBackground: _slideRightBackground(),
-                    direction: DismissDirection.endToStart,
-                    child: Column(
-                      children: [
-                        ExpansionTile(
-                          leading:
-                              _iconAlocacoes(ativo.percentualNaAlocacaoString,
-                                  color: Color(
-                                    _getColor(index, colors),
-                                  ),
-                                  colorDark: Color(
-                                    _getColor(index, colorsBlack),
-                                  )),
-                          title: Text(
-                            ativo.papel,
-                          ),
-                          subtitle: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                cotacao.ultimoString,
-                                style: TextStyle(
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodyText2
-                                        .color),
-                              ),
-                              Text(
-                                (rendimento > 0 ? '+' : '') +
-                                    rendimentoPercentString +
-                                    "%",
-                                style: TextStyle(
-                                    color: rendimento < 0
-                                        ? Colors.red
-                                        : Colors.green),
-                              ),
-                              Text(
-                                totalAportadoAtualString,
-                                style: TextStyle(
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodyText2
-                                        .color),
-                              )
-                            ],
-                          ),
-                          children: [
-                            Container(
-                              color: Color(0xffe7ecf4),
-                              child: ListTile(
-                                dense: true,
-                                title: Text("Rendimento"),
-                                trailing: Text(rendimentoString,
-                                    style: TextStyle(
-                                        color: rendimento < 0
-                                            ? Colors.red
-                                            : Colors.green)),
-                              ),
-                            ),
-                            ListTile(
-                              dense: true,
-                              title: Text("Total Aportado"),
-                              trailing: Text(ativo.totalAportadoString),
-                            ),
-                            ListTile(
-                              dense: true,
-                              title: Text("Alocação Indicada"),
-                              trailing:
-                                  Text(ativo.alocacaoPercentString + " %"),
-                            )
-                          ],
-                        ),
-                        Divider(
-                          height: 5,
-                        )
-                      ],
-                    ),
-                  );
-                }),
-          ],
+        child: AtivosWidget(
+          ativos: controller.ativos,
+          fncExcluir: controller.excluir,
         ),
       );
     });
-  }
-
-  Widget _slideRightBackground() {
-    return Container(
-      color: Colors.red,
-      child: Align(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Icon(
-              Icons.delete,
-              color: Colors.white,
-            ),
-            SizedBox(
-              width: 15,
-            )
-          ],
-        ),
-        alignment: Alignment.centerRight,
-      ),
-    );
   }
 
   _showExcluirCarteiraDialog() {

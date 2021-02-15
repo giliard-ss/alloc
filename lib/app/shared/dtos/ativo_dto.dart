@@ -21,13 +21,22 @@ class AtivoDTO extends AtivoModel {
 
   double get ultimaCotacao => _ultimaCotacao;
 
+  String get ultimaCotacaoString =>
+      GeralUtil.limitaCasasDecimais(ultimaCotacao).toString();
+
   set ultimaCotacao(double value) => _ultimaCotacao = value;
 
   double get percentualNaAlocacao => _percentualNaAlocacao;
 
-  String get percentualNaAlocacaoString =>
-      GeralUtil.limitaCasasDecimais(percentualNaAlocacao, casasDecimais: 1)
-          .toString();
+  String get percentualNaAlocacaoString {
+    String aloc =
+        GeralUtil.limitaCasasDecimais(percentualNaAlocacao, casasDecimais: 1)
+            .toString();
+    if (aloc.split('.')[1] == '0') {
+      return aloc.split('.')[0];
+    }
+    return aloc;
+  }
 
   set percentualNaAlocacao(double value) => _percentualNaAlocacao = value;
 }

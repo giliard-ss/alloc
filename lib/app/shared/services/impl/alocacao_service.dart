@@ -34,8 +34,15 @@ class AlocacaoService implements IAlocacaoService {
   }
 
   @override
-  Future<void> delete(
-      String idAlocacaoDeletar, List<AlocacaoModel> alocacoesUpdate) {
+  Future<void> delete(String idAlocacaoDeletar,
+      List<AlocacaoModel> alocacoesUpdate, bool autoAlocacao) {
+    if (autoAlocacao) {
+      double media = GeralUtil.limitaCasasDecimais(
+          ((100 / alocacoesUpdate.length) / 100),
+          casasDecimais: 3);
+      alocacoesUpdate.forEach((a) => a.alocacao = media);
+    }
+
     return _db.runTransaction(
       (transaction) async {
         alocacaoRepository.delete(transaction, idAlocacaoDeletar);

@@ -124,13 +124,11 @@ abstract class _CarteiraControllerBase with Store {
     try {
       List<AtivoDTO> list = List.from(ativos);
       list = list.where((e) => e.id != ativoDTO.id).toList();
-      double media =
-          double.parse(((100 / list.length) / 100).toStringAsFixed(2));
-      list.forEach((a) => a.alocacao = media);
 
       List<AtivoModel> models = [];
       list.forEach((e) => models.add(e.getModel()));
-      await _ativoService.delete(ativoDTO.getModel(), models);
+      await _ativoService.delete(
+          ativoDTO.getModel(), models, _carteira.autoAlocacao);
       await SharedMain.notifyAddDelAtivo();
       return null;
     } on Exception catch (e) {
@@ -162,11 +160,10 @@ abstract class _CarteiraControllerBase with Store {
 
       List<AlocacaoModel> alocs = List.from(alocacoes);
       alocs = alocs.where((e) => e.id != alocacaoDTO.id).toList();
-      double media =
-          double.parse(((100 / alocs.length) / 100).toStringAsFixed(2));
-      alocs.forEach((a) => a.alocacao = media);
 
-      await _alocacaoService.delete(alocacaoDTO.id, alocs);
+      await _alocacaoService.delete(
+          alocacaoDTO.id, alocs, _carteira.autoAlocacao);
+      await SharedMain.notifyAddDelAlocacao();
       refreshAlocacoes();
       return null;
     } on Exception catch (e) {
@@ -184,6 +181,7 @@ abstract class _CarteiraControllerBase with Store {
 
   double _getPercentualAtualAloc(
       AlocacaoDTO aloc, List<AlocacaoDTO> alocacoes) {
+    if (aloc.totalAportadoAtual == 0) return 0;
     double total = 0;
     alocacoes.forEach((e) => total = total + e.totalAportadoAtual);
     double percent = (aloc.totalAportadoAtual * 100) / total;
@@ -191,6 +189,7 @@ abstract class _CarteiraControllerBase with Store {
   }
 
   double _getPercentualAtualAtivo(AtivoDTO ativo, List<AtivoDTO> ativos) {
+    if (ativo.totalAportadoAtual == 0) return 0;
     double total = 0;
     ativos.forEach((e) => total = total + e.totalAportadoAtual);
     double percent = (ativo.totalAportadoAtual * 100) / total;

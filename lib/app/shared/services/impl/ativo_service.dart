@@ -73,8 +73,15 @@ class AtivoService implements IAtivoService {
   }
 
   @override
-  Future delete(
-      AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar) async {
+  Future delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar,
+      bool autoAlocacao) async {
+    if (autoAlocacao) {
+      double media = GeralUtil.limitaCasasDecimais(
+          (100 / ativosAtualizar.length) / 100,
+          casasDecimais: 3);
+      ativosAtualizar.forEach((a) => a.alocacao = media);
+    }
+
     return _db.runTransaction(
       (transaction) async {
         ativoRepository.delete(transaction, ativoDeletar);

@@ -4,6 +4,6 @@ abstract class IAlocacaoService {
   Future<List<AlocacaoModel>> getAllAlocacoes();
   Future update(AlocacaoModel alocacao);
   Future save(List<AlocacaoModel> alocacoes, bool autoAlocacao);
-  Future<void> delete(
-      String idAlocacaoDeletar, List<AlocacaoModel> alocacoesUpdate);
+  Future<void> delete(String idAlocacaoDeletar,
+      List<AlocacaoModel> alocacoesUpdate, bool autoAlocacao);
 }

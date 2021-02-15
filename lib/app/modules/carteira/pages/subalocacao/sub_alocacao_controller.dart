@@ -56,10 +56,9 @@ abstract class _SubAlocacaoControllerBase with Store {
     try {
       List<AtivoModel> list = List.from(ativos);
       list = list.where((e) => e.id != ativoExcluir.id).toList();
-      double media =
-          double.parse(((100 / list.length) / 100).toStringAsFixed(2));
-      list.forEach((a) => a.alocacao = media);
-      await _ativoService.delete(ativoExcluir, list);
+
+      await _ativoService.delete(
+          ativoExcluir, list, alocacaoAtual.autoAlocacao);
       await SharedMain.notifyAddDelAtivo();
 
       return null;
@@ -77,10 +76,9 @@ abstract class _SubAlocacaoControllerBase with Store {
       }
       List<AlocacaoModel> alocs = List.from(alocacoes);
       alocs = alocs.where((e) => e.id != alocacaoExcluir.id).toList();
-      double media =
-          double.parse(((100 / alocs.length) / 100).toStringAsFixed(2));
-      alocs.forEach((a) => a.alocacao = media);
-      await _alocacaoService.delete(alocacaoExcluir.id, alocs);
+
+      await _alocacaoService.delete(
+          alocacaoExcluir.id, alocs, alocacaoAtual.autoAlocacao);
       await SharedMain.notifyAddDelAlocacao();
       return null;
     } on Exception catch (e) {
