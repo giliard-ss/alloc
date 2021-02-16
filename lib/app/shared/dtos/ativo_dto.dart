@@ -4,20 +4,22 @@ import 'package:alloc/app/shared/utils/geral_util.dart';
 class AtivoDTO extends AtivoModel {
   double _ultimaCotacao;
   double _percentualNaAlocacao;
+  double _totalInvestir;
 
-  AtivoDTO(AtivoModel model, [this._ultimaCotacao, this._percentualNaAlocacao])
+  AtivoDTO(AtivoModel model,
+      [this._ultimaCotacao, this._percentualNaAlocacao, this._totalInvestir])
       : super.fromMap(model.toMap());
 
   AtivoDTO clone() {
     return AtivoDTO(AtivoModel.fromMap(super.toMap()), this._ultimaCotacao,
-        this._percentualNaAlocacao);
+        this._percentualNaAlocacao, this._totalInvestir);
   }
 
   AtivoModel getModel() {
     return AtivoModel.fromMap(super.toMap());
   }
 
-  double get totalAportadoAtual => qtd.toInt() * _ultimaCotacao;
+  double get totalAportadoAtual => qtd.toDouble() * _ultimaCotacao;
 
   double get ultimaCotacao => _ultimaCotacao;
 
@@ -36,4 +38,8 @@ class AtivoDTO extends AtivoModel {
   }
 
   set percentualNaAlocacao(double value) => _percentualNaAlocacao = value;
+
+  double get totalInvestir => _totalInvestir;
+
+  set totalInvestir(double value) => _totalInvestir = value;
 }

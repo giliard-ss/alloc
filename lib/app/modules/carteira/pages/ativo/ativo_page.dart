@@ -74,7 +74,7 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
           ),
           TextField(
             keyboardType: TextInputType.number,
-            onChanged: (text) => controller.qtd = int.parse(text),
+            onChanged: (text) => controller.qtd = double.parse(text),
             decoration: InputDecoration(
                 labelText: "Quantidade", border: const OutlineInputBorder()),
           ),
@@ -85,7 +85,7 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
             keyboardType: TextInputType.number,
             onChanged: (text) => controller.preco = double.parse(text),
             decoration: InputDecoration(
-                labelText: "Preço", border: const OutlineInputBorder()),
+                labelText: "Cotação", border: const OutlineInputBorder()),
           ),
           SizedBox(
             height: 10,

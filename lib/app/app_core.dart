@@ -57,6 +57,18 @@ class AppCore {
     _alocacoesDTO.value = result;
   }
 
+  static void _refreshAtivosDTO() {
+    runInAction(() {
+      List<AtivoDTO> ativosDTO = [];
+      _ativosDTO.value.forEach((e) {
+        CotacaoModel cotacao = getCotacao(e.papel);
+        e.ultimaCotacao = cotacao.ultimo.toDouble();
+        ativosDTO.add(e);
+      });
+      _ativosDTO.value = ativosDTO;
+    });
+  }
+
   static void _refreshAlocacoesDTO() {
     List<AlocacaoDTO> result = [];
     for (AlocacaoDTO aloc in _alocacoesDTO.value) {
@@ -184,18 +196,6 @@ class AppCore {
       });
       _carteirasDTO.value = carteiras;
       _reactionRefreshCarteira.value = _reactionRefreshCarteira.value + 1;
-    });
-  }
-
-  static void _refreshAtivosDTO() {
-    runInAction(() {
-      List<AtivoDTO> ativosDTO = [];
-      _ativosDTO.value.forEach((e) {
-        CotacaoModel cotacao = getCotacao(e.papel);
-        e.ultimaCotacao = cotacao.ultimo.toDouble();
-        ativosDTO.add(e);
-      });
-      _ativosDTO.value = ativosDTO;
     });
   }
 

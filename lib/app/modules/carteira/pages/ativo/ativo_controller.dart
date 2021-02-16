@@ -25,7 +25,7 @@ abstract class _AtivoControllerBase with Store {
 
   DateTime data = DateTime.now();
   String papel;
-  int qtd;
+  double qtd;
   double preco;
 
   @action

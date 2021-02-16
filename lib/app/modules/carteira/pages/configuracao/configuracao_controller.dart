@@ -150,7 +150,7 @@ abstract class _ConfiguracaoControllerBase with Store {
 
   _atualizaCarteiraOuAlocacao() async {
     if (!StringUtil.isEmpty(superiorId)) {
-      AlocacaoDTO aloc = AppCore.getAlocacoesByIdSuperior(superiorId).first;
+      AlocacaoDTO aloc = AppCore.getAlocacaoById(superiorId);
       aloc.autoAlocacao = autoAlocacao;
       await _alocacaoService.update(aloc);
       await AppCore.notifyUpdateAlocacao(); //! TODO reparar isso aqui

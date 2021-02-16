@@ -195,8 +195,13 @@ abstract class _CarteiraControllerBase with Store {
 
   void _loadAtivos() {
     List<AtivoDTO> list = AppCore.getAtivosByCarteira(_carteira.id);
-    list.forEach(
-        (e) => e.percentualNaAlocacao = _getPercentualAtualAtivo(e, list));
+    list.forEach((e) {
+      e.percentualNaAlocacao = _getPercentualAtualAtivo(e, list);
+
+      double totalAposAporte = carteira.getTotalAposAporte() * e.alocacao;
+
+      e.totalInvestir = totalAposAporte - e.totalAportadoAtual;
+    });
 
     list.sort(
         (e1, e2) => e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));

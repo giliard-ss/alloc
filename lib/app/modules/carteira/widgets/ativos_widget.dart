@@ -83,7 +83,7 @@ class AtivosWidget extends StatelessWidget {
               AtivoDTO ativo = ativos[index];
 
               double totalAportadoAtual =
-                  ativo.qtd.toInt() * ativo.ultimaCotacao.toDouble();
+                  ativo.qtd.toDouble() * ativo.ultimaCotacao.toDouble();
 
               double rendimento =
                   totalAportadoAtual - ativo.totalAportado.toDouble();
@@ -192,6 +192,14 @@ class AtivosWidget extends StatelessWidget {
                           dense: true,
                           title: Text("Alocação Indicada"),
                           trailing: Text(ativo.alocacaoPercentString + " %",
+                              style: TextStyle(fontSize: _textSize2)),
+                        ),
+                        ListTile(
+                          dense: true,
+                          title: Text("Aplicar"),
+                          trailing: Text(
+                              GeralUtil.doubleToMoney(ativo.totalInvestir,
+                                  leftSymbol: ""),
                               style: TextStyle(fontSize: _textSize2)),
                         )
                       ],
