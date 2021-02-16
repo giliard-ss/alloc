@@ -147,10 +147,7 @@ class AlocacoesWidget extends StatelessWidget {
                             .toString())
                     : 'Aplicar ' +
                         GeralUtil.doubleToMoney(alocacao.totalInvestir)),
-                style: TextStyle(
-                    color: alocacao.totalInvestir < 0
-                        ? Colors.red
-                        : Colors.green)),
+                style: TextStyle(color: Colors.grey)),
             SizedBox(
               height: 15,
             )

@@ -9,7 +9,7 @@ class GeralUtil {
     var moneyController = MoneyMaskedTextController(leftSymbol: leftSymbol);
 
     moneyController.updateValue(value);
-    return moneyController.text;
+    return (value < 0 ? "-" : "") + moneyController.text;
   }
 
   static String numToMoney(num value, {leftSymbol: 'R\$ '}) {

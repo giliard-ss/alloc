@@ -7,7 +7,9 @@ class AtivoDTO extends AtivoModel {
   double _totalInvestir;
 
   AtivoDTO(AtivoModel model,
-      [this._ultimaCotacao, this._percentualNaAlocacao, this._totalInvestir])
+      [this._ultimaCotacao = 0,
+      this._percentualNaAlocacao = 0,
+      this._totalInvestir = 0])
       : super.fromMap(model.toMap());
 
   AtivoDTO clone() {

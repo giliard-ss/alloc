@@ -79,7 +79,9 @@ class AtivoModel {
   num get alocacaoPercent => alocacaoDouble * 100;
 
   String get alocacaoPercentString {
-    String aloc = alocacaoPercent.toString();
+    String aloc = GeralUtil.limitaCasasDecimais(alocacaoPercent.toDouble(),
+            casasDecimais: 1)
+        .toString();
     if (aloc.split('.')[1] == '0') {
       return aloc.split('.')[0];
     }

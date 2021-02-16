@@ -302,6 +302,7 @@ class _CarteiraPageState
         child: AtivosWidget(
           ativos: controller.ativos,
           showButtonAdd: controller.carteira.saldo > 0,
+          autoAlocacao: controller.carteira.autoAlocacao,
           fncExcluir: controller.excluir,
           fncAdd: () {
             Modular.to.pushNamed("/carteira/ativo");

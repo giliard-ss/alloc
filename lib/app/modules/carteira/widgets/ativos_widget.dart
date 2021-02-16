@@ -15,6 +15,7 @@ class AtivosWidget extends StatelessWidget {
   Function fncConfig;
   Function fncAdd;
   bool showButtonAdd;
+  bool autoAlocacao;
 
   AtivosWidget(
       {@required this.ativos,
@@ -22,7 +23,8 @@ class AtivosWidget extends StatelessWidget {
       this.fncExcluirSecundario,
       @required this.fncConfig,
       @required this.fncAdd,
-      @required this.showButtonAdd});
+      @required this.showButtonAdd,
+      @required this.autoAlocacao});
 
   @override
   Widget build(BuildContext context) {
@@ -194,13 +196,21 @@ class AtivosWidget extends StatelessWidget {
                           trailing: Text(ativo.alocacaoPercentString + " %",
                               style: TextStyle(fontSize: _textSize2)),
                         ),
-                        ListTile(
-                          dense: true,
-                          title: Text("Aplicar"),
-                          trailing: Text(
-                              GeralUtil.doubleToMoney(ativo.totalInvestir,
-                                  leftSymbol: ""),
-                              style: TextStyle(fontSize: _textSize2)),
+                        Visibility(
+                          visible: !autoAlocacao,
+                          child: ListTile(
+                            dense: true,
+                            title: Text(
+                              ativo.totalInvestir < 0 ? "Vender" : "Aplicar",
+                              style: TextStyle(color: Colors.blue),
+                            ),
+                            trailing: Text(
+                                (ativo.totalInvestir > 0 ? "+" : "") +
+                                    GeralUtil.doubleToMoney(ativo.totalInvestir,
+                                        leftSymbol: ""),
+                                style: TextStyle(
+                                    fontSize: _textSize2, color: Colors.blue)),
+                          ),
                         )
                       ],
                     ),

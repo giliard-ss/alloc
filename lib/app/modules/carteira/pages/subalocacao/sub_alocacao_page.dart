@@ -75,8 +75,16 @@ class _SubAlocacaoPageState
   void _loadAtivos() {
     runInAction(() {
       List<AtivoDTO> list = AppCore.getAtivosByIdSuperior(widget.id);
-      list.forEach(
-          (e) => e.percentualNaAlocacao = _getPercentualAtualAtivo(e, list));
+      list.forEach((e) {
+        e.percentualNaAlocacao = _getPercentualAtualAtivo(e, list);
+
+        double totalAposAporte =
+            alocacaoAtual.totalInvestir + alocacaoAtual.totalAportadoAtual;
+
+        double totalIdealAtivo = totalAposAporte * e.alocacao;
+
+        e.totalInvestir = totalIdealAtivo - e.totalAportadoAtual;
+      });
 
       list.sort((e1, e2) =>
           e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));
@@ -225,6 +233,7 @@ class _SubAlocacaoPageState
         child: AtivosWidget(
           ativos: _ativos.value,
           showButtonAdd: alocacaoAtual.totalInvestir > 0,
+          autoAlocacao: alocacaoAtual.autoAlocacao,
           fncExcluirSecundario: controller.excluir,
           fncConfig: () {
             Modular.to.pushNamed("/carteira/config/${alocacaoAtual.id}");
