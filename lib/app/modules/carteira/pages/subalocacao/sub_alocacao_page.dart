@@ -224,6 +224,7 @@ class _SubAlocacaoPageState
         visible: _ativos.value.isNotEmpty && _alocacoes.value.isEmpty,
         child: AtivosWidget(
           ativos: _ativos.value,
+          showButtonAdd: alocacaoAtual.totalInvestir > 0,
           fncExcluirSecundario: controller.excluir,
           fncConfig: () {
             Modular.to.pushNamed("/carteira/config/${alocacaoAtual.id}");

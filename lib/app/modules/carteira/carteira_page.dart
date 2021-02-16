@@ -69,23 +69,27 @@ class _CarteiraPageState
   }
 
   _resumo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          height: 20,
-        ),
-        _resumoRow("Total Depositado", controller.carteira.totalDeposito),
-        Divider(
-          height: 5,
-        ),
-        _resumoRow("Total Aplicado", controller.carteira.totalAportado),
-        Divider(
-          height: 5,
-        ),
-        _resumoRow("Saldo", controller.carteira.saldo,
-            valorFW: FontWeight.bold),
-      ],
+    return Observer(
+      builder: (_) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 20,
+            ),
+            _resumoRow("Total Depositado", controller.carteira.totalDeposito),
+            Divider(
+              height: 5,
+            ),
+            _resumoRow("Total Aplicado", controller.carteira.totalAportado),
+            Divider(
+              height: 5,
+            ),
+            _resumoRow("Saldo", controller.carteira.saldo,
+                valorFW: FontWeight.bold),
+          ],
+        );
+      },
     );
   }
 
@@ -118,10 +122,30 @@ class _CarteiraPageState
                 PopupMenuButton(
                   icon: Icon(Icons.menu),
                   itemBuilder: (BuildContext bc) => [
-                    PopupMenuItem(child: Text("Depósito"), value: "deposito"),
-                    PopupMenuItem(child: Text("Saque"), value: "saque"),
                     PopupMenuItem(
-                        child: Text("Excluir Carteira"),
+                      child: Row(
+                        children: [
+                          Icon(Icons.upload_rounded),
+                          Text("Depósito"),
+                        ],
+                      ),
+                      value: "deposito",
+                    ),
+                    PopupMenuItem(
+                        child: Row(
+                          children: [
+                            Icon(Icons.monetization_on_outlined),
+                            Text("Saque"),
+                          ],
+                        ),
+                        value: "saque"),
+                    PopupMenuItem(
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete),
+                            Text("Excluir Carteira"),
+                          ],
+                        ),
                         value: "excluirCarteira"),
                   ],
                   onSelected: (e) {
@@ -277,6 +301,7 @@ class _CarteiraPageState
         visible: controller.ativos.isNotEmpty && controller.alocacoes.isEmpty,
         child: AtivosWidget(
           ativos: controller.ativos,
+          showButtonAdd: controller.carteira.saldo > 0,
           fncExcluir: controller.excluir,
           fncAdd: () {
             Modular.to.pushNamed("/carteira/ativo");

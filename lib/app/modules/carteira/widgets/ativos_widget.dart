@@ -14,13 +14,15 @@ class AtivosWidget extends StatelessWidget {
   Function(AtivoDTO, List<AtivoDTO>) fncExcluirSecundario;
   Function fncConfig;
   Function fncAdd;
+  bool showButtonAdd;
 
   AtivosWidget(
       {@required this.ativos,
       this.fncExcluir,
       this.fncExcluirSecundario,
       @required this.fncConfig,
-      @required this.fncAdd});
+      @required this.fncAdd,
+      @required this.showButtonAdd});
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +38,31 @@ class AtivosWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.add_circle_outline_sharp,
+                Visibility(
+                  visible: showButtonAdd,
+                  child: GestureDetector(
+                    onTap: fncAdd,
+                    child: Container(
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Aplicar/Vender",
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      width: 140,
+                      height: 30,
+                      decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.all(Radius.circular(40))),
+                    ),
                   ),
-                  onPressed: fncAdd,
                 ),
                 IconButton(
                   icon: Icon(
