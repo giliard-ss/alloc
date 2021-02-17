@@ -36,7 +36,10 @@ class CarteiraDTO extends CarteiraModel {
 
   double get rendimentoTotal => _totalAportadoAtual - _totalAportado;
 
-  double get rendimentoTotalPercent => (rendimentoTotal * 100) / totalAportado;
+  double get rendimentoTotalPercent {
+    if (totalAportado == 0) return 0;
+    return (rendimentoTotal * 100) / totalAportado;
+  }
 
   String get rendimentoTotalPercentString {
     String value =

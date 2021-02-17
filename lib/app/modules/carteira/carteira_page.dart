@@ -50,18 +50,35 @@ class _CarteiraPageState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 50,
+            Observer(
+              builder: (_) {
+                return Visibility(
+                  visible: controller.alocacoes.isEmpty &&
+                      controller.ativos.isEmpty &&
+                      controller.carteira.saldo == 0,
+                  child: _contentPrimeiroDeposito(),
+                );
+              },
             ),
-            _header(),
-            SizedBox(
-              height: 30,
+            Observer(
+              builder: (_) {
+                return Visibility(
+                  visible: controller.alocacoes.isEmpty &&
+                      controller.ativos.isEmpty &&
+                      controller.carteira.saldo != 0,
+                  child: _contentPrimeiraAlocAtivo(),
+                );
+              },
             ),
-            _resumo(),
-            SizedBox(
-              height: 50,
+            Observer(
+              builder: (_) {
+                return Visibility(
+                  visible: controller.alocacoes.isNotEmpty ||
+                      controller.ativos.isNotEmpty,
+                  child: _content(),
+                );
+              },
             ),
-            _content()
           ],
         ),
       ),
@@ -106,81 +123,95 @@ class _CarteiraPageState
     );
   }
 
+  _menu({excluir: true, deposito: true, saque: true}) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 50,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              controller.title,
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            ),
+            PopupMenuButton(
+              icon: Icon(Icons.menu),
+              itemBuilder: (BuildContext bc) => [
+                PopupMenuItem(
+                  enabled: deposito,
+                  child: Row(
+                    children: [
+                      Icon(Icons.upload_rounded),
+                      Text("Depósito"),
+                    ],
+                  ),
+                  value: "deposito",
+                ),
+                PopupMenuItem(
+                    enabled: saque,
+                    child: Row(
+                      children: [
+                        Icon(Icons.monetization_on_outlined),
+                        Text("Saque"),
+                      ],
+                    ),
+                    value: "saque"),
+                PopupMenuItem(
+                    enabled: excluir,
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete),
+                        Text("Excluir Carteira"),
+                      ],
+                    ),
+                    value: "excluirCarteira"),
+              ],
+              onSelected: (e) {
+                if (e == 'excluirCarteira') {
+                  _showExcluirCarteiraDialog();
+                }
+                if (e == 'config') {
+                  Modular.to.pushNamed("/carteira/config");
+                }
+
+                switch (e) {
+                  case 'excluirCarteira':
+                    {
+                      _showExcluirCarteiraDialog();
+                    }
+                    break;
+
+                  case "deposito":
+                    {
+                      _showDepositoDialog();
+                    }
+                    break;
+                  case "saque":
+                    {
+                      _showRetiradaDialog();
+                    }
+                    break;
+
+                  default:
+                    break;
+                }
+              },
+            )
+          ],
+        ),
+      ],
+    );
+  }
+
   _header() {
     return Observer(
       builder: (_) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  controller.title,
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                ),
-                PopupMenuButton(
-                  icon: Icon(Icons.menu),
-                  itemBuilder: (BuildContext bc) => [
-                    PopupMenuItem(
-                      child: Row(
-                        children: [
-                          Icon(Icons.upload_rounded),
-                          Text("Depósito"),
-                        ],
-                      ),
-                      value: "deposito",
-                    ),
-                    PopupMenuItem(
-                        child: Row(
-                          children: [
-                            Icon(Icons.monetization_on_outlined),
-                            Text("Saque"),
-                          ],
-                        ),
-                        value: "saque"),
-                    PopupMenuItem(
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete),
-                            Text("Excluir Carteira"),
-                          ],
-                        ),
-                        value: "excluirCarteira"),
-                  ],
-                  onSelected: (e) {
-                    if (e == 'excluirCarteira') {
-                      _showExcluirCarteiraDialog();
-                    }
-                    if (e == 'config') {
-                      Modular.to.pushNamed("/carteira/config");
-                    }
-
-                    switch (e) {
-                      case 'excluirCarteira':
-                        {
-                          _showExcluirCarteiraDialog();
-                        }
-                        break;
-
-                      case "deposito":
-                        {
-                          _showDepositoDialog();
-                        }
-                        break;
-                      case "saque":
-                        {
-                          _showRetiradaDialog();
-                        }
-                        break;
-
-                      default:
-                        break;
-                    }
-                  },
-                )
-              ],
-            ),
+            _menu(),
             SizedBox(
               height: 50,
             ),
@@ -206,18 +237,57 @@ class _CarteiraPageState
     );
   }
 
-  _contentCarteiraNova() {
+  _contentPrimeiroDeposito() {
+    return Center(
+      child: Column(
+        children: [
+          _menu(deposito: false, saque: false),
+          SizedBox(
+            height: 50,
+          ),
+          Text(
+            "Carteira Nova!",
+            style: TextStyle(fontSize: 16),
+          ),
+          Text("Informe seu primeiro depósito:"),
+          SizedBox(
+            height: 20,
+          ),
+          TextField(
+            keyboardType: TextInputType.number,
+            onChanged: (text) => controller.valorDeposito = double.parse(text),
+            decoration: InputDecoration(
+                errorStyle: TextStyle(color: Colors.red),
+                errorText: controller.errorDialog,
+                labelText: "Valor",
+                border: const OutlineInputBorder()),
+          ),
+          RaisedButton(
+            child: Text("Continuar"),
+            onPressed: () async {
+              bool ok = await LoadingUtil.onLoading(
+                  context, controller.salvarDeposito);
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  _contentPrimeiraAlocAtivo() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        _menu(),
+        _resumo(),
         SizedBox(
           height: 50,
         ),
         Text(
-          "Carteira Nova!",
+          "Saldo Disponível!",
           style: TextStyle(fontSize: 16),
         ),
-        Text("Escolha abaixo se deseja incluir alocações ou ativos"),
+        Text("Escolha abaixo para incluir alocações ou ativos"),
         SizedBox(
           height: 20,
         ),
@@ -226,18 +296,18 @@ class _CarteiraPageState
           children: [
             Flexible(
               child: CustomButtonWidget(
-                  icon: Icons.add_chart,
-                  text: "Ativo",
-                  onPressed: () {
-                    Modular.to.pushNamed("/carteira/ativo");
-                  }),
-            ),
-            Flexible(
-              child: CustomButtonWidget(
                   icon: Icons.add_box_rounded,
                   text: "Alocação",
                   onPressed: () {
                     _showNovaAlocacaoDialog();
+                  }),
+            ),
+            Flexible(
+              child: CustomButtonWidget(
+                  icon: Icons.add_chart,
+                  text: "Ativo",
+                  onPressed: () {
+                    Modular.to.pushNamed("/carteira/ativo");
                   }),
             ),
           ],
@@ -252,18 +322,17 @@ class _CarteiraPageState
         Observer(
           builder: (_) {
             return Visibility(
-              visible:
-                  controller.alocacoes.isEmpty && controller.ativos.isEmpty,
-              child: _contentCarteiraNova(),
-            );
-          },
-        ),
-        Observer(
-          builder: (_) {
-            return Visibility(
               visible: controller.alocacoes.isNotEmpty ||
                   controller.ativos.isNotEmpty,
               child: Column(children: [
+                _header(),
+                SizedBox(
+                  height: 30,
+                ),
+                _resumo(),
+                SizedBox(
+                  height: 50,
+                ),
                 SizedBox(
                   height: 20,
                 ),
@@ -326,6 +395,7 @@ class _CarteiraPageState
         Navigator.of(context).pop();
         DialogUtil.showMessageDialog(context, msg);
       } else {
+        Navigator.of(context).pop();
         Navigator.of(context).pop();
         Navigator.of(context).pop();
       }
