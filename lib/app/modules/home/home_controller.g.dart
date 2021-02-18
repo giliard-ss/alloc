@@ -49,6 +49,21 @@ mixin _$HomeController on _HomeControllerBase, Store {
     });
   }
 
+  final _$ativosAtom = Atom(name: '_HomeControllerBase.ativos');
+
+  @override
+  List<AtivoDTO> get ativos {
+    _$ativosAtom.reportRead();
+    return super.ativos;
+  }
+
+  @override
+  set ativos(List<AtivoDTO> value) {
+    _$ativosAtom.reportWrite(value, super.ativos, () {
+      super.ativos = value;
+    });
+  }
+
   final _$initAsyncAction = AsyncAction('_HomeControllerBase.init');
 
   @override
@@ -76,7 +91,8 @@ mixin _$HomeController on _HomeControllerBase, Store {
   String toString() {
     return '''
 error: ${error},
-carteiras: ${carteiras}
+carteiras: ${carteiras},
+ativos: ${ativos}
     ''';
   }
 }

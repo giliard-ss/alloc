@@ -384,6 +384,12 @@ class AppCore {
     return result;
   }
 
+  static List<AtivoDTO> get allAtivos {
+    List<AtivoDTO> result = [];
+    _ativosDTO.value.forEach((e) => result.add(e.clone()));
+    return result;
+  }
+
   static List<AtivoDTO> getAtivosByCarteira(String idCarteira) {
     List<AtivoDTO> result = [];
     _ativosDTO.value

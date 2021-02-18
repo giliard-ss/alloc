@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
@@ -35,9 +36,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
 
   _body() {
     return SingleChildScrollView(
-      child: Column(children: [
-        getCarteiras(),
-      ]),
+      child: Column(children: [getCarteiras(), getAtivos()]),
     );
   }
 
@@ -82,6 +81,30 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
               },
             )
           ],
+        );
+      },
+    );
+  }
+
+  Widget getAtivos() {
+    return Observer(
+      builder: (_) {
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: controller.ativos.length,
+          itemBuilder: (context, index) {
+            AtivoDTO ativo = controller.ativos[index];
+
+            return ListTile(
+              dense: true,
+              title: Row(
+                children: [Text(ativo.papel)],
+              ),
+              subtitle: Text(GeralUtil.doubleToMoney(ativo.ultimaCotacao)),
+              trailing: Text("+1%"),
+            );
+          },
         );
       },
     );

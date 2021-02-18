@@ -1,4 +1,5 @@
 import 'package:alloc/app/app_core.dart';
+import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/services/icarteira_service.dart';
 import 'package:alloc/app/shared/services/impl/carteira_service.dart';
@@ -23,10 +24,14 @@ abstract class _HomeControllerBase with Store {
   @observable
   List<CarteiraDTO> carteiras = [];
 
+  @observable
+  List<AtivoDTO> ativos = [];
+
   @action
   Future<void> init() async {
     try {
       carteiras = AppCore.carteiras;
+      ativos = AppCore.allAtivos;
       _startCarteirasReaction();
     } catch (e) {
       LoggerUtil.error(e);
@@ -53,6 +58,7 @@ abstract class _HomeControllerBase with Store {
 
     _carteirasReactDispose = AppCore.createCarteirasReact((e) {
       this.carteiras = AppCore.carteiras;
+      this.ativos = AppCore.allAtivos;
     });
   }
 
