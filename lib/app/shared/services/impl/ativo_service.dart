@@ -19,6 +19,16 @@ class AtivoService implements IAtivoService {
 
   @override
   Future save(List<AtivoModel> ativos, bool autoAlocacao) async {
+    return _db.runTransaction(
+      (transaction) async {
+        saveByTransaction(transaction, ativos, autoAlocacao);
+      },
+    );
+  }
+
+  @override
+  void saveByTransaction(
+      Transaction transaction, List<AtivoModel> ativos, bool autoAlocacao) {
     try {
       List<AtivoModel> list = ativos;
       bool isAdicao = ativos.where((a) => a.id == null).isNotEmpty;
@@ -35,13 +45,9 @@ class AtivoService implements IAtivoService {
         list.where((e) => e.id == null).forEach((e) => e.alocacao = 0);
       }
 
-      return _db.runTransaction(
-        (transaction) async {
-          for (AtivoModel ativo in list) {
-            ativoRepository.save(transaction, ativo);
-          }
-        },
-      );
+      for (AtivoModel ativo in list) {
+        ativoRepository.save(transaction, ativo);
+      }
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao cadastrar ativos do usuario ${ativos[0].idUsuario} ' +

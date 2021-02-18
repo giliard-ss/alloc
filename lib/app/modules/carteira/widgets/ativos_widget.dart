@@ -192,7 +192,15 @@ class AtivosWidget extends StatelessWidget {
                         ),
                         ListTile(
                           dense: true,
-                          title: Text("Alocação Indicada"),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Alocação Configurada"),
+                              Visibility(
+                                  visible: ativo.alocacaoPercent == 0,
+                                  child: Icon(Icons.notification_important))
+                            ],
+                          ),
                           trailing: Text(ativo.alocacaoPercentString + " %",
                               style: TextStyle(fontSize: _textSize2)),
                         ),
@@ -201,13 +209,17 @@ class AtivosWidget extends StatelessWidget {
                           child: ListTile(
                             dense: true,
                             title: Text(
-                              ativo.totalInvestir < 0 ? "Vender" : "Aplicar",
+                              "Sugestão: " +
+                                  (ativo.totalInvestir < 0
+                                      ? "Vender"
+                                      : "Aplicar"),
                               style: TextStyle(color: Colors.blue),
                             ),
                             trailing: Text(
-                                (ativo.totalInvestir > 0 ? "+" : "") +
-                                    GeralUtil.doubleToMoney(ativo.totalInvestir,
-                                        leftSymbol: ""),
+                                GeralUtil.doubleToMoney(ativo.totalInvestir,
+                                    leftSymbol:
+                                        (ativo.totalInvestir > 0 ? "+" : "") +
+                                            "R\$ "),
                                 style: TextStyle(
                                     fontSize: _textSize2, color: Colors.blue)),
                           ),

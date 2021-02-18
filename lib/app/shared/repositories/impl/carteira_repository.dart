@@ -60,4 +60,15 @@ class CarteiraRepository implements ICarteiraRepository {
           'Falha ao deletar carteira $idCarteira! ' + e.toString());
     }
   }
+
+  @override
+  void updateByTransaction(Transaction transaction, CarteiraModel carteira) {
+    try {
+      DocumentReference ref = _db.collection(_table).doc(carteira.id);
+      transaction.set(ref, carteira.toMap());
+    } on Exception catch (e) {
+      throw ApplicationException(
+          'Falha ao atualizar a carteira ${carteira.id}! ' + e.toString());
+    }
+  }
 }

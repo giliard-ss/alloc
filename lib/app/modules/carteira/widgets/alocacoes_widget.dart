@@ -180,8 +180,16 @@ class AlocacoesWidget extends StatelessWidget {
           ),
           ListTile(
             dense: true,
-            title: Text("Alocação Indicada",
-                style: TextStyle(fontSize: _textSize2)),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Alocação Configurada",
+                    style: TextStyle(fontSize: _textSize2)),
+                Visibility(
+                    visible: alocacao.alocacaoPercent == 0,
+                    child: Icon(Icons.notification_important))
+              ],
+            ),
             trailing: Text(alocacao.alocacaoPercentString + "%",
                 style: TextStyle(fontSize: _textSize2)),
           ),

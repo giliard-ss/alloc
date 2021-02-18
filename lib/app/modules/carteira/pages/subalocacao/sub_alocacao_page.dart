@@ -3,6 +3,7 @@ import 'package:alloc/app/modules/carteira/pages/subalocacao/sub_alocacao_contro
 import 'package:alloc/app/modules/carteira/widgets/alocacoes_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/ativos_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/custom_button_widget.dart';
+import 'package:alloc/app/modules/carteira/widgets/primeira_inclusao_widget.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
@@ -158,10 +159,40 @@ class _SubAlocacaoPageState
           SizedBox(
             height: 50,
           ),
-          _getAtivos(),
-          _getAlocacoes()
+          Observer(
+            builder: (_) {
+              return Visibility(
+                visible: _alocacoes.value.isEmpty &&
+                    _ativos.value.isEmpty &&
+                    alocacaoAtual.totalInvestir != 0,
+                child: PrimeiraInclusaoWidget(
+                  menuWidget: Container(),
+                  resumoWidget: Container(),
+                  fncNovaAlocacao: _showNovaAlocacaoDialog,
+                  fncNovoAtivo: () {
+                    Modular.to.pushNamed("/carteira/ativo/${alocacaoAtual.id}");
+                  },
+                ),
+              );
+            },
+          ),
+          Observer(
+            builder: (_) {
+              return Visibility(
+                visible:
+                    _alocacoes.value.isNotEmpty || _ativos.value.isNotEmpty,
+                child: _content(),
+              );
+            },
+          ),
         ]),
       ),
+    );
+  }
+
+  _content() {
+    return Column(
+      children: [_getAtivos(), _getAlocacoes()],
     );
   }
 

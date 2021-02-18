@@ -11,6 +11,7 @@ import 'package:alloc/app/shared/services/impl/carteira_service.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -23,6 +24,7 @@ class ConfiguracaoController = _ConfiguracaoControllerBase
     with _$ConfiguracaoController;
 
 abstract class _ConfiguracaoControllerBase with Store {
+  FirebaseFirestore _db = FirebaseFirestore.instance;
   ICarteiraService _carteiraService = Modular.get<CarteiraService>();
   IAlocacaoService _alocacaoService = Modular.get<AlocacaoService>();
   IAtivoService _ativoService = Modular.get<AtivoService>();
@@ -133,14 +135,33 @@ abstract class _ConfiguracaoControllerBase with Store {
 
   Future<String> salvar() async {
     try {
-      await _atualizaCarteiraOuAlocacao();
-      if (alocacoes.isNotEmpty) {
-        await _alocacaoService.save(alocacoes, autoAlocacao);
-        await AppCore.notifyUpdateAlocacao();
-      } else if (ativos.isNotEmpty) {
-        await _ativoService.save(ativos, autoAlocacao);
-        await AppCore.notifyUpdateAtivo();
-      }
+      bool notificarUpdateCarteira = false;
+      bool notificarUpdateAlocacao = false;
+      bool notificarUpdateAtivos = false;
+
+      await _db.runTransaction((transaction) async {
+        notificarUpdateCarteira = _atualizaCarteiraOuAlocacao(transaction);
+        //se nao atualizar a carteira, entao atualiza a alocacao
+        notificarUpdateAlocacao = !notificarUpdateCarteira;
+
+        if (alocacoes.isNotEmpty) {
+          _alocacaoService.saveByTransaction(
+              transaction, alocacoes, autoAlocacao);
+          await AppCore.notifyUpdateAlocacao();
+          notificarUpdateAlocacao = true;
+        } else if (ativos.isNotEmpty) {
+          _ativoService.saveByTransaction(transaction, ativos, autoAlocacao);
+          notificarUpdateAtivos = true;
+        }
+      }).catchError((e) {
+        LoggerUtil.error(e);
+        return "Falha ao salvar!";
+      });
+
+      if (notificarUpdateAtivos) await AppCore.notifyUpdateAtivo();
+      if (notificarUpdateAlocacao) await AppCore.notifyUpdateAlocacao();
+      if (notificarUpdateCarteira) await AppCore.notifyUpdateCarteira();
+
       return null;
     } catch (e) {
       LoggerUtil.error(e);
@@ -148,18 +169,18 @@ abstract class _ConfiguracaoControllerBase with Store {
     }
   }
 
-  _atualizaCarteiraOuAlocacao() async {
+  bool _atualizaCarteiraOuAlocacao(Transaction transaction) {
     if (!StringUtil.isEmpty(superiorId)) {
       AlocacaoDTO aloc = AppCore.getAlocacaoById(superiorId);
       aloc.autoAlocacao = autoAlocacao;
-      await _alocacaoService.update(aloc);
-      await AppCore.notifyUpdateAlocacao(); //! TODO reparar isso aqui
+      _alocacaoService.updateByTransaction(transaction, aloc);
+      return false;
     } else {
       CarteiraModel carteira =
           CarteiraModel.fromMap(_carteiraController.carteira.toMap());
       carteira.autoAlocacao = autoAlocacao;
-      await _carteiraService.update(carteira);
-      await AppCore.notifyUpdateCarteira(); //! TODO reparar isso aqui
+      _carteiraService.updateByTransaction(transaction, carteira);
+      return true;
     }
   }
 

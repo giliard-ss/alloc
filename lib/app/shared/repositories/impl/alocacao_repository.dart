@@ -84,4 +84,16 @@ class AlocacaoRepository implements IAlocacaoRepository {
           'Falha ao salvar nova alocação! ' + e.toString());
     }
   }
+
+  @override
+  void updateByTransaction(
+      Transaction transaction, AlocacaoModel alocacaoModel) {
+    try {
+      DocumentReference ref = _db.collection(_table).doc(alocacaoModel.id);
+      transaction.set(ref, alocacaoModel.toMap());
+    } on Exception catch (e) {
+      throw ApplicationException(
+          'Falha ao salvar nova alocação! ' + e.toString());
+    }
+  }
 }

@@ -14,6 +14,21 @@ class AlocacaoService implements IAlocacaoService {
 
   @override
   Future save(List<AlocacaoModel> alocacoes, bool autoAlocacao) async {
+    return _db.runTransaction(
+      (transaction) async {
+        _saveByTransaction(transaction, alocacoes, autoAlocacao);
+      },
+    );
+  }
+
+  @override
+  void saveByTransaction(Transaction transaction, List<AlocacaoModel> alocacoes,
+      bool autoAlocacao) {
+    _saveByTransaction(transaction, alocacoes, autoAlocacao);
+  }
+
+  void _saveByTransaction(Transaction transaction,
+      List<AlocacaoModel> alocacoes, bool autoAlocacao) {
     if (autoAlocacao) {
       double media = GeralUtil.limitaCasasDecimais(
           ((100 / alocacoes.length) / 100),
@@ -24,13 +39,9 @@ class AlocacaoService implements IAlocacaoService {
       alocacoes.where((e) => e.id == null).forEach((e) => e.alocacao = 0);
     }
 
-    return _db.runTransaction(
-      (transaction) async {
-        for (AlocacaoModel aloc in alocacoes) {
-          alocacaoRepository.save(transaction, aloc);
-        }
-      },
-    );
+    for (AlocacaoModel aloc in alocacoes) {
+      alocacaoRepository.save(transaction, aloc);
+    }
   }
 
   @override
@@ -56,6 +67,11 @@ class AlocacaoService implements IAlocacaoService {
   @override
   Future update(AlocacaoModel alocacao) {
     return alocacaoRepository.update(alocacao);
+  }
+
+  @override
+  void updateByTransaction(Transaction transaction, AlocacaoModel alocacao) {
+    alocacaoRepository.updateByTransaction(transaction, alocacao);
   }
 
   @override

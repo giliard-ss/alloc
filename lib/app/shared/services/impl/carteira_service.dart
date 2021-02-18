@@ -40,4 +40,9 @@ class CarteiraService implements ICarteiraService {
       carteiraRepository.delete(transaction, idCarteira);
     });
   }
+
+  @override
+  void updateByTransaction(Transaction transaction, CarteiraModel carteira) {
+    carteiraRepository.updateByTransaction(transaction, carteira);
+  }
 }

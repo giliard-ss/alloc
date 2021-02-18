@@ -1,6 +1,7 @@
 import 'package:alloc/app/modules/carteira/widgets/alocacoes_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/ativos_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/custom_button_widget.dart';
+import 'package:alloc/app/modules/carteira/widgets/primeira_inclusao_widget.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
@@ -66,7 +67,16 @@ class _CarteiraPageState
                   visible: controller.alocacoes.isEmpty &&
                       controller.ativos.isEmpty &&
                       controller.carteira.saldo != 0,
-                  child: _contentPrimeiraAlocAtivo(),
+                  child: PrimeiraInclusaoWidget(
+                    menuWidget: _menu(),
+                    resumoWidget: _resumo(),
+                    fncNovaAlocacao: () {
+                      _showNovaAlocacaoDialog();
+                    },
+                    fncNovoAtivo: () {
+                      Modular.to.pushNamed("/carteira/ativo");
+                    },
+                  ),
                 );
               },
             ),
@@ -274,76 +284,22 @@ class _CarteiraPageState
     );
   }
 
-  _contentPrimeiraAlocAtivo() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _menu(),
-        _resumo(),
-        SizedBox(
-          height: 50,
-        ),
-        Text(
-          "Saldo Disponível!",
-          style: TextStyle(fontSize: 16),
-        ),
-        Text("Escolha abaixo para incluir alocações ou ativos"),
-        SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Flexible(
-              child: CustomButtonWidget(
-                  icon: Icons.add_box_rounded,
-                  text: "Alocação",
-                  onPressed: () {
-                    _showNovaAlocacaoDialog();
-                  }),
-            ),
-            Flexible(
-              child: CustomButtonWidget(
-                  icon: Icons.add_chart,
-                  text: "Ativo",
-                  onPressed: () {
-                    Modular.to.pushNamed("/carteira/ativo");
-                  }),
-            ),
-          ],
-        )
-      ],
-    );
-  }
-
   _content() {
-    return Column(
-      children: [
-        Observer(
-          builder: (_) {
-            return Visibility(
-              visible: controller.alocacoes.isNotEmpty ||
-                  controller.ativos.isNotEmpty,
-              child: Column(children: [
-                _header(),
-                SizedBox(
-                  height: 30,
-                ),
-                _resumo(),
-                SizedBox(
-                  height: 50,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                _getAtivos(),
-                _getAlocacoes()
-              ]),
-            );
-          },
-        )
-      ],
-    );
+    return Column(children: [
+      _header(),
+      SizedBox(
+        height: 30,
+      ),
+      _resumo(),
+      SizedBox(
+        height: 50,
+      ),
+      SizedBox(
+        height: 20,
+      ),
+      _getAtivos(),
+      _getAlocacoes()
+    ]);
   }
 
   Widget _getAlocacoes() {
