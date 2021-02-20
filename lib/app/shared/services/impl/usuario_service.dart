@@ -2,7 +2,6 @@ import 'package:alloc/app/shared/models/usuario_model.dart';
 import 'package:alloc/app/shared/repositories/impl/usuario_repository.dart';
 import 'package:alloc/app/shared/services/impl/preference_service.dart';
 import 'package:alloc/app/shared/services/iusuario_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class UsuarioService implements IUsuarioService {

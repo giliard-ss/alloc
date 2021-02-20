@@ -25,7 +25,7 @@ class AlocacaoRepository implements IAlocacaoRepository {
   }
 
   @override
-  AlocacaoModel save(Transaction transaction, AlocacaoModel alocacaoModel) {
+  AlocacaoModel saveBatch(WriteBatch batch, AlocacaoModel alocacaoModel) {
     try {
       DocumentReference ref;
       if (alocacaoModel.id == null) {
@@ -35,7 +35,7 @@ class AlocacaoRepository implements IAlocacaoRepository {
         ref = _db.collection(_table).doc(alocacaoModel.id);
       }
 
-      transaction.set(ref, alocacaoModel.toMap());
+      batch.set(ref, alocacaoModel.toMap());
       return alocacaoModel;
     } on Exception catch (e) {
       throw ApplicationException(
@@ -44,10 +44,10 @@ class AlocacaoRepository implements IAlocacaoRepository {
   }
 
   @override
-  void delete(Transaction transaction, String idAlocacao) {
+  void deleteBatch(WriteBatch batch, String idAlocacao) {
     try {
       DocumentReference ref = _db.collection(_table).doc(idAlocacao);
-      transaction.delete(ref);
+      batch.delete(ref);
     } catch (e) {
       throw ApplicationException(
           'Falha ao salvar nova alocação! ' + e.toString());
@@ -55,8 +55,8 @@ class AlocacaoRepository implements IAlocacaoRepository {
   }
 
   @override
-  Future<void> deleteByCarteira(
-      Transaction transaction, String carteiraId) async {
+  Future<void> deleteByCarteiraBatch(
+      WriteBatch batch, String carteiraId) async {
     try {
       QuerySnapshot query = await _db
           .collection(_table)
@@ -64,7 +64,7 @@ class AlocacaoRepository implements IAlocacaoRepository {
           .get();
 
       query.docs.forEach((doc) {
-        transaction.delete(doc.reference);
+        batch.delete(doc.reference);
       });
     } catch (e) {
       throw ApplicationException(
@@ -86,11 +86,10 @@ class AlocacaoRepository implements IAlocacaoRepository {
   }
 
   @override
-  void updateByTransaction(
-      Transaction transaction, AlocacaoModel alocacaoModel) {
+  void updateBatch(WriteBatch batch, AlocacaoModel alocacaoModel) {
     try {
       DocumentReference ref = _db.collection(_table).doc(alocacaoModel.id);
-      transaction.set(ref, alocacaoModel.toMap());
+      batch.set(ref, alocacaoModel.toMap());
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao salvar nova alocação! ' + e.toString());

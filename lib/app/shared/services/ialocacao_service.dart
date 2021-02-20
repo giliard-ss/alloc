@@ -3,11 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class IAlocacaoService {
   Future<List<AlocacaoModel>> getAllAlocacoes();
-  Future update(AlocacaoModel alocacao);
-  void updateByTransaction(Transaction transaction, AlocacaoModel alocacao);
-  Future save(List<AlocacaoModel> alocacoes, bool autoAlocacao);
+  Future<void> update(AlocacaoModel alocacao);
+  void updateBatch(WriteBatch batch, AlocacaoModel alocacao);
+  Future<void> save(List<AlocacaoModel> alocacoes, bool autoAlocacao);
 
-  void saveByTransaction(Transaction transaction, List<AlocacaoModel> alocacoes,
+  void saveBatch(WriteBatch batch, List<AlocacaoModel> alocacoes,
       bool autoAlocacao);
 
   Future<void> delete(String idAlocacaoDeletar,

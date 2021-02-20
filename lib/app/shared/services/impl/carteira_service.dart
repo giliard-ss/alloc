@@ -34,15 +34,15 @@ class CarteiraService implements ICarteiraService {
 
   @override
   Future<void> delete(String idCarteira) async {
-    return _db.runTransaction((transaction) async {
-      await ativoRepository.deleteByCarteira(transaction, idCarteira);
-      await alocacaoRepository.deleteByCarteira(transaction, idCarteira);
-      carteiraRepository.delete(transaction, idCarteira);
-    });
+    WriteBatch batch = _db.batch();
+    await ativoRepository.deleteByCarteiraBatch(batch, idCarteira);
+    await alocacaoRepository.deleteByCarteiraBatch(batch, idCarteira);
+    carteiraRepository.deleteBatch(batch, idCarteira);
+    return batch.commit();
   }
 
   @override
-  void updateByTransaction(Transaction transaction, CarteiraModel carteira) {
-    carteiraRepository.updateByTransaction(transaction, carteira);
+  void updateBatch(WriteBatch batch, CarteiraModel carteira) {
+    carteiraRepository.updateBatch(batch, carteira);
   }
 }

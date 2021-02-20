@@ -10,18 +10,19 @@ class UsuarioRepository implements IUsuarioRepository {
   @override
   Future<void> cadastrar(
       String nome, String email, Function(UsuarioModel) fnc) async {
-    DocumentReference rf = _db.collection(_table).doc();
-    UsuarioModel usuario = UsuarioModel(rf.id, nome, email);
+    try {
+      DocumentReference ref = _db.collection(_table).doc();
+      UsuarioModel usuario = UsuarioModel(ref.id, nome, email);
 
-    await _db.runTransaction((transaction) async {
-      transaction.set(rf, usuario.toMap());
+      WriteBatch batch = _db.batch();
+      batch.set(ref, usuario.toMap());
       await fnc(usuario);
-    }).catchError((e) {
+      await batch.commit();
+      return usuario;
+    } catch (e) {
       ExceptionUtil.throwe(
           e, "Falha ao cadastrar novo usuário!" + e.toString());
-    }).whenComplete(() {
-      return usuario;
-    });
+    }
   }
 
   @override

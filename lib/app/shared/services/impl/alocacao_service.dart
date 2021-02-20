@@ -13,22 +13,15 @@ class AlocacaoService implements IAlocacaoService {
   AlocacaoService({@required this.alocacaoRepository});
 
   @override
-  Future save(List<AlocacaoModel> alocacoes, bool autoAlocacao) async {
-    return _db.runTransaction(
-      (transaction) async {
-        _saveByTransaction(transaction, alocacoes, autoAlocacao);
-      },
-    );
+  Future<void> save(List<AlocacaoModel> alocacoes, bool autoAlocacao) async {
+    WriteBatch batch = _db.batch();
+    saveBatch(batch, alocacoes, autoAlocacao);
+    return batch.commit();
   }
 
   @override
-  void saveByTransaction(Transaction transaction, List<AlocacaoModel> alocacoes,
-      bool autoAlocacao) {
-    _saveByTransaction(transaction, alocacoes, autoAlocacao);
-  }
-
-  void _saveByTransaction(Transaction transaction,
-      List<AlocacaoModel> alocacoes, bool autoAlocacao) {
+  void saveBatch(
+      WriteBatch batch, List<AlocacaoModel> alocacoes, bool autoAlocacao) {
     if (autoAlocacao) {
       double media = GeralUtil.limitaCasasDecimais(
           ((100 / alocacoes.length) / 100),
@@ -40,7 +33,7 @@ class AlocacaoService implements IAlocacaoService {
     }
 
     for (AlocacaoModel aloc in alocacoes) {
-      alocacaoRepository.save(transaction, aloc);
+      alocacaoRepository.saveBatch(batch, aloc);
     }
   }
 
@@ -54,24 +47,23 @@ class AlocacaoService implements IAlocacaoService {
       alocacoesUpdate.forEach((a) => a.alocacao = media);
     }
 
-    return _db.runTransaction(
-      (transaction) async {
-        alocacaoRepository.delete(transaction, idAlocacaoDeletar);
-        for (AlocacaoModel aloc in alocacoesUpdate) {
-          alocacaoRepository.save(transaction, aloc);
-        }
-      },
-    );
+    WriteBatch batch = _db.batch();
+
+    alocacaoRepository.deleteBatch(batch, idAlocacaoDeletar);
+    for (AlocacaoModel aloc in alocacoesUpdate) {
+      alocacaoRepository.saveBatch(batch, aloc);
+    }
+    return batch.commit();
   }
 
   @override
-  Future update(AlocacaoModel alocacao) {
+  Future update(AlocacaoModel alocacao) async {
     return alocacaoRepository.update(alocacao);
   }
 
   @override
-  void updateByTransaction(Transaction transaction, AlocacaoModel alocacao) {
-    alocacaoRepository.updateByTransaction(transaction, alocacao);
+  void updateBatch(WriteBatch batch, AlocacaoModel alocacao) {
+    alocacaoRepository.updateBatch(batch, alocacao);
   }
 
   @override

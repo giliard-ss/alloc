@@ -25,7 +25,7 @@ class AtivoRepository implements IAtivoRepository {
   }
 
   @override
-  AtivoModel save(Transaction transaction, AtivoModel ativoModel) {
+  AtivoModel saveBatch(WriteBatch batch, AtivoModel ativoModel) {
     try {
       DocumentReference ref;
       if (ativoModel.id == null) {
@@ -35,7 +35,7 @@ class AtivoRepository implements IAtivoRepository {
         ref = _db.collection(_table).doc(ativoModel.id);
       }
 
-      transaction.set(ref, ativoModel.toMap());
+      batch.set(ref, ativoModel.toMap());
       return ativoModel;
     } catch (e) {
       throw ApplicationException(
@@ -45,10 +45,10 @@ class AtivoRepository implements IAtivoRepository {
   }
 
   @override
-  void delete(Transaction transaction, AtivoModel ativoModel) {
+  void deleteBatch(WriteBatch batch, AtivoModel ativoModel) {
     try {
       DocumentReference ref = _db.collection(_table).doc(ativoModel.id);
-      transaction.delete(ref);
+      batch.delete(ref);
     } catch (e) {
       throw ApplicationException(
           'Falha ao deletar ativos do usuario ${ativoModel.idUsuario} ' +
@@ -57,15 +57,15 @@ class AtivoRepository implements IAtivoRepository {
   }
 
   @override
-  Future<void> deleteByCarteira(
-      Transaction transaction, String carteiraId) async {
+  Future<void> deleteByCarteiraBatch(
+      WriteBatch batch, String carteiraId) async {
     try {
       QuerySnapshot query = await _db
           .collection(_table)
           .where("idCarteira", isEqualTo: carteiraId)
           .get();
       query.docs.forEach((QueryDocumentSnapshot doc) {
-        transaction.delete(doc.reference);
+        batch.delete(doc.reference);
       });
     } catch (e) {
       throw ApplicationException(

@@ -29,9 +29,7 @@ class CarteiraRepository implements ICarteiraRepository {
     try {
       DocumentReference ref = _db.collection(_table).doc();
       CarteiraModel carteira = CarteiraModel(ref.id, idUsuario, descricao, 0);
-      await _db.runTransaction((transaction) async {
-        transaction.set(ref, carteira.toMap());
-      });
+      await ref.set(carteira.toMap());
       return carteira;
     } on Exception catch (e) {
       throw ApplicationException(
@@ -41,9 +39,9 @@ class CarteiraRepository implements ICarteiraRepository {
   }
 
   @override
-  Future<void> update(CarteiraModel carteira) {
+  Future<void> update(CarteiraModel carteira) async {
     try {
-      _db.collection(_table).doc(carteira.id).set(carteira.toMap());
+      return _db.collection(_table).doc(carteira.id).set(carteira.toMap());
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao atualizar a carteira ${carteira.id}! ' + e.toString());
@@ -51,10 +49,10 @@ class CarteiraRepository implements ICarteiraRepository {
   }
 
   @override
-  void delete(Transaction transaction, String idCarteira) {
+  void deleteBatch(WriteBatch batch, String idCarteira) {
     try {
       DocumentReference ref = _db.collection(_table).doc(idCarteira);
-      transaction.delete(ref);
+      batch.delete(ref);
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao deletar carteira $idCarteira! ' + e.toString());
@@ -62,10 +60,10 @@ class CarteiraRepository implements ICarteiraRepository {
   }
 
   @override
-  void updateByTransaction(Transaction transaction, CarteiraModel carteira) {
+  void updateBatch(WriteBatch batch, CarteiraModel carteira) {
     try {
       DocumentReference ref = _db.collection(_table).doc(carteira.id);
-      transaction.set(ref, carteira.toMap());
+      batch.set(ref, carteira.toMap());
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao atualizar a carteira ${carteira.id}! ' + e.toString());

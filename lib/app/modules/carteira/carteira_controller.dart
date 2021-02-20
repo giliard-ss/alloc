@@ -136,7 +136,7 @@ abstract class _CarteiraControllerBase with Store {
 
   Future<String> excluirCarteira() async {
     try {
-      await _carteiraService.delete(_carteira.id);
+      _carteiraService.delete(_carteira.id);
       await AppCore.notifyAddDelCarteira();
       return null;
     } on Exception catch (e) {

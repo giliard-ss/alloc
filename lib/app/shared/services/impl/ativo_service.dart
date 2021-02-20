@@ -18,17 +18,14 @@ class AtivoService implements IAtivoService {
   }
 
   @override
-  Future save(List<AtivoModel> ativos, bool autoAlocacao) async {
-    return _db.runTransaction(
-      (transaction) async {
-        saveByTransaction(transaction, ativos, autoAlocacao);
-      },
-    );
+  Future<void> save(List<AtivoModel> ativos, bool autoAlocacao) async {
+    WriteBatch batch = _db.batch();
+    saveBatch(batch, ativos, autoAlocacao);
+    return batch.commit();
   }
 
   @override
-  void saveByTransaction(
-      Transaction transaction, List<AtivoModel> ativos, bool autoAlocacao) {
+  void saveBatch(WriteBatch batch, List<AtivoModel> ativos, bool autoAlocacao) {
     try {
       List<AtivoModel> list = ativos;
       bool isAdicao = ativos.where((a) => a.id == null).isNotEmpty;
@@ -46,7 +43,7 @@ class AtivoService implements IAtivoService {
       }
 
       for (AtivoModel ativo in list) {
-        ativoRepository.save(transaction, ativo);
+        ativoRepository.saveBatch(batch, ativo);
       }
     } on Exception catch (e) {
       throw ApplicationException(
@@ -79,7 +76,7 @@ class AtivoService implements IAtivoService {
   }
 
   @override
-  Future delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar,
+  Future<void> delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar,
       bool autoAlocacao) async {
     if (autoAlocacao) {
       double media = GeralUtil.limitaCasasDecimais(
@@ -87,14 +84,12 @@ class AtivoService implements IAtivoService {
           casasDecimais: 3);
       ativosAtualizar.forEach((a) => a.alocacao = media);
     }
+    WriteBatch batch = _db.batch();
 
-    return _db.runTransaction(
-      (transaction) async {
-        ativoRepository.delete(transaction, ativoDeletar);
-        for (AtivoModel ativo in ativosAtualizar) {
-          ativoRepository.save(transaction, ativo);
-        }
-      },
-    );
+    ativoRepository.deleteBatch(batch, ativoDeletar);
+    for (AtivoModel ativo in ativosAtualizar) {
+      ativoRepository.saveBatch(batch, ativo);
+    }
+    return batch.commit();
   }
 }

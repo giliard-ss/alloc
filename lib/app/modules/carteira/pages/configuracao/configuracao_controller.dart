@@ -138,25 +138,21 @@ abstract class _ConfiguracaoControllerBase with Store {
       bool notificarUpdateCarteira = false;
       bool notificarUpdateAlocacao = false;
       bool notificarUpdateAtivos = false;
+      WriteBatch batch = _db.batch();
+      notificarUpdateCarteira = _atualizaCarteiraOuAlocacao(batch);
+      //se nao atualizar a carteira, entao atualiza a alocacao
+      notificarUpdateAlocacao = !notificarUpdateCarteira;
 
-      await _db.runTransaction((transaction) async {
-        notificarUpdateCarteira = _atualizaCarteiraOuAlocacao(transaction);
-        //se nao atualizar a carteira, entao atualiza a alocacao
-        notificarUpdateAlocacao = !notificarUpdateCarteira;
+      if (alocacoes.isNotEmpty) {
+        _alocacaoService.saveBatch(batch, alocacoes, autoAlocacao);
+        await AppCore.notifyUpdateAlocacao();
+        notificarUpdateAlocacao = true;
+      } else if (ativos.isNotEmpty) {
+        _ativoService.saveBatch(batch, ativos, autoAlocacao);
+        notificarUpdateAtivos = true;
+      }
 
-        if (alocacoes.isNotEmpty) {
-          _alocacaoService.saveByTransaction(
-              transaction, alocacoes, autoAlocacao);
-          await AppCore.notifyUpdateAlocacao();
-          notificarUpdateAlocacao = true;
-        } else if (ativos.isNotEmpty) {
-          _ativoService.saveByTransaction(transaction, ativos, autoAlocacao);
-          notificarUpdateAtivos = true;
-        }
-      }).catchError((e) {
-        LoggerUtil.error(e);
-        return "Falha ao salvar!";
-      });
+      await batch.commit();
 
       if (notificarUpdateAtivos) await AppCore.notifyUpdateAtivo();
       if (notificarUpdateAlocacao) await AppCore.notifyUpdateAlocacao();
@@ -169,17 +165,17 @@ abstract class _ConfiguracaoControllerBase with Store {
     }
   }
 
-  bool _atualizaCarteiraOuAlocacao(Transaction transaction) {
+  bool _atualizaCarteiraOuAlocacao(WriteBatch batch) {
     if (!StringUtil.isEmpty(superiorId)) {
       AlocacaoDTO aloc = AppCore.getAlocacaoById(superiorId);
       aloc.autoAlocacao = autoAlocacao;
-      _alocacaoService.updateByTransaction(transaction, aloc);
+      _alocacaoService.updateBatch(batch, aloc);
       return false;
     } else {
       CarteiraModel carteira =
           CarteiraModel.fromMap(_carteiraController.carteira.toMap());
       carteira.autoAlocacao = autoAlocacao;
-      _carteiraService.updateByTransaction(transaction, carteira);
+      _carteiraService.updateBatch(batch, carteira);
       return true;
     }
   }
