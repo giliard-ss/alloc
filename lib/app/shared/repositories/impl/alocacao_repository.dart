@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/config/cf_settings.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/repositories/ialocacao_repository.dart';
@@ -13,13 +14,30 @@ class AlocacaoRepository implements IAlocacaoRepository {
       QuerySnapshot snapshot = await _db
           .collection(_table)
           .where("idUsuario", isEqualTo: idUsuario)
-          .get();
+          .get(await CfSettrings.getOptions());
       return List.generate(snapshot.docs.length, (i) {
         return AlocacaoModel.fromMap(snapshot.docs[i].data());
       });
     } catch (e) {
       throw ApplicationException(
           'Falha ao consultar alocacoes do usuario $idUsuario! ' +
+              e.toString());
+    }
+  }
+
+  @override
+  Future<List<AlocacaoModel>> findByCarteira(String carteiraId) async {
+    try {
+      QuerySnapshot snapshot = await _db
+          .collection(_table)
+          .where("idCarteira", isEqualTo: carteiraId)
+          .get(await CfSettrings.getOptions());
+      return List.generate(snapshot.docs.length, (i) {
+        return AlocacaoModel.fromMap(snapshot.docs[i].data());
+      });
+    } catch (e) {
+      throw ApplicationException(
+          'Falha ao consultar alocacoes da carteira $carteiraId! ' +
               e.toString());
     }
   }
@@ -55,30 +73,9 @@ class AlocacaoRepository implements IAlocacaoRepository {
   }
 
   @override
-  Future<void> deleteByCarteiraBatch(
-      WriteBatch batch, String carteiraId) async {
+  void update(AlocacaoModel alocacaoModel) {
     try {
-      QuerySnapshot query = await _db
-          .collection(_table)
-          .where("idCarteira", isEqualTo: carteiraId)
-          .get();
-
-      query.docs.forEach((doc) {
-        batch.delete(doc.reference);
-      });
-    } catch (e) {
-      throw ApplicationException(
-          'Falha ao deletar alocações da carteira $carteiraId ' + e.toString());
-    }
-  }
-
-  @override
-  Future update(AlocacaoModel alocacaoModel) async {
-    try {
-      return _db
-          .collection(_table)
-          .doc(alocacaoModel.id)
-          .set(alocacaoModel.toMap());
+      _db.collection(_table).doc(alocacaoModel.id).set(alocacaoModel.toMap());
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao salvar nova alocação! ' + e.toString());

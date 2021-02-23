@@ -152,7 +152,7 @@ abstract class _ConfiguracaoControllerBase with Store {
         notificarUpdateAtivos = true;
       }
 
-      await batch.commit();
+      batch.commit();
 
       if (notificarUpdateAtivos) await AppCore.notifyUpdateAtivo();
       if (notificarUpdateAlocacao) await AppCore.notifyUpdateAlocacao();

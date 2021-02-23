@@ -1,4 +1,6 @@
 import 'package:alloc/app/app_core.dart';
+import 'package:alloc/app/shared/models/alocacao_model.dart';
+import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/repositories/impl/alocacao_repository.dart';
 import 'package:alloc/app/shared/repositories/impl/ativo_repository.dart';
@@ -28,17 +30,28 @@ class CarteiraService implements ICarteiraService {
   }
 
   @override
-  Future<void> update(CarteiraModel carteira) {
-    return carteiraRepository.update(carteira);
+  void update(CarteiraModel carteira) {
+    carteiraRepository.update(carteira);
   }
 
   @override
   Future<void> delete(String idCarteira) async {
+    List<AtivoModel> ativos = await ativoRepository.findByCarteira(idCarteira);
+    List<AlocacaoModel> alocacoes =
+        await alocacaoRepository.findByCarteira(idCarteira);
+
     WriteBatch batch = _db.batch();
-    await ativoRepository.deleteByCarteiraBatch(batch, idCarteira);
-    await alocacaoRepository.deleteByCarteiraBatch(batch, idCarteira);
+
+    for (AtivoModel a in ativos) {
+      ativoRepository.deleteBatch(batch, a);
+    }
+
+    for (AlocacaoModel a in alocacoes) {
+      alocacaoRepository.deleteBatch(batch, a.id);
+    }
+
     carteiraRepository.deleteBatch(batch, idCarteira);
-    return batch.commit();
+    batch.commit();
   }
 
   @override

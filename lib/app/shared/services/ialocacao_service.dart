@@ -5,11 +5,11 @@ abstract class IAlocacaoService {
   Future<List<AlocacaoModel>> getAllAlocacoes();
   Future<void> update(AlocacaoModel alocacao);
   void updateBatch(WriteBatch batch, AlocacaoModel alocacao);
-  Future<void> save(List<AlocacaoModel> alocacoes, bool autoAlocacao);
+  void save(List<AlocacaoModel> alocacoes, bool autoAlocacao);
 
-  void saveBatch(WriteBatch batch, List<AlocacaoModel> alocacoes,
+  void saveBatch(
+      WriteBatch batch, List<AlocacaoModel> alocacoes, bool autoAlocacao);
+
+  void delete(String idAlocacaoDeletar, List<AlocacaoModel> alocacoesUpdate,
       bool autoAlocacao);
-
-  Future<void> delete(String idAlocacaoDeletar,
-      List<AlocacaoModel> alocacoesUpdate, bool autoAlocacao);
 }

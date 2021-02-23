@@ -17,7 +17,7 @@ class UsuarioRepository implements IUsuarioRepository {
       WriteBatch batch = _db.batch();
       batch.set(ref, usuario.toMap());
       await fnc(usuario);
-      await batch.commit();
+      batch.commit();
       return usuario;
     } catch (e) {
       ExceptionUtil.throwe(

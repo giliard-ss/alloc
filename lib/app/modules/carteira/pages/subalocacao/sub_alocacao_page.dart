@@ -2,7 +2,6 @@ import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/pages/subalocacao/sub_alocacao_controller.dart';
 import 'package:alloc/app/modules/carteira/widgets/alocacoes_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/ativos_widget.dart';
-import 'package:alloc/app/modules/carteira/widgets/custom_button_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/primeira_inclusao_widget.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
@@ -162,9 +161,7 @@ class _SubAlocacaoPageState
           Observer(
             builder: (_) {
               return Visibility(
-                visible: _alocacoes.value.isEmpty &&
-                    _ativos.value.isEmpty &&
-                    alocacaoAtual.totalInvestir != 0,
+                visible: _alocacoes.value.isEmpty && _ativos.value.isEmpty,
                 child: PrimeiraInclusaoWidget(
                   menuWidget: Container(),
                   resumoWidget: Container(),
@@ -263,7 +260,7 @@ class _SubAlocacaoPageState
         visible: _ativos.value.isNotEmpty && _alocacoes.value.isEmpty,
         child: AtivosWidget(
           ativos: _ativos.value,
-          showButtonAdd: alocacaoAtual.totalInvestir > 0,
+          showButtonAdd: true,
           autoAlocacao: alocacaoAtual.autoAlocacao,
           fncExcluirSecundario: controller.excluir,
           fncConfig: () {

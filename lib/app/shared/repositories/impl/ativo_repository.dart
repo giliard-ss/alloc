@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/config/cf_settings.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/repositories/iativo_repository.dart';
@@ -13,13 +14,30 @@ class AtivoRepository implements IAtivoRepository {
       QuerySnapshot snapshot = await _db
           .collection(_table)
           .where("idUsuario", isEqualTo: idUsuario)
-          .get();
+          .get(await CfSettrings.getOptions());
       return List.generate(snapshot.docs.length, (i) {
         return AtivoModel.fromMap(snapshot.docs[i].data());
       });
     } catch (e) {
       throw ApplicationException(
           'Falha ao consultar os ativos do usuário $idUsuario! ' +
+              e.toString());
+    }
+  }
+
+  @override
+  Future<List<AtivoModel>> findByCarteira(String carteiraId) async {
+    try {
+      QuerySnapshot snapshot = await _db
+          .collection(_table)
+          .where("idCarteira", isEqualTo: carteiraId)
+          .get(await CfSettrings.getOptions());
+      return List.generate(snapshot.docs.length, (i) {
+        return AtivoModel.fromMap(snapshot.docs[i].data());
+      });
+    } catch (e) {
+      throw ApplicationException(
+          'Falha ao consultar os ativos da carteira $carteiraId! ' +
               e.toString());
     }
   }
@@ -53,23 +71,6 @@ class AtivoRepository implements IAtivoRepository {
       throw ApplicationException(
           'Falha ao deletar ativos do usuario ${ativoModel.idUsuario} ' +
               e.toString());
-    }
-  }
-
-  @override
-  Future<void> deleteByCarteiraBatch(
-      WriteBatch batch, String carteiraId) async {
-    try {
-      QuerySnapshot query = await _db
-          .collection(_table)
-          .where("idCarteira", isEqualTo: carteiraId)
-          .get();
-      query.docs.forEach((QueryDocumentSnapshot doc) {
-        batch.delete(doc.reference);
-      });
-    } catch (e) {
-      throw ApplicationException(
-          'Falha ao deletar ativos da carteira $carteiraId ' + e.toString());
     }
   }
 }

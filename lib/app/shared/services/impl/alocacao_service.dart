@@ -13,10 +13,10 @@ class AlocacaoService implements IAlocacaoService {
   AlocacaoService({@required this.alocacaoRepository});
 
   @override
-  Future<void> save(List<AlocacaoModel> alocacoes, bool autoAlocacao) async {
+  void save(List<AlocacaoModel> alocacoes, bool autoAlocacao) {
     WriteBatch batch = _db.batch();
     saveBatch(batch, alocacoes, autoAlocacao);
-    return batch.commit();
+    batch.commit();
   }
 
   @override
@@ -38,8 +38,8 @@ class AlocacaoService implements IAlocacaoService {
   }
 
   @override
-  Future<void> delete(String idAlocacaoDeletar,
-      List<AlocacaoModel> alocacoesUpdate, bool autoAlocacao) {
+  void delete(String idAlocacaoDeletar, List<AlocacaoModel> alocacoesUpdate,
+      bool autoAlocacao) {
     if (autoAlocacao) {
       double media = GeralUtil.limitaCasasDecimais(
           ((100 / alocacoesUpdate.length) / 100),
@@ -53,7 +53,7 @@ class AlocacaoService implements IAlocacaoService {
     for (AlocacaoModel aloc in alocacoesUpdate) {
       alocacaoRepository.saveBatch(batch, aloc);
     }
-    return batch.commit();
+    batch.commit();
   }
 
   @override

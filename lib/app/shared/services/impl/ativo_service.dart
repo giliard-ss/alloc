@@ -18,10 +18,10 @@ class AtivoService implements IAtivoService {
   }
 
   @override
-  Future<void> save(List<AtivoModel> ativos, bool autoAlocacao) async {
+  void save(List<AtivoModel> ativos, bool autoAlocacao) {
     WriteBatch batch = _db.batch();
     saveBatch(batch, ativos, autoAlocacao);
-    return batch.commit();
+    batch.commit();
   }
 
   @override
@@ -58,7 +58,7 @@ class AtivoService implements IAtivoService {
     ativos.forEach((a) {
       //se o mapa ja tiver o papel, entao mantem ele e soma os valores
       if (map.containsKey(a.papel)) {
-        int qtdTotal = map[a.papel].qtd + a.qtd;
+        double qtdTotal = map[a.papel].qtd + a.qtd;
         double mediaPreco =
             (map[a.papel].totalAportado + a.totalAportado) / qtdTotal;
 
@@ -76,8 +76,8 @@ class AtivoService implements IAtivoService {
   }
 
   @override
-  Future<void> delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar,
-      bool autoAlocacao) async {
+  void delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar,
+      bool autoAlocacao) {
     if (autoAlocacao) {
       double media = GeralUtil.limitaCasasDecimais(
           (100 / ativosAtualizar.length) / 100,
@@ -90,6 +90,6 @@ class AtivoService implements IAtivoService {
     for (AtivoModel ativo in ativosAtualizar) {
       ativoRepository.saveBatch(batch, ativo);
     }
-    return batch.commit();
+    batch.commit();
   }
 }

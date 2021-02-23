@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/config/cf_settings.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/repositories/icarteira_repository.dart';
@@ -13,7 +14,7 @@ class CarteiraRepository implements ICarteiraRepository {
       QuerySnapshot snapshot = await _db
           .collection(_table)
           .where("idUsuario", isEqualTo: idUsuario)
-          .get();
+          .get(await CfSettrings.getOptions());
       return List.generate(snapshot.docs.length, (i) {
         return CarteiraModel.fromMap(snapshot.docs[i].data());
       });
@@ -29,7 +30,7 @@ class CarteiraRepository implements ICarteiraRepository {
     try {
       DocumentReference ref = _db.collection(_table).doc();
       CarteiraModel carteira = CarteiraModel(ref.id, idUsuario, descricao, 0);
-      await ref.set(carteira.toMap());
+      ref.set(carteira.toMap());
       return carteira;
     } on Exception catch (e) {
       throw ApplicationException(
@@ -39,9 +40,9 @@ class CarteiraRepository implements ICarteiraRepository {
   }
 
   @override
-  Future<void> update(CarteiraModel carteira) async {
+  void update(CarteiraModel carteira) {
     try {
-      return _db.collection(_table).doc(carteira.id).set(carteira.toMap());
+      _db.collection(_table).doc(carteira.id).set(carteira.toMap());
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao atualizar a carteira ${carteira.id}! ' + e.toString());

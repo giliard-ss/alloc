@@ -326,7 +326,7 @@ class _CarteiraPageState
         visible: controller.ativos.isNotEmpty && controller.alocacoes.isEmpty,
         child: AtivosWidget(
           ativos: controller.ativos,
-          showButtonAdd: controller.carteira.saldo > 0,
+          showButtonAdd: true,
           autoAlocacao: controller.carteira.autoAlocacao,
           fncExcluir: controller.excluir,
           fncAdd: () {
