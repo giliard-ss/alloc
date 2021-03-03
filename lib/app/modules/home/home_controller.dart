@@ -25,17 +25,24 @@ abstract class _HomeControllerBase with Store {
   List<CarteiraDTO> carteiras = [];
 
   @observable
-  List<AtivoDTO> ativos = [];
+  List<AtivoDTO> acoes = [];
 
   @action
   Future<void> init() async {
     try {
       carteiras = AppCore.carteiras;
-      ativos = AppCore.allAtivos;
+      loadAcoes();
       _startCarteirasReaction();
     } catch (e) {
       LoggerUtil.error(e);
     }
+  }
+
+  void loadAcoes() {
+    acoes = AppCore.allAtivos.where((e) => e.isAcao).toList();
+    acoes.sort((e1, e2) => e2.cotacaoModel.variacaoDouble
+        .compareTo(e1.cotacaoModel.variacaoDouble));
+    acoes = acoes.sublist(0, 5);
   }
 
   @action
@@ -58,7 +65,7 @@ abstract class _HomeControllerBase with Store {
 
     _carteirasReactDispose = AppCore.createCarteirasReact((e) {
       this.carteiras = AppCore.carteiras;
-      this.ativos = AppCore.allAtivos;
+      loadAcoes();
     });
   }
 

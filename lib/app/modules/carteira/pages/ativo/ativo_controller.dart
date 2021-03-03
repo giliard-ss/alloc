@@ -1,4 +1,5 @@
 import 'package:alloc/app/app_core.dart';
+import 'package:alloc/app/modules/carteira/backup.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
@@ -22,6 +23,8 @@ abstract class _AtivoControllerBase with Store {
 
   @observable
   String error = "";
+  @observable
+  String tipo = "ACAO";
 
   DateTime data = DateTime.now();
   String papel;
@@ -35,10 +38,11 @@ abstract class _AtivoControllerBase with Store {
       ativo.idCarteira = _carteiraController.carteira.id;
       ativo.idUsuario = AppCore.usuario.id;
       ativo.papel = papel;
-      ativo.preco = preco;
+      ativo.precoMedio = preco;
       ativo.qtd = qtd;
-      ativo.data = data;
+      ativo.dataRecente = data;
       ativo.superiores = getIdSuperiores();
+      ativo.tipo = tipo;
 
       List<AtivoDTO> dtos = _alocacaoAtual == null
           ? AppCore.getAtivosByCarteira(_carteiraController.carteira.id)
@@ -48,7 +52,7 @@ abstract class _AtivoControllerBase with Store {
       dtos.forEach((e) => ativos.add(AtivoModel.fromMap(e.toMap())));
 
       ativos.add(ativo);
-      await _ativoService.save(
+      _ativoService.save(
           ativos,
           _alocacaoAtual == null
               ? _carteiraController.carteira.autoAlocacao
@@ -82,7 +86,22 @@ abstract class _AtivoControllerBase with Store {
   }
 
   @action
-  Future<bool> vender() {}
+  Future<bool> vender() async {
+    try {
+      // List<AtivoModel> list = Backup.getAllAtivos();
+      // _ativoService.save(list, true);
+
+      //AppCore.allAtivos.forEach((e) => _ativoService.delete(e, [], false));
+      //await AppCore.notifyAddDelAtivo();
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  @action
+  void changeTipo(String value) => tipo = value;
 
   AlocacaoDTO _getAlocacaoDTO(String id) {
     return AppCore.getAlocacaoById(id);

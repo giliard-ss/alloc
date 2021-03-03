@@ -61,8 +61,7 @@ class AppCore {
     runInAction(() {
       List<AtivoDTO> ativosDTO = [];
       _ativosDTO.value.forEach((e) {
-        CotacaoModel cotacao = getCotacao(e.papel);
-        e.ultimaCotacao = cotacao.ultimo.toDouble();
+        e.cotacaoModel = getCotacao(e.papel);
         ativosDTO.add(e);
       });
       _ativosDTO.value = ativosDTO;
@@ -127,7 +126,7 @@ class AppCore {
       }
     }
 
-    return CotacaoModel(id, 0);
+    return CotacaoModel(id, 0, 0);
   }
 
   static _startReactionCotacoes() {
@@ -248,6 +247,27 @@ class AppCore {
     await runInAction(() async {
       List<AtivoDTO> result = [];
       List<AtivoModel> ativos = await _ativoService.getAtivos(_usuario.id);
+
+      ativos.forEach((e) {
+        print(e.id +
+            ';' +
+            e.idUsuario +
+            ';' +
+            e.papel +
+            ';' +
+            e.idCarteira +
+            ';' +
+            e.alocacao.toString() +
+            ';' +
+            e.qtd.toString() +
+            ';' +
+            e.precoMedio.toString() +
+            ';' +
+            e.superiores.toString() +
+            ';' +
+            e.dataRecente.toIso8601String());
+      });
+
       ativos.forEach((e) => result.add(AtivoDTO(e)));
       _ativosDTO.value = result;
     });

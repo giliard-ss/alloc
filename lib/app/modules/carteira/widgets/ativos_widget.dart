@@ -85,7 +85,7 @@ class AtivosWidget extends StatelessWidget {
               AtivoDTO ativo = ativos[index];
 
               double totalAportadoAtual =
-                  ativo.qtd.toDouble() * ativo.ultimaCotacao.toDouble();
+                  ativo.qtd.toDouble() * ativo.cotacaoModel.ultimo.toDouble();
 
               double rendimento =
                   totalAportadoAtual - ativo.totalAportado.toDouble();
@@ -130,7 +130,8 @@ class AtivosWidget extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            GeralUtil.doubleToMoney(ativo.ultimaCotacao),
+                            GeralUtil.doubleToMoney(
+                                ativo.cotacaoModel.ultimo.toDouble()),
                             style: TextStyle(
                                 fontSize: _textSize2,
                                 color: Theme.of(context)
@@ -182,7 +183,7 @@ class AtivosWidget extends StatelessWidget {
                           dense: true,
                           title: Text(
                               "Total Aportado - ${ativo.qtd} x ${GeralUtil.doubleToMoney(
-                                ativo.preco,
+                                ativo.precoMedio,
                               )}",
                               style: TextStyle(fontSize: _textSize2)),
                           trailing: Text(

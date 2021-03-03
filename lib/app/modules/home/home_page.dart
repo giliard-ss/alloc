@@ -1,5 +1,6 @@
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
+
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
@@ -29,7 +30,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
       body: RefreshIndicator(
           onRefresh: controller.refresh,
           child: Container(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.all(15),
               child: WidgetUtil.futureBuild(controller.init, _body))),
     );
   }
@@ -87,26 +88,55 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
   }
 
   Widget getAtivos() {
-    return Observer(
-      builder: (_) {
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: controller.ativos.length,
-          itemBuilder: (context, index) {
-            AtivoDTO ativo = controller.ativos[index];
-
-            return ListTile(
-              dense: true,
-              title: Row(
-                children: [Text(ativo.papel)],
-              ),
-              subtitle: Text(GeralUtil.doubleToMoney(ativo.ultimaCotacao)),
-              trailing: Text("+1%"),
-            );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Ações e ETFs",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        GestureDetector(
+          onTap: () {
+            Modular.to.pushNamed("/home/cotacao");
           },
-        );
-      },
+          child: Card(
+            child: Observer(
+              builder: (_) {
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: controller.acoes.length,
+                  itemBuilder: (context, index) {
+                    AtivoDTO ativo = controller.acoes[index];
+
+                    return ListTile(
+                      dense: true,
+                      leading:
+                          Text(ativo.papel, style: TextStyle(fontSize: 13)),
+                      title: Center(
+                        child: Text(
+                          (ativo.cotacaoModel.variacaoDouble > 0 ? "+" : "") +
+                              ativo.cotacaoModel.variacaoDouble.toString() +
+                              "%",
+                          style: TextStyle(
+                              color: ativo.cotacaoModel.variacaoDouble > 0
+                                  ? Colors.green
+                                  : Colors.red),
+                        ),
+                      ),
+                      trailing: Text(
+                        GeralUtil.doubleToMoney(ativo.cotacaoModel.ultimo,
+                            leftSymbol: ""),
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 

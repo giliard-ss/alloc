@@ -49,18 +49,18 @@ mixin _$HomeController on _HomeControllerBase, Store {
     });
   }
 
-  final _$ativosAtom = Atom(name: '_HomeControllerBase.ativos');
+  final _$acoesAtom = Atom(name: '_HomeControllerBase.acoes');
 
   @override
-  List<AtivoDTO> get ativos {
-    _$ativosAtom.reportRead();
-    return super.ativos;
+  List<AtivoDTO> get acoes {
+    _$acoesAtom.reportRead();
+    return super.acoes;
   }
 
   @override
-  set ativos(List<AtivoDTO> value) {
-    _$ativosAtom.reportWrite(value, super.ativos, () {
-      super.ativos = value;
+  set acoes(List<AtivoDTO> value) {
+    _$acoesAtom.reportWrite(value, super.acoes, () {
+      super.acoes = value;
     });
   }
 
@@ -92,7 +92,7 @@ mixin _$HomeController on _HomeControllerBase, Store {
     return '''
 error: ${error},
 carteiras: ${carteiras},
-ativos: ${ativos}
+acoes: ${acoes}
     ''';
   }
 }

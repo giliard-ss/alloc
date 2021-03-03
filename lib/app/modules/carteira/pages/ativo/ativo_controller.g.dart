@@ -34,6 +34,21 @@ mixin _$AtivoController on _AtivoControllerBase, Store {
     });
   }
 
+  final _$tipoAtom = Atom(name: '_AtivoControllerBase.tipo');
+
+  @override
+  String get tipo {
+    _$tipoAtom.reportRead();
+    return super.tipo;
+  }
+
+  @override
+  set tipo(String value) {
+    _$tipoAtom.reportWrite(value, super.tipo, () {
+      super.tipo = value;
+    });
+  }
+
   final _$comprarAsyncAction = AsyncAction('_AtivoControllerBase.comprar');
 
   @override
@@ -41,15 +56,22 @@ mixin _$AtivoController on _AtivoControllerBase, Store {
     return _$comprarAsyncAction.run(() => super.comprar());
   }
 
+  final _$venderAsyncAction = AsyncAction('_AtivoControllerBase.vender');
+
+  @override
+  Future<bool> vender() {
+    return _$venderAsyncAction.run(() => super.vender());
+  }
+
   final _$_AtivoControllerBaseActionController =
       ActionController(name: '_AtivoControllerBase');
 
   @override
-  Future<bool> vender() {
+  void changeTipo(String value) {
     final _$actionInfo = _$_AtivoControllerBaseActionController.startAction(
-        name: '_AtivoControllerBase.vender');
+        name: '_AtivoControllerBase.changeTipo');
     try {
-      return super.vender();
+      return super.changeTipo(value);
     } finally {
       _$_AtivoControllerBaseActionController.endAction(_$actionInfo);
     }
@@ -58,7 +80,8 @@ mixin _$AtivoController on _AtivoControllerBase, Store {
   @override
   String toString() {
     return '''
-error: ${error}
+error: ${error},
+tipo: ${tipo}
     ''';
   }
 }

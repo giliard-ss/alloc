@@ -59,6 +59,10 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
           SizedBox(
             height: 10,
           ),
+          _selectTipo(),
+          SizedBox(
+            height: 10,
+          ),
           _dataTextField(),
           SizedBox(
             height: 10,
@@ -94,7 +98,15 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
             children: [
               Flexible(
                 child: RaisedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    bool ok =
+                        await LoadingUtil.onLoading(context, controller.vender);
+                    if (ok) {
+                      setState(() {
+                        Modular.to.pop();
+                      });
+                    }
+                  },
                   child: Text('Vender'),
                 ),
               ),
@@ -119,6 +131,26 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
           )
         ],
       ),
+    );
+  }
+
+  Widget _selectTipo() {
+    return Observer(
+      builder: (_) {
+        return DropdownButton<String>(
+          value: controller.tipo,
+          icon: Icon(Icons.arrow_downward),
+          isExpanded: true,
+          onChanged: controller.changeTipo,
+          items: <String>['ACAO', 'FII', 'ETF', 'CRIPTO', 'RF']
+              .map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 

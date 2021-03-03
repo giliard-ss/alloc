@@ -7,8 +7,10 @@ class AtivoModel {
   String _idCarteira;
   num _alocacao;
   num _qtd;
-  num _preco;
-  DateTime _data;
+  num _precoMedio;
+  DateTime _dataRecente;
+  String _tipo;
+  num _precoRecente;
 
   List _superiores;
 
@@ -19,9 +21,11 @@ class AtivoModel {
       this._idCarteira,
       this._alocacao,
       this._qtd,
-      this._preco,
+      this._precoMedio,
       this._superiores,
-      this._data]);
+      this._dataRecente,
+      this._tipo,
+      this._precoRecente]);
 
   AtivoModel.fromMap(Map map) {
     this._id = map['id'];
@@ -30,8 +34,10 @@ class AtivoModel {
     this._idCarteira = map['idCarteira'];
     this._alocacao = map['alocacao'];
     this._qtd = map['qtd'];
-    this._preco = map['preco'];
-    this._data = DateTime.fromMillisecondsSinceEpoch(map['data']);
+    this._precoMedio = map['precoMedio'];
+    this._dataRecente = DateTime.fromMillisecondsSinceEpoch(map['dataRecente']);
+    this._tipo = map['tipo'];
+    this._precoRecente = map['precoRecente'];
     this._superiores = List.generate(map['superiores'].length, (i) {
       return map['superiores'][i];
     });
@@ -45,9 +51,11 @@ class AtivoModel {
       'idCarteira': this._idCarteira,
       'alocacao': this._alocacao,
       'qtd': this._qtd,
-      'preco': this._preco,
+      'precoMedio': this._precoMedio,
+      'tipo': this._tipo,
+      'precoRecente': this._precoRecente,
       'superiores': this._superiores,
-      'data': this._data.millisecondsSinceEpoch
+      'dataRecente': this._dataRecente.millisecondsSinceEpoch
     };
   }
 
@@ -94,17 +102,30 @@ class AtivoModel {
 
   set qtd(num value) => _qtd = value;
 
-  num get totalAportado => _preco * qtd;
+  num get totalAportado => _precoMedio * qtd;
 
   List get superiores => _superiores;
 
   set superiores(List value) => _superiores = value;
 
-  num get preco => _preco;
+  num get precoMedio => _precoMedio;
 
-  set preco(num value) => _preco = value;
+  set precoMedio(num value) => _precoMedio = value;
 
-  DateTime get data => _data;
+  DateTime get dataRecente => _dataRecente;
 
-  set data(DateTime value) => _data = value;
+  set dataRecente(DateTime value) => _dataRecente = value;
+
+  String get tipo => _tipo;
+
+  set tipo(String value) => _tipo = value;
+
+  num get precoRecente => _precoRecente;
+
+  set precoRecente(num value) => _precoRecente = value;
+
+  bool get isAcao => _tipo == "ACAO";
+  bool get isETF => _tipo == "ETF";
+  bool get isFII => _tipo == "FII";
+  bool get isCripto => _tipo == "CRIPTO";
 }

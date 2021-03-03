@@ -1,31 +1,34 @@
 import 'package:alloc/app/shared/models/ativo_model.dart';
+import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 
 class AtivoDTO extends AtivoModel {
-  double _ultimaCotacao;
+  CotacaoModel _cotacaoModel;
   double _percentualNaAlocacao;
   double _totalInvestir;
 
   AtivoDTO(AtivoModel model,
-      [this._ultimaCotacao = 0,
+      [this._cotacaoModel,
       this._percentualNaAlocacao = 0,
       this._totalInvestir = 0])
       : super.fromMap(model.toMap());
 
   AtivoDTO clone() {
-    return AtivoDTO(AtivoModel.fromMap(super.toMap()), this._ultimaCotacao,
-        this._percentualNaAlocacao, this._totalInvestir);
+    return AtivoDTO(
+        AtivoModel.fromMap(super.toMap()),
+        CotacaoModel.fromMap(this._cotacaoModel.toMap()),
+        this._percentualNaAlocacao,
+        this._totalInvestir);
   }
 
   AtivoModel getModel() {
     return AtivoModel.fromMap(super.toMap());
   }
 
-  double get totalAportadoAtual => qtd.toDouble() * _ultimaCotacao;
+  CotacaoModel get cotacaoModel => _cotacaoModel;
+  set cotacaoModel(value) => _cotacaoModel = value;
 
-  double get ultimaCotacao => _ultimaCotacao;
-
-  set ultimaCotacao(double value) => _ultimaCotacao = value;
+  double get totalAportadoAtual => qtd.toDouble() * _cotacaoModel.ultimo;
 
   double get percentualNaAlocacao => _percentualNaAlocacao;
 
