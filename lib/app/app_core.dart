@@ -279,6 +279,22 @@ class AppCore {
     });
   }
 
+  static List<String> _getPapeisObrigatorios() {
+    List<String> list = [];
+
+    if (_ativosDTO.value
+        .where((AtivoDTO e) => e.isAcao || e.isETF)
+        .isNotEmpty) {
+      list.add("IBOV");
+    }
+
+    if (_ativosDTO.value.where((AtivoDTO e) => e.isFII).isNotEmpty) {
+      list.add("IFIX");
+    }
+
+    return list;
+  }
+
   static double _getTotalAportadoAtivos(String idCarteira) {
     double total = 0;
     _ativosDTO.value.forEach((e) {
@@ -306,6 +322,7 @@ class AppCore {
       }
 
       List<String> papeis = _getPapeisAtivos();
+      papeis.addAll(_getPapeisObrigatorios());
       if (papeis.isEmpty) {
         return;
       }

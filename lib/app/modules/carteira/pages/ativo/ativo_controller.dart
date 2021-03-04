@@ -88,11 +88,11 @@ abstract class _AtivoControllerBase with Store {
   @action
   Future<bool> vender() async {
     try {
-      // List<AtivoModel> list = Backup.getAllAtivos();
-      // _ativoService.save(list, true);
+      //List<AtivoModel> list = Backup.getAllAtivos();
+      //_ativoService.save(list, true);
 
       //AppCore.allAtivos.forEach((e) => _ativoService.delete(e, [], false));
-      //await AppCore.notifyAddDelAtivo();
+      await AppCore.notifyAddDelAtivo();
       return true;
     } catch (e) {
       print(e);

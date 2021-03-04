@@ -1,8 +1,12 @@
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
+import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
+import 'package:alloc/app/shared/models/ativo_model.dart';
+import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/services/icarteira_service.dart';
 import 'package:alloc/app/shared/services/impl/carteira_service.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 
 import 'package:mobx/mobx.dart';
@@ -39,10 +43,31 @@ abstract class _HomeControllerBase with Store {
   }
 
   void loadAcoes() {
-    acoes = AppCore.allAtivos.where((e) => e.isAcao).toList();
-    acoes.sort((e1, e2) => e2.cotacaoModel.variacaoDouble
+    List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.isAcao).toList();
+    list.sort((e1, e2) => e2.cotacaoModel.variacaoDouble
         .compareTo(e1.cotacaoModel.variacaoDouble));
-    acoes = acoes.sublist(0, 5);
+    list = list.sublist(0, 5);
+    acoes = list;
+  }
+
+  CotacaoModel getCotacaoIndiceByTipo(TipoAtivoEnum tipo) {
+    if (tipo == TipoAtivoEnum.ACAO) return AppCore.getCotacao("IBOV");
+    return CotacaoModel("--", 0.0, 0.0);
+  }
+
+  double getVariacaoTotalAcoes() {
+    double totalAbertura = 0.0;
+    double totalAtual = 0.0;
+    AppCore.allAtivos.where((e) => e.isAcao).forEach((e) {
+      double precoAbertura =
+          (e.cotacaoModel.ultimo * 100) / (100 + e.cotacaoModel.variacaoDouble);
+
+      totalAbertura += precoAbertura * e.qtd;
+      totalAtual += e.cotacaoModel.ultimo * e.qtd;
+    });
+
+    double percentual = ((totalAtual * 100) / totalAbertura) - 100;
+    return GeralUtil.limitaCasasDecimais(percentual);
   }
 
   @action

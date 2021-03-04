@@ -1,5 +1,7 @@
+import 'package:alloc/app/modules/home/widgets/cotacao_card.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
+import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
 
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
@@ -8,6 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'home_controller.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+
+import 'widgets/carousel_with_indicator.dart';
 
 class HomePage extends StatefulWidget {
   final String title;
@@ -37,7 +42,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
 
   _body() {
     return SingleChildScrollView(
-      child: Column(children: [getCarteiras(), getAtivos()]),
+      child: Column(children: [getCarteiras(), carousel()]),
     );
   }
 
@@ -87,57 +92,33 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
     );
   }
 
-  Widget getAtivos() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Ações e ETFs",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-        ),
-        GestureDetector(
-          onTap: () {
-            Modular.to.pushNamed("/home/cotacao");
-          },
-          child: Card(
-            child: Observer(
-              builder: (_) {
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: controller.acoes.length,
-                  itemBuilder: (context, index) {
-                    AtivoDTO ativo = controller.acoes[index];
-
-                    return ListTile(
-                      dense: true,
-                      leading:
-                          Text(ativo.papel, style: TextStyle(fontSize: 13)),
-                      title: Center(
-                        child: Text(
-                          (ativo.cotacaoModel.variacaoDouble > 0 ? "+" : "") +
-                              ativo.cotacaoModel.variacaoDouble.toString() +
-                              "%",
-                          style: TextStyle(
-                              color: ativo.cotacaoModel.variacaoDouble > 0
-                                  ? Colors.green
-                                  : Colors.red),
-                        ),
-                      ),
-                      trailing: Text(
-                        GeralUtil.doubleToMoney(ativo.cotacaoModel.ultimo,
-                            leftSymbol: ""),
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ),
-      ],
+  Widget carousel() {
+    return CarouselWithIndicator(
+      height: 285,
+      items: cotacaoAtivosCard(),
     );
+  }
+
+  List<Widget> cotacaoAtivosCard() {
+    List<Widget> list = [];
+
+    if (controller.acoes.isNotEmpty) {
+      list.add(Observer(
+        builder: (_) {
+          return CotacaoCard(
+            cotacaoIndice:
+                controller.getCotacaoIndiceByTipo(TipoAtivoEnum.ACAO),
+            variacaoTotal: controller.getVariacaoTotalAcoes(),
+            ativos: controller.acoes,
+            onTap: () {
+              Modular.to.pushNamed("/home/cotacao");
+            },
+            title: "Ações e ETFs",
+          );
+        },
+      ));
+    }
+    return list;
   }
 
   Widget getCarteiras() {

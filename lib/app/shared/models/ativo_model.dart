@@ -25,7 +25,15 @@ class AtivoModel {
       this._superiores,
       this._dataRecente,
       this._tipo,
-      this._precoRecente]);
+      this._precoRecente]) {
+    if (this.dataRecente == null) {
+      this.dataRecente = DateTime.now();
+    }
+
+    if (this.superiores == null) {
+      this.superiores = [];
+    }
+  }
 
   AtivoModel.fromMap(Map map) {
     this._id = map['id'];

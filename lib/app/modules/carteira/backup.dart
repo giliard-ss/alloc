@@ -607,6 +607,18 @@ class Backup {
         'RANI3',
         'eyyokB82WciaQB1vf0C4',
         0,
+        50.0,
+        6.03,
+        ['MunK1do0QVQxty6yksxq', 'MVtIfLy0mMwUTR4CW2Va'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'ACAO',
+        6.03));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'RANI3',
+        'eyyokB82WciaQB1vf0C4',
+        0,
         38.0,
         5.04,
         ['MunK1do0QVQxty6yksxq', 'MVtIfLy0mMwUTR4CW2Va'],
@@ -751,6 +763,7 @@ class Backup {
 
   static List<AtivoModel> getFiis() {
     List<AtivoModel> list = [];
+
     list.add(AtivoModel(
         null,
         '5r0iVHL3Tmby4h5rh1YW',
@@ -817,6 +830,30 @@ class Backup {
         'VISC11',
         'eyyokB82WciaQB1vf0C4',
         0,
+        5.0,
+        112.0,
+        ['3FE6iMLBhc1nLc42M6yq', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        112.0));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'VISC11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        5.0,
+        112.85,
+        ['3FE6iMLBhc1nLc42M6yq', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        112.85));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'VISC11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
         2.0,
         107.6,
         ['3FE6iMLBhc1nLc42M6yq', 'nx7S0bxHXQQSeCBICLZZ'],
@@ -865,6 +902,30 @@ class Backup {
         'HGBS11',
         'eyyokB82WciaQB1vf0C4',
         0,
+        3.0,
+        207.89,
+        ['3FE6iMLBhc1nLc42M6yq', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        207.89));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'HGBS11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        3.0,
+        209.02,
+        ['3FE6iMLBhc1nLc42M6yq', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        209.02));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'HGBS11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
         1.0,
         207.6,
         ['3FE6iMLBhc1nLc42M6yq', 'nx7S0bxHXQQSeCBICLZZ'],
@@ -895,6 +956,30 @@ class Backup {
         DateTime.parse('2020-03-19 00:00:00.000'),
         'FII',
         58.0));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'MALL11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        6.0,
+        97.12,
+        ['3FE6iMLBhc1nLc42M6yq', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        97.12));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'MALL11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        6.0,
+        99.0,
+        ['3FE6iMLBhc1nLc42M6yq', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        99.0));
     list.add(AtivoModel(
         null,
         '5r0iVHL3Tmby4h5rh1YW',
@@ -979,6 +1064,54 @@ class Backup {
         DateTime.parse('2020-03-17 00:00:00.000'),
         'FII',
         100.49));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'LVBI11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        6.0,
+        116.44,
+        ['KLQlBUkipawLNumkVKcG', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        116.44));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'LVBI11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        6.0,
+        118.0,
+        ['KLQlBUkipawLNumkVKcG', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        118.0));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'XPLG11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        6.0,
+        117.35,
+        ['KLQlBUkipawLNumkVKcG', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        117.35));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'XPLG11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        6.0,
+        119.96,
+        ['KLQlBUkipawLNumkVKcG', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        119.96));
     list.add(AtivoModel(
         null,
         '5r0iVHL3Tmby4h5rh1YW',
@@ -1078,6 +1211,42 @@ class Backup {
     list.add(AtivoModel(
         null,
         '5r0iVHL3Tmby4h5rh1YW',
+        'PORD11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        7.0,
+        103.1,
+        ['Ew5N2FTYlLbG274jL94B', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        103.1));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'CPFF11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        6.0,
+        84.28,
+        ['Ew5N2FTYlLbG274jL94B', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        84.28));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'CPFF11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        6.0,
+        83.89,
+        ['Ew5N2FTYlLbG274jL94B', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        83.89));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
         'CPFF11',
         'eyyokB82WciaQB1vf0C4',
         0,
@@ -1117,6 +1286,30 @@ class Backup {
         'BRCR11',
         'eyyokB82WciaQB1vf0C4',
         0,
+        1.0,
+        86.51,
+        ['4CBk2h2GyFRqyo8osnXm', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        86.51));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'BRCR11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        1.0,
+        87.0,
+        ['4CBk2h2GyFRqyo8osnXm', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        87.0));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'BRCR11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
         7.0,
         91.69,
         ['4CBk2h2GyFRqyo8osnXm', 'nx7S0bxHXQQSeCBICLZZ'],
@@ -1126,27 +1319,51 @@ class Backup {
     list.add(AtivoModel(
         null,
         '5r0iVHL3Tmby4h5rh1YW',
-        'RECT11',
+        'HGRU11',
         'eyyokB82WciaQB1vf0C4',
         0,
-        1.0,
-        74.5,
+        6.0,
+        127.45,
         ['4CBk2h2GyFRqyo8osnXm', 'nx7S0bxHXQQSeCBICLZZ'],
-        DateTime.parse('2020-03-19 00:00:00.000'),
+        DateTime.parse('2021-03-01 00:00:00.000'),
         'FII',
-        74.5));
+        127.45));
     list.add(AtivoModel(
         null,
         '5r0iVHL3Tmby4h5rh1YW',
-        'RECT11',
+        'HGRU11',
         'eyyokB82WciaQB1vf0C4',
         0,
-        10.0,
-        97.0,
+        6.0,
+        128.08,
         ['4CBk2h2GyFRqyo8osnXm', 'nx7S0bxHXQQSeCBICLZZ'],
-        DateTime.parse('2020-08-13 00:00:00.000'),
+        DateTime.parse('2021-03-01 00:00:00.000'),
         'FII',
-        97.0));
+        128.08));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'KNRI11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        6.0,
+        157.61,
+        ['4CBk2h2GyFRqyo8osnXm', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        157.61));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'KNRI11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        6.0,
+        157.85,
+        ['4CBk2h2GyFRqyo8osnXm', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        157.85));
     list.add(AtivoModel(
         null,
         '5r0iVHL3Tmby4h5rh1YW',
@@ -1186,18 +1403,6 @@ class Backup {
     list.add(AtivoModel(
         null,
         '5r0iVHL3Tmby4h5rh1YW',
-        'VINO11',
-        'eyyokB82WciaQB1vf0C4',
-        0,
-        3.0,
-        51.0,
-        ['rm7Ef8nExmcJ0M4P1NR9', 'nx7S0bxHXQQSeCBICLZZ'],
-        DateTime.parse('2020-05-27 00:00:00.000'),
-        'FII',
-        51.0));
-    list.add(AtivoModel(
-        null,
-        '5r0iVHL3Tmby4h5rh1YW',
         'RCRB11',
         'eyyokB82WciaQB1vf0C4',
         0,
@@ -1207,6 +1412,66 @@ class Backup {
         DateTime.parse('2020-03-19 00:00:00.000'),
         'FII',
         119.0));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'RCRB11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        5.0,
+        159.97,
+        ['rm7Ef8nExmcJ0M4P1NR9', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        159.97));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'RCRB11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        5.0,
+        160.02,
+        ['rm7Ef8nExmcJ0M4P1NR9', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        160.02));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'VINO11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        12.0,
+        60.49,
+        ['rm7Ef8nExmcJ0M4P1NR9', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        60.49));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'VINO11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        12.0,
+        62.35,
+        ['rm7Ef8nExmcJ0M4P1NR9', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2021-03-01 00:00:00.000'),
+        'FII',
+        62.35));
+    list.add(AtivoModel(
+        null,
+        '5r0iVHL3Tmby4h5rh1YW',
+        'VINO11',
+        'eyyokB82WciaQB1vf0C4',
+        0,
+        3.0,
+        51.0,
+        ['rm7Ef8nExmcJ0M4P1NR9', 'nx7S0bxHXQQSeCBICLZZ'],
+        DateTime.parse('2020-05-27 00:00:00.000'),
+        'FII',
+        51.0));
     list.add(AtivoModel(
         null,
         '5r0iVHL3Tmby4h5rh1YW',

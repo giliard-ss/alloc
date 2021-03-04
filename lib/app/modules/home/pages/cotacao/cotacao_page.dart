@@ -37,11 +37,7 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Ações e ETFs",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-          ),
-          Card(
+          Container(
             child: Observer(
               builder: (_) {
                 return ListView.builder(
