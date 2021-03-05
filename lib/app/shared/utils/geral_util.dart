@@ -1,6 +1,11 @@
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 
 class GeralUtil {
+  static double variacaoPercentualDeXparaY(double x, double y) {
+    if (x == 0) return 0;
+    return ((y * 100) / x) - 100;
+  }
+
   static double limitaCasasDecimais(double value, {casasDecimais = 2}) {
     return double.parse((value).toStringAsFixed(casasDecimais));
   }

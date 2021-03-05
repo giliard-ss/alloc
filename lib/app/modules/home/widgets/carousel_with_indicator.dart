@@ -2,8 +2,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
 class CarouselWithIndicator extends StatefulWidget {
-  List<Widget> items;
-  double height;
+  final List<Widget> items;
+  final double height;
 
   CarouselWithIndicator({this.items, this.height});
   @override

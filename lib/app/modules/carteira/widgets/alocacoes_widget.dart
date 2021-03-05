@@ -102,114 +102,124 @@ class AlocacoesWidget extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
       ),
-      child: ExpansionTile(
-        title: Row(
-          children: [
-            CircleInfoWidget(alocacao.percentualNaAlocacaoString, index),
-            SizedBox(
-              width: 10,
-            ),
-            Text(
-              alocacao.descricao,
-              style: TextStyle(fontSize: _textSize1),
-            ),
-          ],
+      child: tileExpansion(context, alocacao, index),
+    );
+  }
+
+  Widget titleExpansion(AlocacaoDTO alocacao, index) {
+    return Row(
+      children: [
+        CircleInfoWidget(alocacao.percentualNaAlocacaoString, index),
+        SizedBox(
+          width: 10,
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-                GeralUtil.doubleToMoney(
-                  alocacao.totalAportadoAtual,
-                ),
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              (alocacao.rendimento > 0 ? '+' : '') +
-                  alocacao.rendimentoPercentString +
-                  "%",
-              style: TextStyle(
-                  fontSize: _textSize2,
-                  color: alocacao.rendimento < 0 ? Colors.red : Colors.green),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-                (alocacao.totalInvestir < 0
-                    ? ('Vender ' +
-                        (GeralUtil.doubleToMoney(alocacao.totalInvestir * -1))
-                            .toString())
-                    : 'Aplicar ' +
-                        GeralUtil.doubleToMoney(alocacao.totalInvestir)),
-                style: TextStyle(color: Colors.grey)),
-            SizedBox(
-              height: 15,
-            )
-          ],
+        Text(
+          alocacao.descricao,
+          style: TextStyle(fontSize: _textSize1),
         ),
-        children: [
-          ListTile(
-            dense: true,
-            title: Text("Rendimento", style: TextStyle(fontSize: _textSize2)),
-            trailing: Text(
-              GeralUtil.doubleToMoney(alocacao.rendimento, leftSymbol: ""),
-              style: TextStyle(
-                  fontSize: _textSize2,
-                  color: alocacao.rendimento < 0 ? Colors.red : Colors.green),
+      ],
+    );
+  }
+
+  Widget subtitleExpansion(context, AlocacaoDTO alocacao, int index) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 10,
+        ),
+        Text(
+            GeralUtil.doubleToMoney(
+              alocacao.totalAportadoAtual,
             ),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+        SizedBox(
+          height: 10,
+        ),
+        Text(
+          (alocacao.rendimento > 0 ? '+' : '') +
+              alocacao.rendimentoPercentString +
+              "%",
+          style: TextStyle(
+              fontSize: _textSize2,
+              color: alocacao.rendimento < 0 ? Colors.red : Colors.green),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Text(
+            (alocacao.totalInvestir < 0
+                ? ('Vender ' +
+                    (GeralUtil.doubleToMoney(alocacao.totalInvestir * -1))
+                        .toString())
+                : 'Aplicar ' + GeralUtil.doubleToMoney(alocacao.totalInvestir)),
+            style: TextStyle(color: Colors.grey)),
+        SizedBox(
+          height: 15,
+        )
+      ],
+    );
+  }
+
+  Widget tileExpansion(context, AlocacaoDTO alocacao, int index) {
+    return ExpansionTile(
+      title: titleExpansion(alocacao, index),
+      subtitle: subtitleExpansion(context, alocacao, index),
+      children: [
+        ListTile(
+          dense: true,
+          title: Text("Rendimento", style: TextStyle(fontSize: _textSize2)),
+          trailing: Text(
+            GeralUtil.doubleToMoney(alocacao.rendimento, leftSymbol: ""),
+            style: TextStyle(
+                fontSize: _textSize2,
+                color: alocacao.rendimento < 0 ? Colors.red : Colors.green),
           ),
-          Divider(
-            height: 5,
+        ),
+        Divider(
+          height: 5,
+        ),
+        ListTile(
+          dense: true,
+          title: Text("Total Aportado", style: TextStyle(fontSize: _textSize2)),
+          trailing: Text(
+              GeralUtil.doubleToMoney(alocacao.totalAportado, leftSymbol: ""),
+              style: TextStyle(fontSize: _textSize2)),
+        ),
+        Divider(
+          height: 5,
+        ),
+        ListTile(
+          dense: true,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Alocação Configurada",
+                  style: TextStyle(fontSize: _textSize2)),
+              Visibility(
+                  visible: alocacao.alocacaoPercent == 0,
+                  child: Icon(Icons.notification_important))
+            ],
           ),
-          ListTile(
-            dense: true,
-            title:
-                Text("Total Aportado", style: TextStyle(fontSize: _textSize2)),
-            trailing: Text(
-                GeralUtil.doubleToMoney(alocacao.totalAportado, leftSymbol: ""),
-                style: TextStyle(fontSize: _textSize2)),
+          trailing: Text(alocacao.alocacaoPercentString + "%",
+              style: TextStyle(fontSize: _textSize2)),
+        ),
+        GestureDetector(
+          onTap: () {
+            Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
+          },
+          child: Container(
+            height: 40,
+            width: double.infinity,
+            decoration: BoxDecoration(
+                color: Color(0xffe7ecf4),
+                borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(23),
+                    bottomRight: Radius.circular(23))),
+            child: Icon(Icons.search),
           ),
-          Divider(
-            height: 5,
-          ),
-          ListTile(
-            dense: true,
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Alocação Configurada",
-                    style: TextStyle(fontSize: _textSize2)),
-                Visibility(
-                    visible: alocacao.alocacaoPercent == 0,
-                    child: Icon(Icons.notification_important))
-              ],
-            ),
-            trailing: Text(alocacao.alocacaoPercentString + "%",
-                style: TextStyle(fontSize: _textSize2)),
-          ),
-          GestureDetector(
-            onTap: () {
-              Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
-            },
-            child: Container(
-              height: 40,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  color: Color(0xffe7ecf4),
-                  borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(23),
-                      bottomRight: Radius.circular(23))),
-              child: Icon(Icons.search),
-            ),
-          )
-        ],
-      ),
+        )
+      ],
     );
   }
 

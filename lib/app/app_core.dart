@@ -54,7 +54,9 @@ class AppCore {
     List<AlocacaoDTO> result = [];
     List<AlocacaoModel> list = await _alocacaoService.getAllAlocacoes();
     list.forEach((a) => result.add(AlocacaoDTO(a)));
-    _alocacoesDTO.value = result;
+    runInAction(() {
+      _alocacoesDTO.value = result;
+    });
   }
 
   static void _refreshAtivosDTO() {
@@ -244,31 +246,32 @@ class AppCore {
   }
 
   static Future<void> _loadAtivos() async {
-    await runInAction(() async {
-      List<AtivoDTO> result = [];
-      List<AtivoModel> ativos = await _ativoService.getAtivos(_usuario.id);
+    List<AtivoDTO> result = [];
+    List<AtivoModel> ativos = await _ativoService.getAtivos(_usuario.id);
 
-      ativos.forEach((e) {
-        print(e.id +
-            ';' +
-            e.idUsuario +
-            ';' +
-            e.papel +
-            ';' +
-            e.idCarteira +
-            ';' +
-            e.alocacao.toString() +
-            ';' +
-            e.qtd.toString() +
-            ';' +
-            e.precoMedio.toString() +
-            ';' +
-            e.superiores.toString() +
-            ';' +
-            e.dataRecente.toIso8601String());
-      });
+    ativos.forEach((e) {
+      print(e.id +
+          ';' +
+          e.idUsuario +
+          ';' +
+          e.papel +
+          ';' +
+          e.idCarteira +
+          ';' +
+          e.alocacao.toString() +
+          ';' +
+          e.qtd.toString() +
+          ';' +
+          e.precoMedio.toString() +
+          ';' +
+          e.superiores.toString() +
+          ';' +
+          e.dataRecente.toIso8601String());
+    });
 
-      ativos.forEach((e) => result.add(AtivoDTO(e)));
+    ativos.forEach((e) => result.add(AtivoDTO(e, getCotacao(e.id))));
+
+    runInAction(() {
       _ativosDTO.value = result;
     });
   }

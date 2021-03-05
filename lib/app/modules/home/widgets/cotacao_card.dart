@@ -1,6 +1,8 @@
+import 'package:alloc/app/modules/home/widgets/title_widget.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
+import 'package:alloc/app/shared/widgets/variacao_percentual_widget.dart';
 import 'package:flutter/material.dart';
 
 class CotacaoCard extends StatelessWidget {
@@ -21,18 +23,20 @@ class CotacaoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Card(
+      child: Container(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Text(
-                title,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
+            TitleWidget(
+              title: title,
+              withDivider: true,
             ),
             resumoCotacao("Total", cotacaoIndice.id,
                 cotacaoIndice.variacaoDouble, variacaoTotal),
+            Divider(
+              height: 10,
+              color: Colors.grey,
+            ),
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
@@ -54,22 +58,25 @@ class CotacaoCard extends StatelessWidget {
   Widget itemCotacao(String papel, double ultimo, double variacao) {
     return Container(
       padding: EdgeInsets.all(7),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(papel, style: TextStyle(fontSize: 13)),
-              Text(
-                GeralUtil.doubleToMoney(ultimo, leftSymbol: ""),
-                style: TextStyle(fontSize: 12),
-              )
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(papel, style: TextStyle(fontSize: 13)),
+                  Text(
+                    GeralUtil.doubleToMoney(ultimo, leftSymbol: ""),
+                    style: TextStyle(fontSize: 12),
+                  )
+                ],
+              ),
+              VariacaoPercentualWidget(
+                value: variacao,
+              ),
             ],
-          ),
-          Text(
-            (variacao > 0 ? "+" : "") + variacao.toString() + "%",
-            style: TextStyle(color: variacao > 0 ? Colors.green : Colors.red),
           ),
         ],
       ),
@@ -96,19 +103,11 @@ class CotacaoCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                (variacaoTotal > 0 ? "+" : "") + variacaoTotal.toString() + "%",
-                style: TextStyle(
-                    color: variacaoTotal > 0 ? Colors.green : Colors.red,
-                    fontSize: 13),
+              VariacaoPercentualWidget(
+                value: variacaoTotal,
               ),
-              Text(
-                (variacaoIndice > 0 ? "+" : "") +
-                    variacaoIndice.toString() +
-                    "%",
-                style: TextStyle(
-                    color: variacaoIndice > 0 ? Colors.green : Colors.red,
-                    fontSize: 12),
+              VariacaoPercentualWidget(
+                value: variacaoIndice,
               ),
             ],
           ),

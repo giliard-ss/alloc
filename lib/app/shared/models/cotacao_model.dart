@@ -21,6 +21,8 @@ class CotacaoModel {
     };
   }
 
+  double get precoAbertura => (ultimo * 100) / (100 + variacaoDouble);
+
   String get id => _id;
 
   set id(String value) => _id = value;

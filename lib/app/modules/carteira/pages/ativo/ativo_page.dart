@@ -1,5 +1,6 @@
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
+import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +24,8 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
       TextEditingController(text: DateUtil.dateToString(DateTime.now()));
   var maskFormatter = new MaskTextInputFormatter(
       mask: '##/##/####', filter: {"#": RegExp(r'[0-9]')});
+  final _moneyController = new MoneyMaskedTextController(leftSymbol: "R\$ ");
+
   @override
   void initState() {
     controller.setAlocacaoAtual(widget.idAlocacao);
@@ -77,7 +80,7 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
             height: 10,
           ),
           TextField(
-            keyboardType: TextInputType.number,
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
             onChanged: (text) => controller.qtd = double.parse(text),
             decoration: InputDecoration(
                 labelText: "Quantidade", border: const OutlineInputBorder()),
@@ -86,10 +89,13 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
             height: 10,
           ),
           TextField(
-            keyboardType: TextInputType.number,
-            onChanged: (text) => controller.preco = double.parse(text),
             decoration: InputDecoration(
                 labelText: "Cotação", border: const OutlineInputBorder()),
+            controller: _moneyController,
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              controller.preco = _moneyController.numberValue;
+            },
           ),
           SizedBox(
             height: 10,

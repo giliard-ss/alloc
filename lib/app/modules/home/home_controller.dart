@@ -31,11 +31,15 @@ abstract class _HomeControllerBase with Store {
   @observable
   List<AtivoDTO> acoes = [];
 
+  @observable
+  List<AtivoDTO> fiis = [];
+
   @action
   Future<void> init() async {
     try {
       carteiras = AppCore.carteiras;
       loadAcoes();
+      loadFiis();
       _startCarteirasReaction();
     } catch (e) {
       LoggerUtil.error(e);
@@ -46,33 +50,67 @@ abstract class _HomeControllerBase with Store {
     List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.isAcao).toList();
     list.sort((e1, e2) => e2.cotacaoModel.variacaoDouble
         .compareTo(e1.cotacaoModel.variacaoDouble));
-    list = list.sublist(0, 5);
+    if (list.length > 5) {
+      list = list.sublist(0, 5);
+    }
     acoes = list;
   }
 
-  CotacaoModel getCotacaoIndiceByTipo(TipoAtivoEnum tipo) {
-    if (tipo == TipoAtivoEnum.ACAO) return AppCore.getCotacao("IBOV");
+  void loadFiis() {
+    List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.isFII).toList();
+    list.sort((e1, e2) => e2.cotacaoModel.variacaoDouble
+        .compareTo(e1.cotacaoModel.variacaoDouble));
+    if (list.length > 5) {
+      list = list.sublist(0, 5);
+    }
+
+    fiis = list;
+  }
+
+  @computed
+  int get maiorQuantItemsExistenteListas {
+    if (acoes.length > fiis.length)
+      return acoes.length;
+    else
+      return fiis.length;
+  }
+
+  CotacaoModel getCotacaoIndiceByTipo(TipoAtivo tipo) {
+    if (tipo.equals(TipoAtivo.ACAO)) return AppCore.getCotacao("IBOV");
+    if (tipo.equals(TipoAtivo.FII)) return AppCore.getCotacao("IFIX");
     return CotacaoModel("--", 0.0, 0.0);
   }
 
   double getVariacaoTotalAcoes() {
+    return getVariacaoTotal(AppCore.allAtivos.where((e) => e.isAcao).toList());
+  }
+
+  double getVariacaoTotalFiis() {
+    return getVariacaoTotal(AppCore.allAtivos.where((e) => e.isFII).toList());
+  }
+
+  double getVariacaoTotal(List<AtivoDTO> ativos) {
     double totalAbertura = 0.0;
     double totalAtual = 0.0;
-    AppCore.allAtivos.where((e) => e.isAcao).forEach((e) {
-      double precoAbertura =
-          (e.cotacaoModel.ultimo * 100) / (100 + e.cotacaoModel.variacaoDouble);
-
-      totalAbertura += precoAbertura * e.qtd;
+    ativos.forEach((e) {
+      totalAbertura += e.cotacaoModel.precoAbertura * e.qtd;
       totalAtual += e.cotacaoModel.ultimo * e.qtd;
     });
 
-    double percentual = ((totalAtual * 100) / totalAbertura) - 100;
+    double percentual =
+        GeralUtil.variacaoPercentualDeXparaY(totalAbertura, totalAtual);
     return GeralUtil.limitaCasasDecimais(percentual);
   }
 
   @action
   Future<bool> salvarNovaCarteira() async {
     try {
+      if (descricao.length <= 1) {
+        //o icone da carteira por exemplo usa as 2 primeiras letras
+        error = "A descrição deve ter pelo menos 2 letras!";
+        return false;
+      }
+
       await _carteiraService.create(descricao);
       await AppCore.notifyAddDelCarteira();
       return true;
@@ -91,6 +129,7 @@ abstract class _HomeControllerBase with Store {
     _carteirasReactDispose = AppCore.createCarteirasReact((e) {
       this.carteiras = AppCore.carteiras;
       loadAcoes();
+      loadFiis();
     });
   }
 

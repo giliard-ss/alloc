@@ -7,7 +7,9 @@ import 'cotacao_controller.dart';
 
 class CotacaoPage extends StatefulWidget {
   final String title;
-  const CotacaoPage({Key key, this.title = "Cotacao"}) : super(key: key);
+  final String tipo;
+  const CotacaoPage(this.tipo, {Key key, this.title = "Cotacao"})
+      : super(key: key);
 
   @override
   _CotacaoPageState createState() => _CotacaoPageState();
@@ -18,7 +20,7 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
 
   @override
   void initState() {
-    controller.init();
+    controller.init(widget.tipo);
     super.initState();
   }
 
@@ -43,9 +45,9 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
-                  itemCount: controller.acoes.length,
+                  itemCount: controller.ativos.length,
                   itemBuilder: (context, index) {
-                    AtivoDTO ativo = controller.acoes[index];
+                    AtivoDTO ativo = controller.ativos[index];
 
                     return ListTile(
                       dense: true,

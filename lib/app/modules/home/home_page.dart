@@ -1,4 +1,6 @@
+import 'package:alloc/app/modules/carteira/widgets/carteira_icon.dart';
 import 'package:alloc/app/modules/home/widgets/cotacao_card.dart';
+import 'package:alloc/app/modules/home/widgets/title_widget.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
@@ -6,6 +8,7 @@ import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
+import 'package:alloc/app/shared/widgets/variacao_percentual_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -42,7 +45,13 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
 
   _body() {
     return SingleChildScrollView(
-      child: Column(children: [getCarteiras(), carousel()]),
+      child: Column(children: [
+        getCarteiras(),
+        SizedBox(
+          height: 15,
+        ),
+        carousel()
+      ]),
     );
   }
 
@@ -93,32 +102,90 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
   }
 
   Widget carousel() {
-    return CarouselWithIndicator(
-      height: 285,
-      items: cotacaoAtivosCard(),
+    return Observer(
+      builder: (_) {
+        return Visibility(
+          visible: controller.acoes.isNotEmpty || controller.fiis.isNotEmpty,
+          child: CarouselWithIndicator(
+            height:
+                ((controller.maiorQuantItemsExistenteListas.toDouble()) * 50) +
+                    105,
+            items: cotacaoAtivosCard(),
+          ),
+        );
+      },
     );
   }
 
   List<Widget> cotacaoAtivosCard() {
     List<Widget> list = [];
-
     if (controller.acoes.isNotEmpty) {
       list.add(Observer(
         builder: (_) {
           return CotacaoCard(
-            cotacaoIndice:
-                controller.getCotacaoIndiceByTipo(TipoAtivoEnum.ACAO),
+            cotacaoIndice: controller.getCotacaoIndiceByTipo(TipoAtivo.ACAO),
             variacaoTotal: controller.getVariacaoTotalAcoes(),
             ativos: controller.acoes,
             onTap: () {
-              Modular.to.pushNamed("/home/cotacao");
+              Modular.to.pushNamed("/home/cotacao/${TipoAtivo.ACAO.code}");
             },
             title: "Ações e ETFs",
           );
         },
       ));
     }
+    if (controller.fiis.isNotEmpty) {
+      list.add(Observer(
+        builder: (_) {
+          return CotacaoCard(
+            cotacaoIndice: controller.getCotacaoIndiceByTipo(TipoAtivo.FII),
+            variacaoTotal: controller.getVariacaoTotalFiis(),
+            ativos: controller.fiis,
+            onTap: () {
+              Modular.to.pushNamed("/home/cotacao/${TipoAtivo.FII.code}");
+            },
+            title: "Fundos Imobiliários",
+          );
+        },
+      ));
+    }
     return list;
+  }
+
+  Widget subtitleCarteira(CarteiraDTO carteira) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 10,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+                GeralUtil.doubleToMoney(
+                  carteira.totalAtualizado,
+                ),
+                style: TextStyle(fontSize: 15, color: Colors.black)),
+            VariacaoPercentualWidget(
+              value: carteira.rendimentoTotalPercent,
+            )
+          ],
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Text(
+            (carteira.saldo < 0
+                ? ('Vender ' +
+                    (GeralUtil.doubleToMoney(carteira.saldo * -1)).toString())
+                : 'Aplicar ' + GeralUtil.doubleToMoney(carteira.saldo)),
+            style: TextStyle(color: Colors.grey)),
+        SizedBox(
+          height: 15,
+        )
+      ],
+    );
   }
 
   Widget getCarteiras() {
@@ -127,23 +194,21 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
         Observer(builder: (_) {
           return Column(
             children: [
-              ListTile(
-                  title: Text(
-                    "CARTEIRAS",
-                    style: TextStyle(
-                        color: Color(0xff103d6b),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
-                  ),
-                  trailing: IconButton(
+              TitleWidget(
+                title: "Carteiras",
+                rightItems: [
+                  IconButton(
                     icon: Icon(
-                      Icons.add_box,
-                      color: Color(0xff103d6b),
+                      Icons.add_circle_outline_rounded,
                     ),
-                    onPressed: () {
-                      _showNovaCarteiraDialog();
-                    },
-                  )),
+                    onPressed: _showNovaCarteiraDialog,
+                  )
+                ],
+                withDivider: true,
+              ),
+              SizedBox(
+                height: 20,
+              ),
               ListView.builder(
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true,
@@ -152,49 +217,27 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
                   itemBuilder: (context, index) {
                     CarteiraDTO carteira = controller.carteiras[index];
 
-                    return Card(
+                    return Container(
                       child: Column(
                         children: [
-                          Container(
-                            //  color: Color(0xffe9edf4),
-                            child: ListTile(
-                              onTap: () {
-                                Modular.to
-                                    .pushNamed("/carteira/${carteira.id}");
-                              },
-                              leading: Icon(Icons.account_balance_wallet),
-                              title: Text(
-                                carteira.descricao,
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              trailing: Text(
-                                  GeralUtil.doubleToMoney(
-                                      carteira.totalAtualizado),
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                            ),
-                          ),
                           ListTile(
-                            leading: Icon(
-                              carteira.saldo < 0
-                                  ? Icons.remove_circle
-                                  : Icons.add_circle,
-                              color: carteira.saldo < 0
-                                  ? Colors.red
-                                  : Colors.green,
-                            ),
+                            onTap: () {
+                              Modular.to.pushNamed("/carteira/${carteira.id}");
+                            },
+                            leading: CarteiraIcon(carteira.descricao),
                             title: Text(
-                              "${carteira.saldo < 0 ? 'Vender' : 'Investir'}",
+                              carteira.descricao,
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            trailing: Text(
-                              GeralUtil.doubleToMoney(carteira.saldo),
-                              style: TextStyle(
-                                  color: carteira.saldo < 0
-                                      ? Colors.red
-                                      : Colors.green,
-                                  fontWeight: FontWeight.bold),
-                            ),
+                            subtitle: subtitleCarteira(carteira),
                           ),
+                          Visibility(
+                              visible: controller.carteiras.length > 1 &&
+                                  (controller.carteiras.length - 1) != index,
+                              child: Divider(
+                                height: 10,
+                                color: Colors.grey,
+                              ))
                         ],
                       ),
                     );

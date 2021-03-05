@@ -1,8 +1,10 @@
 import 'package:alloc/app/modules/carteira/widgets/circle_info_widget.dart';
+import 'package:alloc/app/modules/home/widgets/title_widget.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
+import 'package:alloc/app/shared/widgets/variacao_percentual_widget.dart';
 import 'package:flutter/material.dart';
 
 class AtivosWidget extends StatelessWidget {
@@ -30,49 +32,40 @@ class AtivosWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Ativos",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Visibility(
-                  visible: showButtonAdd,
-                  child: GestureDetector(
-                    onTap: fncAdd,
-                    child: Container(
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Aplicar/Vender",
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+        TitleWidget(
+          title: "Ativos",
+          rightItems: [
+            Visibility(
+              visible: showButtonAdd,
+              child: GestureDetector(
+                onTap: fncAdd,
+                child: Container(
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Aplicar/Vender",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      width: 140,
-                      height: 30,
-                      decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.all(Radius.circular(40))),
+                      ],
                     ),
                   ),
+                  width: 140,
+                  height: 30,
+                  decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: BorderRadius.all(Radius.circular(40))),
                 ),
-                IconButton(
-                  icon: Icon(
-                    Icons.dashboard_outlined,
-                  ),
-                  onPressed: fncConfig,
-                )
-              ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.dashboard_outlined,
+              ),
+              onPressed: fncConfig,
             )
           ],
         ),
@@ -90,9 +83,8 @@ class AtivosWidget extends StatelessWidget {
               double rendimento =
                   totalAportadoAtual - ativo.totalAportado.toDouble();
 
-              String rendimentoPercentString = GeralUtil.limitaCasasDecimais(
-                      (rendimento * 100) / ativo.totalAportado.toDouble())
-                  .toString();
+              double variacaoPercentual = GeralUtil.variacaoPercentualDeXparaY(
+                  ativo.totalAportado.toDouble(), totalAportadoAtual);
 
               return Dismissible(
                 key: Key(ativo.id),
@@ -139,14 +131,8 @@ class AtivosWidget extends StatelessWidget {
                                     .bodyText2
                                     .color),
                           ),
-                          Text(
-                            (rendimento > 0 ? '+' : '') +
-                                rendimentoPercentString +
-                                "%",
-                            style: TextStyle(
-                                fontSize: _textSize2,
-                                color:
-                                    rendimento < 0 ? Colors.red : Colors.green),
+                          VariacaoPercentualWidget(
+                            value: variacaoPercentual,
                           ),
                           Text(
                             GeralUtil.doubleToMoney(totalAportadoAtual,

@@ -38,7 +38,7 @@ abstract class _AtivoControllerBase with Store {
       ativo.idCarteira = _carteiraController.carteira.id;
       ativo.idUsuario = AppCore.usuario.id;
       ativo.papel = papel;
-      ativo.precoMedio = preco;
+      ativo.precoMedio = preco == null ? 0.0 : preco;
       ativo.qtd = qtd;
       ativo.dataRecente = data;
       ativo.superiores = getIdSuperiores();

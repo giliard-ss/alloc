@@ -19,6 +19,15 @@ final $HomeController = BindInject(
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$HomeController on _HomeControllerBase, Store {
+  Computed<int> _$maiorQuantItemsExistenteListasComputed;
+
+  @override
+  int get maiorQuantItemsExistenteListas =>
+      (_$maiorQuantItemsExistenteListasComputed ??= Computed<int>(
+              () => super.maiorQuantItemsExistenteListas,
+              name: '_HomeControllerBase.maiorQuantItemsExistenteListas'))
+          .value;
+
   final _$errorAtom = Atom(name: '_HomeControllerBase.error');
 
   @override
@@ -64,6 +73,21 @@ mixin _$HomeController on _HomeControllerBase, Store {
     });
   }
 
+  final _$fiisAtom = Atom(name: '_HomeControllerBase.fiis');
+
+  @override
+  List<AtivoDTO> get fiis {
+    _$fiisAtom.reportRead();
+    return super.fiis;
+  }
+
+  @override
+  set fiis(List<AtivoDTO> value) {
+    _$fiisAtom.reportWrite(value, super.fiis, () {
+      super.fiis = value;
+    });
+  }
+
   final _$initAsyncAction = AsyncAction('_HomeControllerBase.init');
 
   @override
@@ -92,7 +116,9 @@ mixin _$HomeController on _HomeControllerBase, Store {
     return '''
 error: ${error},
 carteiras: ${carteiras},
-acoes: ${acoes}
+acoes: ${acoes},
+fiis: ${fiis},
+maiorQuantItemsExistenteListas: ${maiorQuantItemsExistenteListas}
     ''';
   }
 }
