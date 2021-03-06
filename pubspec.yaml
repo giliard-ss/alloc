@@ -35,6 +35,7 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  flutter_typeahead: ^2.0.0
   carousel_slider: ^3.0.0
   connectivity: ^2.0.2
   flutter_masked_text: ^0.8.0

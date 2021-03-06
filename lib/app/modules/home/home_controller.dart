@@ -46,6 +46,13 @@ abstract class _HomeControllerBase with Store {
     }
   }
 
+  @computed
+  double get patrimonio {
+    double total = 0.0;
+    carteiras.forEach((e) => total += e.totalAtualizado);
+    return total;
+  }
+
   void loadAcoes() {
     List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.isAcao).toList();
     list.sort((e1, e2) => e2.cotacaoModel.variacaoDouble
@@ -82,14 +89,29 @@ abstract class _HomeControllerBase with Store {
   }
 
   double getVariacaoTotalAcoes() {
-    return getVariacaoTotal(AppCore.allAtivos.where((e) => e.isAcao).toList());
+    return getVariacaoTotal(
+        AppCore.allAtivos.where((e) => e.isAcao).toList())[1];
   }
 
   double getVariacaoTotalFiis() {
-    return getVariacaoTotal(AppCore.allAtivos.where((e) => e.isFII).toList());
+    return getVariacaoTotal(
+        AppCore.allAtivos.where((e) => e.isFII).toList())[1];
   }
 
-  double getVariacaoTotal(List<AtivoDTO> ativos) {
+  double getVariacaoCarteira(String idCarteira) {
+    return getVariacaoTotal(AppCore.allAtivos
+        .where((e) =>
+            e.idCarteira == idCarteira && e.cotacaoModel.variacao != null)
+        .toList())[1];
+  }
+
+  List getVariacaoPatrimonio() {
+    return getVariacaoTotal(AppCore.allAtivos
+        .where((e) => e.cotacaoModel.variacao != null)
+        .toList());
+  }
+
+  List getVariacaoTotal(List<AtivoDTO> ativos) {
     double totalAbertura = 0.0;
     double totalAtual = 0.0;
     ativos.forEach((e) {
@@ -99,7 +121,11 @@ abstract class _HomeControllerBase with Store {
 
     double percentual =
         GeralUtil.variacaoPercentualDeXparaY(totalAbertura, totalAtual);
-    return GeralUtil.limitaCasasDecimais(percentual);
+
+    return [
+      GeralUtil.limitaCasasDecimais(totalAtual - totalAbertura),
+      GeralUtil.limitaCasasDecimais(percentual)
+    ];
   }
 
   @action

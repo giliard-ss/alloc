@@ -1,10 +1,9 @@
+import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/widgets/carteira_icon.dart';
 import 'package:alloc/app/modules/home/widgets/cotacao_card.dart';
 import 'package:alloc/app/modules/home/widgets/title_widget.dart';
-import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
-
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
@@ -13,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'home_controller.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 
 import 'widgets/carousel_with_indicator.dart';
 
@@ -34,6 +32,13 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Alloc"),
+        actions: [
+          PopupMenuButton(
+            icon: Icon(Icons.menu),
+            itemBuilder: (BuildContext bc) => [],
+            onSelected: (e) {},
+          )
+        ],
       ),
       body: RefreshIndicator(
           onRefresh: controller.refresh,
@@ -45,13 +50,82 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
 
   _body() {
     return SingleChildScrollView(
-      child: Column(children: [
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        menu(),
+        resumo(),
         getCarteiras(),
         SizedBox(
           height: 15,
         ),
         carousel()
       ]),
+    );
+  }
+
+  Widget menu() {
+    return Column(
+      children: [
+        SizedBox(
+          height: 30,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Olá, " + AppCore.usuario.nome.split(" ")[0],
+              style: TextStyle(fontSize: 25),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget resumo() {
+    return Observer(
+      builder: (_) {
+        List variacao = controller.getVariacaoPatrimonio();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 50,
+            ),
+            Text("PATRIMÔNIO"),
+            Text(
+              GeralUtil.doubleToMoney(controller.patrimonio),
+              style: TextStyle(
+                fontSize: 30,
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text("Variação Hoje"),
+            SizedBox(
+              height: 5,
+            ),
+            Row(
+              children: [
+                Container(
+                  width: 180,
+                  child: Text(
+                    GeralUtil.doubleToMoney(variacao[0]),
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+                VariacaoPercentualWidget(
+                  value: variacao[1],
+                  fontSize: 16,
+                )
+              ],
+            ),
+            SizedBox(
+              height: 15,
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -168,7 +242,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
                 ),
                 style: TextStyle(fontSize: 15, color: Colors.black)),
             VariacaoPercentualWidget(
-              value: carteira.rendimentoTotalPercent,
+              value: controller.getVariacaoCarteira(carteira.id),
             )
           ],
         ),

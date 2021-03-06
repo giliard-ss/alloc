@@ -6,6 +6,7 @@ import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
+import 'package:alloc/app/shared/widgets/variacao_percentual_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -40,6 +41,74 @@ class _CarteiraPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          title: Text(controller.title),
+          actions: [
+            PopupMenuButton(
+              icon: Icon(Icons.menu),
+              itemBuilder: (BuildContext bc) => [
+                PopupMenuItem(
+                  enabled: true,
+                  child: Row(
+                    children: [
+                      Icon(Icons.upload_rounded),
+                      Text("Depósito"),
+                    ],
+                  ),
+                  value: "deposito",
+                ),
+                PopupMenuItem(
+                    enabled: true,
+                    child: Row(
+                      children: [
+                        Icon(Icons.monetization_on_outlined),
+                        Text("Saque"),
+                      ],
+                    ),
+                    value: "saque"),
+                PopupMenuItem(
+                    enabled: true,
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete),
+                        Text("Excluir Carteira"),
+                      ],
+                    ),
+                    value: "excluirCarteira"),
+              ],
+              onSelected: (e) {
+                if (e == 'excluirCarteira') {
+                  _showExcluirCarteiraDialog();
+                }
+                if (e == 'config') {
+                  Modular.to.pushNamed("/carteira/config");
+                }
+
+                switch (e) {
+                  case 'excluirCarteira':
+                    {
+                      _showExcluirCarteiraDialog();
+                    }
+                    break;
+
+                  case "deposito":
+                    {
+                      _showDepositoDialog();
+                    }
+                    break;
+                  case "saque":
+                    {
+                      _showRetiradaDialog();
+                    }
+                    break;
+
+                  default:
+                    break;
+                }
+              },
+            )
+          ],
+        ),
         key: _scaffoldKey,
         body: WidgetUtil.futureBuild(controller.init, _body));
   }
@@ -68,7 +137,7 @@ class _CarteiraPageState
                       controller.ativos.isEmpty &&
                       controller.carteira.saldo != 0,
                   child: PrimeiraInclusaoWidget(
-                    menuWidget: _menu(),
+                    menuWidget: Container(),
                     resumoWidget: _resumo(),
                     fncNovaAlocacao: () {
                       _showNovaAlocacaoDialog();
@@ -133,114 +202,50 @@ class _CarteiraPageState
     );
   }
 
-  _menu({excluir: true, deposito: true, saque: true}) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 50,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              controller.title,
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
-            PopupMenuButton(
-              icon: Icon(Icons.menu),
-              itemBuilder: (BuildContext bc) => [
-                PopupMenuItem(
-                  enabled: deposito,
-                  child: Row(
-                    children: [
-                      Icon(Icons.upload_rounded),
-                      Text("Depósito"),
-                    ],
-                  ),
-                  value: "deposito",
-                ),
-                PopupMenuItem(
-                    enabled: saque,
-                    child: Row(
-                      children: [
-                        Icon(Icons.monetization_on_outlined),
-                        Text("Saque"),
-                      ],
-                    ),
-                    value: "saque"),
-                PopupMenuItem(
-                    enabled: excluir,
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete),
-                        Text("Excluir Carteira"),
-                      ],
-                    ),
-                    value: "excluirCarteira"),
-              ],
-              onSelected: (e) {
-                if (e == 'excluirCarteira') {
-                  _showExcluirCarteiraDialog();
-                }
-                if (e == 'config') {
-                  Modular.to.pushNamed("/carteira/config");
-                }
-
-                switch (e) {
-                  case 'excluirCarteira':
-                    {
-                      _showExcluirCarteiraDialog();
-                    }
-                    break;
-
-                  case "deposito":
-                    {
-                      _showDepositoDialog();
-                    }
-                    break;
-                  case "saque":
-                    {
-                      _showRetiradaDialog();
-                    }
-                    break;
-
-                  default:
-                    break;
-                }
-              },
-            )
-          ],
-        ),
-      ],
-    );
-  }
-
   _header() {
     return Observer(
       builder: (_) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _menu(),
             SizedBox(
               height: 50,
             ),
-            Text("TOTAL ATUALIZADO"),
+            Text("VALOR APLICADO ATUALIZADO"),
             Text(
               GeralUtil.doubleToMoney(controller.carteira.totalAportadoAtual),
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
-            Text(
-              (controller.carteira.rendimentoTotal > 0 ? '+' : '') +
-                  controller.carteira.rendimentoTotalPercentString +
-                  "%",
-              style: TextStyle(
-                color: controller.carteira.rendimentoTotal < 0
-                    ? Colors.red
-                    : Colors.green,
-                fontSize: 16,
-              ),
-            )
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              children: [
+                Container(
+                  width: 180,
+                  child: Text("Rendimento Total"),
+                ),
+                Text("Variação Total")
+              ],
+            ),
+            SizedBox(
+              height: 5,
+            ),
+            Row(
+              children: [
+                Container(
+                  width: 180,
+                  child: Text(
+                    GeralUtil.doubleToMoney(
+                        controller.carteira.rendimentoTotal),
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+                VariacaoPercentualWidget(
+                  value: controller.carteira.rendimentoTotalPercent,
+                )
+              ],
+            ),
           ],
         );
       },
@@ -251,7 +256,6 @@ class _CarteiraPageState
     return Center(
       child: Column(
         children: [
-          _menu(deposito: false, saque: false),
           SizedBox(
             height: 50,
           ),
@@ -285,7 +289,7 @@ class _CarteiraPageState
   }
 
   _content() {
-    return Column(children: [
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       _header(),
       SizedBox(
         height: 30,

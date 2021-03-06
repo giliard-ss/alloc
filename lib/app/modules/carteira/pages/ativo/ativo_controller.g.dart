@@ -19,6 +19,14 @@ final $AtivoController = BindInject(
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$AtivoController on _AtivoControllerBase, Store {
+  Computed<bool> _$papelValidoComputed;
+
+  @override
+  bool get papelValido =>
+      (_$papelValidoComputed ??= Computed<bool>(() => super.papelValido,
+              name: '_AtivoControllerBase.papelValido'))
+          .value;
+
   final _$errorAtom = Atom(name: '_AtivoControllerBase.error');
 
   @override
@@ -34,18 +42,18 @@ mixin _$AtivoController on _AtivoControllerBase, Store {
     });
   }
 
-  final _$tipoAtom = Atom(name: '_AtivoControllerBase.tipo');
+  final _$papelAtom = Atom(name: '_AtivoControllerBase.papel');
 
   @override
-  String get tipo {
-    _$tipoAtom.reportRead();
-    return super.tipo;
+  String get papel {
+    _$papelAtom.reportRead();
+    return super.papel;
   }
 
   @override
-  set tipo(String value) {
-    _$tipoAtom.reportWrite(value, super.tipo, () {
-      super.tipo = value;
+  set papel(String value) {
+    _$papelAtom.reportWrite(value, super.papel, () {
+      super.papel = value;
     });
   }
 
@@ -67,11 +75,11 @@ mixin _$AtivoController on _AtivoControllerBase, Store {
       ActionController(name: '_AtivoControllerBase');
 
   @override
-  void changeTipo(String value) {
+  void setPapel(String papel) {
     final _$actionInfo = _$_AtivoControllerBaseActionController.startAction(
-        name: '_AtivoControllerBase.changeTipo');
+        name: '_AtivoControllerBase.setPapel');
     try {
-      return super.changeTipo(value);
+      return super.setPapel(papel);
     } finally {
       _$_AtivoControllerBaseActionController.endAction(_$actionInfo);
     }
@@ -81,7 +89,8 @@ mixin _$AtivoController on _AtivoControllerBase, Store {
   String toString() {
     return '''
 error: ${error},
-tipo: ${tipo}
+papel: ${papel},
+papelValido: ${papelValido}
     ''';
   }
 }

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 
 class VariacaoPercentualWidget extends StatelessWidget {
   final double value;
-  VariacaoPercentualWidget({this.value = 0});
+  final double fontSize;
+  VariacaoPercentualWidget({this.value = 0, this.fontSize = 13});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,10 @@ class VariacaoPercentualWidget extends StatelessWidget {
 
     return Text(
       text,
-      style: TextStyle(fontSize: 13, color: color),
+      style: TextStyle(
+        fontSize: fontSize,
+        color: color,
+      ),
     );
   }
 }

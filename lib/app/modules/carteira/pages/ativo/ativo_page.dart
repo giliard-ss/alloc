@@ -1,6 +1,8 @@
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
+import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,6 +27,7 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
   var maskFormatter = new MaskTextInputFormatter(
       mask: '##/##/####', filter: {"#": RegExp(r'[0-9]')});
   final _moneyController = new MoneyMaskedTextController(leftSymbol: "R\$ ");
+  final TextEditingController _typeAheadController = TextEditingController();
 
   @override
   void initState() {
@@ -62,7 +65,6 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
           SizedBox(
             height: 10,
           ),
-          _selectTipo(),
           SizedBox(
             height: 10,
           ),
@@ -70,11 +72,37 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
           SizedBox(
             height: 10,
           ),
-          TextField(
-            textCapitalization: TextCapitalization.characters,
-            onChanged: (text) => controller.papel = text.toUpperCase(),
-            decoration: InputDecoration(
-                labelText: "Papel", border: const OutlineInputBorder()),
+          Observer(
+            builder: (_) {
+              return TypeAheadField(
+                hideOnEmpty: true,
+                textFieldConfiguration: TextFieldConfiguration(
+                  controller: _typeAheadController,
+                  keyboardType: TextInputType.text,
+                  onChanged: (text) => controller.setPapel(text.toUpperCase()),
+                  autofocus: true,
+                  decoration: InputDecoration(
+                      errorText: StringUtil.isEmpty(controller.papel) ||
+                              controller.papelValido
+                          ? null
+                          : "",
+                      border: OutlineInputBorder(),
+                      labelText: "Papel"),
+                ),
+                suggestionsCallback: (pattern) {
+                  return controller.getSugestoes(pattern);
+                },
+                itemBuilder: (context, suggestion) {
+                  return ListTile(
+                    title: Text(suggestion),
+                  );
+                },
+                onSuggestionSelected: (suggestion) {
+                  this._typeAheadController.text = suggestion;
+                  controller.papel = suggestion.toUpperCase();
+                },
+              );
+            },
           ),
           SizedBox(
             height: 10,
@@ -104,6 +132,7 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
             children: [
               Flexible(
                 child: RaisedButton(
+                  color: Colors.red[900],
                   onPressed: () async {
                     bool ok =
                         await LoadingUtil.onLoading(context, controller.vender);
@@ -113,7 +142,10 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
                       });
                     }
                   },
-                  child: Text('Vender'),
+                  child: Text(
+                    'Vender',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
               SizedBox(
@@ -121,7 +153,8 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
               ),
               Flexible(
                 child: RaisedButton(
-                  child: Text('Comprar'),
+                  color: Colors.green[900],
+                  child: Text('Comprar', style: TextStyle(color: Colors.white)),
                   onPressed: () async {
                     bool ok = await LoadingUtil.onLoading(
                         context, controller.comprar);
@@ -137,26 +170,6 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
           )
         ],
       ),
-    );
-  }
-
-  Widget _selectTipo() {
-    return Observer(
-      builder: (_) {
-        return DropdownButton<String>(
-          value: controller.tipo,
-          icon: Icon(Icons.arrow_downward),
-          isExpanded: true,
-          onChanged: controller.changeTipo,
-          items: <String>['ACAO', 'FII', 'ETF', 'CRIPTO', 'RF']
-              .map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-        );
-      },
     );
   }
 

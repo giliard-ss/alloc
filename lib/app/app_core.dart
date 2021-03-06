@@ -41,12 +41,13 @@ class AppCore {
     _alocacaoService = Modular.get<AlocacaoService>();
     await _loadCarteiras();
     await _loadAtivos();
-    await _loadCotacoes();
+    //await _loadCotacoes();
+    await _startListenerCotacoes();
     _refreshAtivosDTO();
     await _loadAlocacoes();
     _refreshAlocacoesDTO();
     _refreshCarteiraDTO();
-    await _startListenerCotacoes();
+    //await _startListenerCotacoes();
     _startReactionCotacoes();
   }
 
@@ -150,7 +151,7 @@ class AppCore {
 
   static Future<void> notifyAddDelAtivo() async {
     await _loadAtivos();
-    await _loadCotacoes();
+    //await _loadCotacoes();
     _refreshAtivosDTO();
     _refreshAlocacoesDTO();
     _refreshCarteiraDTO();
@@ -248,27 +249,6 @@ class AppCore {
   static Future<void> _loadAtivos() async {
     List<AtivoDTO> result = [];
     List<AtivoModel> ativos = await _ativoService.getAtivos(_usuario.id);
-
-    ativos.forEach((e) {
-      print(e.id +
-          ';' +
-          e.idUsuario +
-          ';' +
-          e.papel +
-          ';' +
-          e.idCarteira +
-          ';' +
-          e.alocacao.toString() +
-          ';' +
-          e.qtd.toString() +
-          ';' +
-          e.precoMedio.toString() +
-          ';' +
-          e.superiores.toString() +
-          ';' +
-          e.dataRecente.toIso8601String());
-    });
-
     ativos.forEach((e) => result.add(AtivoDTO(e, getCotacao(e.id))));
 
     runInAction(() {
@@ -324,24 +304,21 @@ class AppCore {
         await _stopListenerCotacoes();
       }
 
-      List<String> papeis = _getPapeisAtivos();
-      papeis.addAll(_getPapeisObrigatorios());
-      if (papeis.isEmpty) {
-        return;
-      }
-
       CollectionReference reference =
           FirebaseFirestore.instance.collection(_tableCotacoes);
       _listenerCotacoes = reference.snapshots().listen((snapshot) {
-        List<QueryDocumentSnapshot> cotacoesPapeis =
-            snapshot.docs.where((e) => papeis.contains(e.id)).toList();
-        List<CotacaoModel> cotacoes = List.generate(cotacoesPapeis.length, (i) {
-          return CotacaoModel.fromMap(cotacoesPapeis[i].data());
+        // if (snapshot.docChanges
+        //     .where((e) => e.doc.id == "cotacao")
+        //     .isNotEmpty) {
+        //   _loadCotacoes();
+        // }
+        //print(snapshot.docChanges.length);
+        List<CotacaoModel> cotacoesChange =
+            List.generate(snapshot.docChanges.length, (i) {
+          return CotacaoModel.fromMap(snapshot.docChanges[i].doc.data());
         });
 
-        runInAction(() async {
-          _cotacoes.value = cotacoes;
-        });
+        _refreshCotacoes(cotacoesChange);
       });
       LoggerUtil.info("Listener de cotações iniciado.");
     } catch (ex) {
@@ -350,28 +327,43 @@ class AppCore {
     }
   }
 
-  static Future<void> _loadCotacoes() async {
-    List<String> papeis = _getPapeisAtivos();
-    if (papeis.isEmpty) {
-      return;
+  static void _refreshCotacoes(List<CotacaoModel> cotacoesChange) {
+    List<CotacaoModel> list = [];
+
+    if (_cotacoes.value.isNotEmpty) {
+      _cotacoes.value.forEach((e) {
+        list.add(
+            cotacoesChange.firstWhere((f) => f.id == e.id, orElse: () => e));
+      });
+    } else {
+      list = cotacoesChange;
     }
-    // QuerySnapshot snapshot = await FirebaseFirestore.instance
-    //     .collection(_tableCotacoes)
-    //     .where("id", whereIn: papeis)
-    //     .get();
 
-    QuerySnapshot query =
-        await FirebaseFirestore.instance.collection(_tableCotacoes).get();
-
-    List docs = query.docs.where((e) => papeis.contains(e.id)).toList();
-    List<CotacaoModel> cotacoes = List.generate(docs.length, (i) {
-      return CotacaoModel.fromMap(docs[i].data());
-    });
-
-    runInAction(() async {
-      _cotacoes.value = cotacoes;
+    runInAction(() {
+      _cotacoes.value = list;
     });
   }
+
+  // static Future<void> _loadCotacoes() async {
+  //   List<String> papeis = _getPapeisAtivos();
+  //   papeis.addAll(_getPapeisObrigatorios());
+  //   if (papeis.isEmpty) {
+  //     return;
+  //   }
+
+  //   QuerySnapshot query = await FirebaseFirestore.instance
+  //       .collection(_tableCotacoes)
+  //       //.where( )
+  //       .get();
+
+  //   List<CotacaoModel> cotacoes = List.generate(query.docs.length, (i) {
+  //     return CotacaoModel.fromMap(query.docs[i].data());
+  //   });
+
+  //   runInAction(() async {
+  //     _cotacoes.value = cotacoes;
+  //   });
+  // }
 
   static Future<void> _stopListenerCotacoes() async {
     try {
@@ -427,6 +419,12 @@ class AppCore {
   static List<AtivoDTO> get allAtivos {
     List<AtivoDTO> result = [];
     _ativosDTO.value.forEach((e) => result.add(e.clone()));
+    return result;
+  }
+
+  static List<String> get allPapeis {
+    List<String> result = [];
+    _cotacoes.value.forEach((e) => result.add(e.id));
     return result;
   }
 

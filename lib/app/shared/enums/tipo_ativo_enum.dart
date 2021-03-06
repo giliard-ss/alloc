@@ -18,4 +18,5 @@ class TipoAtivo {
   static TipoAtivo get FII => TipoAtivo("FII");
   static TipoAtivo get RF => TipoAtivo("RF");
   static TipoAtivo get CRIPTO => TipoAtivo("CRIPTO");
+  static TipoAtivo get ETF => TipoAtivo("ETF");
 }

@@ -19,6 +19,13 @@ final $HomeController = BindInject(
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$HomeController on _HomeControllerBase, Store {
+  Computed<double> _$patrimonioComputed;
+
+  @override
+  double get patrimonio =>
+      (_$patrimonioComputed ??= Computed<double>(() => super.patrimonio,
+              name: '_HomeControllerBase.patrimonio'))
+          .value;
   Computed<int> _$maiorQuantItemsExistenteListasComputed;
 
   @override
@@ -118,6 +125,7 @@ error: ${error},
 carteiras: ${carteiras},
 acoes: ${acoes},
 fiis: ${fiis},
+patrimonio: ${patrimonio},
 maiorQuantItemsExistenteListas: ${maiorQuantItemsExistenteListas}
     ''';
   }
