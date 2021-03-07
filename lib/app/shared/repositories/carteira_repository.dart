@@ -1,20 +1,28 @@
 import 'package:alloc/app/shared/config/cf_settings.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
-import 'package:alloc/app/shared/repositories/icarteira_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+abstract class ICarteiraRepository {
+  Future<List<CarteiraModel>> findCarteiras(String idUsuario, {bool onlyCache});
+  Future<CarteiraModel> create(String idUsuario, String descricao);
+  void update(CarteiraModel carteira);
+  void updateBatch(WriteBatch batch, CarteiraModel carteira);
+  void deleteBatch(WriteBatch batch, String idCarteira);
+}
 
 class CarteiraRepository implements ICarteiraRepository {
   static final _table = "carteiras";
   FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
-  Future<List<CarteiraModel>> findCarteiras(String idUsuario) async {
+  Future<List<CarteiraModel>> findCarteiras(String idUsuario,
+      {bool onlyCache = true}) async {
     try {
       QuerySnapshot snapshot = await _db
           .collection(_table)
           .where("idUsuario", isEqualTo: idUsuario)
-          .get(await CfSettrings.getOptions());
+          .get(await CfSettrings.getOptions(onlyCache: onlyCache));
       return List.generate(snapshot.docs.length, (i) {
         return CarteiraModel.fromMap(snapshot.docs[i].data());
       });

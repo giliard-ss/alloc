@@ -1,13 +1,11 @@
 import 'package:alloc/app/app_core.dart';
-import 'package:alloc/app/modules/carteira/backup.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
-import 'package:alloc/app/shared/services/iativo_service.dart';
-import 'package:alloc/app/shared/services/impl/ativo_service.dart';
+import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:mobx/mobx.dart';

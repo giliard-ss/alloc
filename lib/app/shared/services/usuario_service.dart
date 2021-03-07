@@ -1,8 +1,12 @@
 import 'package:alloc/app/shared/models/usuario_model.dart';
-import 'package:alloc/app/shared/repositories/impl/usuario_repository.dart';
-import 'package:alloc/app/shared/services/impl/preference_service.dart';
-import 'package:alloc/app/shared/services/iusuario_service.dart';
+import 'package:alloc/app/shared/repositories/usuario_repository.dart';
+import 'package:alloc/app/shared/services/preference_service.dart';
 import 'package:flutter/material.dart';
+
+abstract class IUsuarioService {
+  Future<UsuarioModel> getUsuario(String email);
+  Future<void> cadastrar(String nome, String email);
+}
 
 class UsuarioService implements IUsuarioService {
   final UsuarioRepository usuarioRepository;

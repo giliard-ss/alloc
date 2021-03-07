@@ -1,7 +1,6 @@
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/models/usuario_model.dart';
-import 'package:alloc/app/shared/services/impl/preference_service.dart';
-import 'package:alloc/app/shared/services/ipreference_service.dart';
+import 'package:alloc/app/shared/services/preference_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 

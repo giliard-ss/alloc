@@ -2,10 +2,8 @@ import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
-import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
-import 'package:alloc/app/shared/services/icarteira_service.dart';
-import 'package:alloc/app/shared/services/impl/carteira_service.dart';
+import 'package:alloc/app/shared/services/carteira_service.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 

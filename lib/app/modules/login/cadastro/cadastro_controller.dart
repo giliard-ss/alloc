@@ -1,14 +1,8 @@
 import 'dart:math';
 
-import 'package:alloc/app/shared/models/usuario_model.dart';
-import 'package:alloc/app/shared/services/iemail_service.dart';
-import 'package:alloc/app/shared/services/impl/email_service.dart';
-
-import 'package:alloc/app/shared/services/impl/usuario_service.dart';
-
-import 'package:alloc/app/shared/services/iusuario_service.dart';
+import 'package:alloc/app/shared/services/email_service.dart';
+import 'package:alloc/app/shared/services/usuario_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
-import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 

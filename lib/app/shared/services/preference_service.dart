@@ -1,8 +1,12 @@
 import 'package:alloc/app/shared/models/usuario_model.dart';
-import 'package:alloc/app/shared/services/ipreference_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dart:convert';
+
+abstract class IPreferenceService {
+  Future<void> saveUsuario(UsuarioModel usuario);
+  Future<UsuarioModel> getUsuario();
+}
 
 class PreferenceService implements IPreferenceService {
   static final String _keyUsuario = "_user";

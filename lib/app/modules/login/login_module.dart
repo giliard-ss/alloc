@@ -1,6 +1,5 @@
 import 'package:alloc/app/modules/login/cadastro/cadastro_page.dart';
-import 'package:alloc/app/shared/services/iemail_service.dart';
-import 'package:alloc/app/shared/services/impl/email_service.dart';
+import 'package:alloc/app/shared/services/email_service.dart';
 
 import 'cadastro/cadastro_controller.dart';
 import 'login_controller.dart';

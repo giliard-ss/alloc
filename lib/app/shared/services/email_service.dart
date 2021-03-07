@@ -1,7 +1,11 @@
-import 'package:alloc/app/shared/services/iemail_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
+
+abstract class IEmailService {
+  Future<bool> sendMessage(
+      String mensagem, String destinatario, String assunto);
+}
 
 class EmailService implements IEmailService {
   String _username = "giliard_sousa@hotmail.com";

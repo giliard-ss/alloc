@@ -2,12 +2,19 @@ import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
-import 'package:alloc/app/shared/repositories/impl/alocacao_repository.dart';
-import 'package:alloc/app/shared/repositories/impl/ativo_repository.dart';
-import 'package:alloc/app/shared/repositories/impl/carteira_repository.dart';
-import 'package:alloc/app/shared/services/icarteira_service.dart';
+import 'package:alloc/app/shared/repositories/alocacao_repository.dart';
+import 'package:alloc/app/shared/repositories/ativo_repository.dart';
+import 'package:alloc/app/shared/repositories/carteira_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+abstract class ICarteiraService {
+  Future<List<CarteiraModel>> getCarteiras(String usuarioId, {bool onlyCache});
+  Future<void> create(String descricao);
+  void update(CarteiraModel carteira);
+  void updateBatch(WriteBatch batch, CarteiraModel carteira);
+  Future<void> delete(String idCarteira);
+}
 
 class CarteiraService implements ICarteiraService {
   FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -20,8 +27,9 @@ class CarteiraService implements ICarteiraService {
       @required this.alocacaoRepository});
 
   @override
-  Future<List<CarteiraModel>> getCarteiras(String usuarioId) {
-    return carteiraRepository.findCarteiras(usuarioId);
+  Future<List<CarteiraModel>> getCarteiras(String usuarioId,
+      {bool onlyCache = true}) {
+    return carteiraRepository.findCarteiras(usuarioId, onlyCache: onlyCache);
   }
 
   @override

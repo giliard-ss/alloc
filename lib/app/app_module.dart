@@ -1,27 +1,16 @@
 import 'package:alloc/app/modules/carteira/carteira_module.dart';
-import 'package:alloc/app/shared/services/impl/preference_service.dart';
-import 'package:alloc/app/shared/services/ipreference_service.dart';
+import 'package:alloc/app/shared/repositories/alocacao_repository.dart';
+import 'package:alloc/app/shared/repositories/ativo_repository.dart';
+import 'package:alloc/app/shared/repositories/carteira_repository.dart';
+import 'package:alloc/app/shared/repositories/usuario_repository.dart';
+import 'package:alloc/app/shared/services/alocacao_service.dart';
+import 'package:alloc/app/shared/services/ativo_service.dart';
+import 'package:alloc/app/shared/services/carteira_service.dart';
+import 'package:alloc/app/shared/services/preference_service.dart';
+import 'package:alloc/app/shared/services/usuario_service.dart';
 import 'package:alloc/app/splash/splash_page.dart';
-
 import 'splash/splash_controller.dart';
 import 'package:alloc/app/modules/login/login_module.dart';
-import 'package:alloc/app/shared/repositories/ialocacao_repository.dart';
-import 'package:alloc/app/shared/repositories/iativo_repository.dart';
-import 'package:alloc/app/shared/repositories/icarteira_repository.dart';
-import 'package:alloc/app/shared/repositories/impl/alocacao_repository.dart';
-import 'package:alloc/app/shared/repositories/impl/ativo_repository.dart';
-import 'package:alloc/app/shared/repositories/impl/carteira_repository.dart';
-import 'package:alloc/app/shared/repositories/impl/usuario_repository.dart';
-import 'package:alloc/app/shared/repositories/iusuario_repository.dart';
-import 'package:alloc/app/shared/services/ialocacao_service.dart';
-import 'package:alloc/app/shared/services/iativo_service.dart';
-import 'package:alloc/app/shared/services/icarteira_service.dart';
-import 'package:alloc/app/shared/services/impl/alocacao_service.dart';
-import 'package:alloc/app/shared/services/impl/ativo_service.dart';
-import 'package:alloc/app/shared/services/impl/carteira_service.dart';
-import 'package:alloc/app/shared/services/impl/usuario_service.dart';
-import 'package:alloc/app/shared/services/iusuario_service.dart';
-
 import 'app_controller.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter/material.dart';

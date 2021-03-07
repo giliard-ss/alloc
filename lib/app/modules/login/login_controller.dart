@@ -1,12 +1,12 @@
 import 'dart:math';
 
 import 'package:alloc/app/shared/models/usuario_model.dart';
-import 'package:alloc/app/shared/services/iemail_service.dart';
-import 'package:alloc/app/shared/services/impl/email_service.dart';
-import 'package:alloc/app/shared/services/impl/preference_service.dart';
-import 'package:alloc/app/shared/services/impl/usuario_service.dart';
-import 'package:alloc/app/shared/services/ipreference_service.dart';
-import 'package:alloc/app/shared/services/iusuario_service.dart';
+import 'package:alloc/app/shared/services/alocacao_service.dart';
+import 'package:alloc/app/shared/services/ativo_service.dart';
+import 'package:alloc/app/shared/services/carteira_service.dart';
+import 'package:alloc/app/shared/services/email_service.dart';
+import 'package:alloc/app/shared/services/preference_service.dart';
+import 'package:alloc/app/shared/services/usuario_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -20,6 +20,9 @@ abstract class _LoginControllerBase with Store {
   IUsuarioService _usuarioService = Modular.get<UsuarioService>();
   IEmailService _emailService = Modular.get<EmailService>();
   IPreferenceService _preferenceService = Modular.get<PreferenceService>();
+  IAlocacaoService _alocacaoService = Modular.get<AlocacaoService>();
+  IAtivoService _ativoService = Modular.get<AtivoService>();
+  ICarteiraService _carteiraService = Modular.get<CarteiraService>();
   String _codigoGerado;
   UsuarioModel _usuario;
   String codigo;
@@ -67,12 +70,19 @@ abstract class _LoginControllerBase with Store {
 
   Future<bool> _concluirLogin() async {
     if (codigo == _codigoGerado) {
+      await baixarInformacoes();
       await _preferenceService.saveUsuario(_usuario);
       return true;
     } else {
       error = 'Código inválido!';
     }
     return false;
+  }
+
+  Future<void> baixarInformacoes() async {
+    await _alocacaoService.getAllAlocacoes(_usuario.id, onlyCache: false);
+    await _ativoService.getAtivos(_usuario.id, onlyCache: false);
+    await _carteiraService.getCarteiras(_usuario.id, onlyCache: false);
   }
 
   @action

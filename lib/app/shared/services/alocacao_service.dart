@@ -1,10 +1,22 @@
-import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
-import 'package:alloc/app/shared/repositories/ialocacao_repository.dart';
-import 'package:alloc/app/shared/services/ialocacao_service.dart';
+import 'package:alloc/app/shared/repositories/alocacao_repository.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+abstract class IAlocacaoService {
+  Future<List<AlocacaoModel>> getAllAlocacoes(String usuarioId,
+      {bool onlyCache});
+  Future<void> update(AlocacaoModel alocacao);
+  void updateBatch(WriteBatch batch, AlocacaoModel alocacao);
+  void save(List<AlocacaoModel> alocacoes, bool autoAlocacao);
+
+  void saveBatch(
+      WriteBatch batch, List<AlocacaoModel> alocacoes, bool autoAlocacao);
+
+  void delete(String idAlocacaoDeletar, List<AlocacaoModel> alocacoesUpdate,
+      bool autoAlocacao);
+}
 
 class AlocacaoService implements IAlocacaoService {
   FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -67,7 +79,8 @@ class AlocacaoService implements IAlocacaoService {
   }
 
   @override
-  Future<List<AlocacaoModel>> getAllAlocacoes() {
-    return alocacaoRepository.findAlocacoes(AppCore.usuario.id);
+  Future<List<AlocacaoModel>> getAllAlocacoes(String usuarioId,
+      {bool onlyCache = true}) {
+    return alocacaoRepository.findAlocacoes(usuarioId, onlyCache: onlyCache);
   }
 }

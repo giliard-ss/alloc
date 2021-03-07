@@ -1,7 +1,11 @@
 import 'package:alloc/app/shared/models/usuario_model.dart';
-import 'package:alloc/app/shared/repositories/iusuario_repository.dart';
 import 'package:alloc/app/shared/utils/exception_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+abstract class IUsuarioRepository {
+  Future<UsuarioModel> find(String email);
+  Future<void> cadastrar(String nome, String email, Function(UsuarioModel) fnc);
+}
 
 class UsuarioRepository implements IUsuarioRepository {
   static final _table = "usuarios";

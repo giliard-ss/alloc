@@ -6,14 +6,10 @@ import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
-import 'package:alloc/app/shared/services/ialocacao_service.dart';
-import 'package:alloc/app/shared/services/iativo_service.dart';
-import 'package:alloc/app/shared/services/icarteira_service.dart';
-import 'package:alloc/app/shared/services/impl/alocacao_service.dart';
-import 'package:alloc/app/shared/services/impl/ativo_service.dart';
-import 'package:alloc/app/shared/services/impl/carteira_service.dart';
+import 'package:alloc/app/shared/services/alocacao_service.dart';
+import 'package:alloc/app/shared/services/ativo_service.dart';
+import 'package:alloc/app/shared/services/carteira_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
-
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 

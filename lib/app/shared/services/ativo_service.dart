@@ -1,11 +1,18 @@
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
-import 'package:alloc/app/shared/repositories/iativo_repository.dart';
-import 'package:alloc/app/shared/services/iativo_service.dart';
+import 'package:alloc/app/shared/repositories/ativo_repository.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+abstract class IAtivoService {
+  Future<List<AtivoModel>> getAtivos(String usuarioId, {bool onlyCache});
+  void save(List<AtivoModel> ativos, bool autoAlocacao);
+  void saveBatch(WriteBatch batch, List<AtivoModel> ativos, bool autoAlocacao);
+  void delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar,
+      bool autoAlocacao);
+}
 
 class AtivoService implements IAtivoService {
   FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -14,8 +21,9 @@ class AtivoService implements IAtivoService {
   AtivoService({@required this.ativoRepository});
 
   @override
-  Future<List<AtivoModel>> getAtivos(String usuarioId) {
-    return ativoRepository.findAtivos(usuarioId);
+  Future<List<AtivoModel>> getAtivos(String usuarioId,
+      {bool onlyCache = true}) {
+    return ativoRepository.findAtivos(usuarioId, onlyCache: onlyCache);
   }
 
   @override

@@ -1,20 +1,30 @@
 import 'package:alloc/app/shared/config/cf_settings.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
-import 'package:alloc/app/shared/repositories/ialocacao_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+abstract class IAlocacaoRepository {
+  Future<List<AlocacaoModel>> findAlocacoes(String idUsuario, {bool onlyCache});
+  Future<List<AlocacaoModel>> findByCarteira(String carteiraId,
+      {bool onlyCache});
+  AlocacaoModel saveBatch(WriteBatch batch, AlocacaoModel alocacaoModel);
+  void update(AlocacaoModel alocacaoModel);
+  void updateBatch(WriteBatch batch, AlocacaoModel alocacaoModel);
+  void deleteBatch(WriteBatch batch, String idAlocacao);
+}
 
 class AlocacaoRepository implements IAlocacaoRepository {
   static final _table = "alocacoes";
   FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
-  Future<List<AlocacaoModel>> findAlocacoes(String idUsuario) async {
+  Future<List<AlocacaoModel>> findAlocacoes(String idUsuario,
+      {bool onlyCache = true}) async {
     try {
       QuerySnapshot snapshot = await _db
           .collection(_table)
           .where("idUsuario", isEqualTo: idUsuario)
-          .get(await CfSettrings.getOptions());
+          .get(await CfSettrings.getOptions(onlyCache: onlyCache));
       return List.generate(snapshot.docs.length, (i) {
         return AlocacaoModel.fromMap(snapshot.docs[i].data());
       });
@@ -26,12 +36,13 @@ class AlocacaoRepository implements IAlocacaoRepository {
   }
 
   @override
-  Future<List<AlocacaoModel>> findByCarteira(String carteiraId) async {
+  Future<List<AlocacaoModel>> findByCarteira(String carteiraId,
+      {bool onlyCache = true}) async {
     try {
       QuerySnapshot snapshot = await _db
           .collection(_table)
           .where("idCarteira", isEqualTo: carteiraId)
-          .get(await CfSettrings.getOptions());
+          .get(await CfSettrings.getOptions(onlyCache: onlyCache));
       return List.generate(snapshot.docs.length, (i) {
         return AlocacaoModel.fromMap(snapshot.docs[i].data());
       });
