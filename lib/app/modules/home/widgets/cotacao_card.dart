@@ -74,6 +74,8 @@ class CotacaoCard extends StatelessWidget {
                 ],
               ),
               VariacaoPercentualWidget(
+                withIcon: true,
+                withSinal: false,
                 value: variacao,
               ),
             ],
@@ -104,9 +106,13 @@ class CotacaoCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               VariacaoPercentualWidget(
+                withIcon: true,
+                withSinal: false,
                 value: variacaoTotal,
               ),
               VariacaoPercentualWidget(
+                withIcon: true,
+                withSinal: false,
                 value: variacaoIndice,
               ),
             ],

@@ -1,6 +1,7 @@
 import 'package:alloc/app/modules/carteira/widgets/alocacoes_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/ativos_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/custom_button_widget.dart';
+import 'package:alloc/app/modules/carteira/widgets/money_text_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/primeira_inclusao_widget.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
@@ -235,10 +236,8 @@ class _CarteiraPageState
               children: [
                 Container(
                   width: 180,
-                  child: Text(
-                    GeralUtil.doubleToMoney(
-                        controller.carteira.rendimentoTotal),
-                    style: TextStyle(fontSize: 16),
+                  child: MoneyTextWidget(
+                    value: controller.carteira.rendimentoTotal,
                   ),
                 ),
                 VariacaoPercentualWidget(

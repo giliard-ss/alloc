@@ -2,13 +2,47 @@ import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:flutter/material.dart';
 
 class VariacaoPercentualWidget extends StatelessWidget {
-  final double value;
+  double value;
   final double fontSize;
-  VariacaoPercentualWidget({this.value = 0, this.fontSize = 13});
+  final bool withSinal;
+  final int casasDecimais;
+  final bool withIcon;
+
+  VariacaoPercentualWidget(
+      {this.value = 0,
+      this.fontSize = 13,
+      this.withSinal = true,
+      this.casasDecimais = 2,
+      this.withIcon = false}) {
+    value = GeralUtil.limitaCasasDecimais(value, casasDecimais: casasDecimais);
+  }
+
+  String getSinal() {
+    if (!withSinal) return "";
+
+    if (value > 0) return "+";
+    if (value < 0) return "-";
+    return "";
+  }
+
+  Widget getIcon() {
+    if (!withIcon || value == 0) return Container();
+
+    Color color = value > 0 ? Colors.green : Colors.red;
+    if (value > 0)
+      return Icon(
+        Icons.arrow_drop_up_outlined,
+        color: color,
+      );
+    return Icon(
+      Icons.arrow_drop_down,
+      color: color,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    String sinal = value > 0 ? "+" : "";
+    String sinal = getSinal();
     Color color = Colors.grey;
 
     if (value < 0)
@@ -28,12 +62,15 @@ class VariacaoPercentualWidget extends StatelessWidget {
 
     text = sinal + text + "%";
 
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: fontSize,
-        color: color,
-      ),
+    return Row(
+      children: [
+        Text(text,
+            style: TextStyle(
+              fontSize: fontSize,
+              color: color,
+            )),
+        getIcon(),
+      ],
     );
   }
 }

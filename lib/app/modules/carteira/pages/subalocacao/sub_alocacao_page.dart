@@ -2,6 +2,7 @@ import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/pages/subalocacao/sub_alocacao_controller.dart';
 import 'package:alloc/app/modules/carteira/widgets/alocacoes_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/ativos_widget.dart';
+import 'package:alloc/app/modules/carteira/widgets/money_text_widget.dart';
 import 'package:alloc/app/modules/carteira/widgets/primeira_inclusao_widget.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
@@ -9,6 +10,7 @@ import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
+import 'package:alloc/app/shared/widgets/variacao_percentual_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -199,19 +201,36 @@ class _SubAlocacaoPageState
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("TOTAL ATUALIZADO"),
+            Text("VALOR APLICADO ATUALIZADO"),
             Text(
               GeralUtil.doubleToMoney(alocacaoAtual.totalAportadoAtual),
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
-            Text(
-              (alocacaoAtual.rendimento > 0 ? '+' : '') +
-                  alocacaoAtual.rendimentoPercentString +
-                  "%",
-              style: TextStyle(
-                color: alocacaoAtual.rendimento < 0 ? Colors.red : Colors.green,
-                fontSize: 16,
-              ),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              children: [
+                Container(
+                  width: 180,
+                  child: Text("Rendimento Total"),
+                ),
+                Text("Variação Total")
+              ],
+            ),
+            SizedBox(
+              height: 5,
+            ),
+            Row(
+              children: [
+                Container(
+                  width: 180,
+                  child: MoneyTextWidget(value: alocacaoAtual.rendimento),
+                ),
+                VariacaoPercentualWidget(
+                  value: alocacaoAtual.rendimentoPercent,
+                )
+              ],
             )
           ],
         );

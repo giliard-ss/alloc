@@ -115,6 +115,8 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
                   ),
                 ),
                 VariacaoPercentualWidget(
+                  withIcon: true,
+                  withSinal: false,
                   value: variacao[1],
                   fontSize: 16,
                 )
@@ -242,6 +244,8 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
                 ),
                 style: TextStyle(fontSize: 15, color: Colors.black)),
             VariacaoPercentualWidget(
+              withSinal: false,
+              withIcon: true,
               value: controller.getVariacaoCarteira(carteira.id),
             )
           ],

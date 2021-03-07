@@ -1,5 +1,6 @@
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
+import 'package:alloc/app/shared/widgets/variacao_percentual_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -39,6 +40,9 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(
+            height: 20,
+          ),
           Container(
             child: Observer(
               builder: (_) {
@@ -49,31 +53,44 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
                   itemBuilder: (context, index) {
                     AtivoDTO ativo = controller.ativos[index];
 
-                    return ListTile(
-                      dense: true,
-                      leading:
-                          Text(ativo.papel, style: TextStyle(fontSize: 13)),
-                      title: Center(
-                        child: Text(
-                          (ativo.cotacaoModel.variacaoDouble > 0 ? "+" : "") +
-                              ativo.cotacaoModel.variacaoDouble.toString() +
-                              "%",
-                          style: TextStyle(
-                              color: ativo.cotacaoModel.variacaoDouble > 0
-                                  ? Colors.green
-                                  : Colors.red),
-                        ),
-                      ),
-                      trailing: Text(
-                        GeralUtil.doubleToMoney(ativo.cotacaoModel.ultimo,
-                            leftSymbol: ""),
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    );
+                    return itemCotacao(
+                        ativo.papel,
+                        ativo.cotacaoModel.ultimo.toDouble(),
+                        ativo.cotacaoModel.variacaoDouble);
                   },
                 );
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget itemCotacao(String papel, double ultimo, double variacao) {
+    return Container(
+      padding: EdgeInsets.all(7),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(papel, style: TextStyle(fontSize: 13)),
+                  Text(
+                    GeralUtil.doubleToMoney(ultimo, leftSymbol: ""),
+                    style: TextStyle(fontSize: 12),
+                  )
+                ],
+              ),
+              VariacaoPercentualWidget(
+                withIcon: true,
+                withSinal: false,
+                value: variacao,
+              ),
+            ],
           ),
         ],
       ),
