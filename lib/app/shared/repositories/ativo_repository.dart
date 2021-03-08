@@ -1,14 +1,15 @@
 import 'package:alloc/app/shared/config/cf_settings.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
+import 'package:alloc/app/shared/utils/connection_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class IAtivoRepository {
   Future<List<AtivoModel>> findAtivos(String idUsuario, {onlyCache});
   Future<List<AtivoModel>> findByCarteira(String carteiraId, {onlyCache});
 
-  AtivoModel saveBatch(WriteBatch batch, AtivoModel ativoModel);
-  void deleteBatch(WriteBatch batch, AtivoModel ativoModel);
+  Future<AtivoModel> saveTransaction(Transaction tr, AtivoModel ativoModel);
+  Future<void> deleteTransaction(Transaction tr, AtivoModel ativoModel);
 }
 
 class AtivoRepository implements IAtivoRepository {
@@ -52,7 +53,9 @@ class AtivoRepository implements IAtivoRepository {
   }
 
   @override
-  AtivoModel saveBatch(WriteBatch batch, AtivoModel ativoModel) {
+  Future<AtivoModel> saveTransaction(
+      Transaction tr, AtivoModel ativoModel) async {
+    await ConnectionUtil.checkConnection();
     try {
       DocumentReference ref;
       if (ativoModel.id == null) {
@@ -62,7 +65,7 @@ class AtivoRepository implements IAtivoRepository {
         ref = _db.collection(_table).doc(ativoModel.id);
       }
 
-      batch.set(ref, ativoModel.toMap());
+      tr.set(ref, ativoModel.toMap());
       return ativoModel;
     } catch (e) {
       throw ApplicationException(
@@ -72,10 +75,11 @@ class AtivoRepository implements IAtivoRepository {
   }
 
   @override
-  void deleteBatch(WriteBatch batch, AtivoModel ativoModel) {
+  Future<void> deleteTransaction(Transaction tr, AtivoModel ativoModel) async {
+    await ConnectionUtil.checkConnection();
     try {
       DocumentReference ref = _db.collection(_table).doc(ativoModel.id);
-      batch.delete(ref);
+      tr.delete(ref);
     } catch (e) {
       throw ApplicationException(
           'Falha ao deletar ativos do usuario ${ativoModel.idUsuario} ' +

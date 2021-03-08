@@ -8,14 +8,14 @@ abstract class IAlocacaoService {
   Future<List<AlocacaoModel>> getAllAlocacoes(String usuarioId,
       {bool onlyCache});
   Future<void> update(AlocacaoModel alocacao);
-  void updateBatch(WriteBatch batch, AlocacaoModel alocacao);
-  void save(List<AlocacaoModel> alocacoes, bool autoAlocacao);
+  Future<void> updateTransaction(Transaction tr, AlocacaoModel alocacao);
+  Future<void> save(List<AlocacaoModel> alocacoes, bool autoAlocacao);
 
-  void saveBatch(
-      WriteBatch batch, List<AlocacaoModel> alocacoes, bool autoAlocacao);
+  Future<void> saveTransaction(
+      Transaction tr, List<AlocacaoModel> alocacoes, bool autoAlocacao);
 
-  void delete(String idAlocacaoDeletar, List<AlocacaoModel> alocacoesUpdate,
-      bool autoAlocacao);
+  Future<void> delete(String idAlocacaoDeletar,
+      List<AlocacaoModel> alocacoesUpdate, bool autoAlocacao);
 }
 
 class AlocacaoService implements IAlocacaoService {
@@ -25,15 +25,15 @@ class AlocacaoService implements IAlocacaoService {
   AlocacaoService({@required this.alocacaoRepository});
 
   @override
-  void save(List<AlocacaoModel> alocacoes, bool autoAlocacao) {
-    WriteBatch batch = _db.batch();
-    saveBatch(batch, alocacoes, autoAlocacao);
-    batch.commit();
+  Future<void> save(List<AlocacaoModel> alocacoes, bool autoAlocacao) async {
+    return _db.runTransaction((tr) async {
+      await saveTransaction(tr, alocacoes, autoAlocacao);
+    });
   }
 
   @override
-  void saveBatch(
-      WriteBatch batch, List<AlocacaoModel> alocacoes, bool autoAlocacao) {
+  Future<void> saveTransaction(
+      Transaction tr, List<AlocacaoModel> alocacoes, bool autoAlocacao) async {
     if (autoAlocacao) {
       double media = GeralUtil.limitaCasasDecimais(
           ((100 / alocacoes.length) / 100),
@@ -45,13 +45,13 @@ class AlocacaoService implements IAlocacaoService {
     }
 
     for (AlocacaoModel aloc in alocacoes) {
-      alocacaoRepository.saveBatch(batch, aloc);
+      await alocacaoRepository.saveTransaction(tr, aloc);
     }
   }
 
   @override
-  void delete(String idAlocacaoDeletar, List<AlocacaoModel> alocacoesUpdate,
-      bool autoAlocacao) {
+  Future<void> delete(String idAlocacaoDeletar,
+      List<AlocacaoModel> alocacoesUpdate, bool autoAlocacao) async {
     if (autoAlocacao) {
       double media = GeralUtil.limitaCasasDecimais(
           ((100 / alocacoesUpdate.length) / 100),
@@ -59,23 +59,22 @@ class AlocacaoService implements IAlocacaoService {
       alocacoesUpdate.forEach((a) => a.alocacao = media);
     }
 
-    WriteBatch batch = _db.batch();
-
-    alocacaoRepository.deleteBatch(batch, idAlocacaoDeletar);
-    for (AlocacaoModel aloc in alocacoesUpdate) {
-      alocacaoRepository.saveBatch(batch, aloc);
-    }
-    batch.commit();
+    return _db.runTransaction((tr) async {
+      await alocacaoRepository.deleteTransaction(tr, idAlocacaoDeletar);
+      for (AlocacaoModel aloc in alocacoesUpdate) {
+        await alocacaoRepository.saveTransaction(tr, aloc);
+      }
+    });
   }
 
   @override
-  Future update(AlocacaoModel alocacao) async {
+  Future<void> update(AlocacaoModel alocacao) {
     return alocacaoRepository.update(alocacao);
   }
 
   @override
-  void updateBatch(WriteBatch batch, AlocacaoModel alocacao) {
-    alocacaoRepository.updateBatch(batch, alocacao);
+  Future<void> updateTransaction(Transaction tr, AlocacaoModel alocacao) {
+    return alocacaoRepository.updateTransaction(tr, alocacao);
   }
 
   @override

@@ -37,6 +37,12 @@ abstract class _AtivoControllerBase with Store {
         error = "Papel não encontrado.";
         return false;
       }
+
+      if (preco == 0 || preco == null) {
+        error = "Informe a cotação!";
+        return false;
+      }
+
       AtivoModel ativo = AtivoModel();
       ativo.idCarteira = _carteiraController.carteira.id;
       ativo.idUsuario = AppCore.usuario.id;
@@ -55,19 +61,20 @@ abstract class _AtivoControllerBase with Store {
       dtos.forEach((e) => ativos.add(AtivoModel.fromMap(e.toMap())));
 
       ativos.add(ativo);
-      _ativoService.save(
+      await _ativoService.save(
           ativos,
           _alocacaoAtual == null
               ? _carteiraController.carteira.autoAlocacao
               : _alocacaoAtual.autoAlocacao);
       await AppCore.notifyAddDelAtivo();
       return true;
+    } on ApplicationException catch (e) {
+      error = e.toString();
     } catch (e) {
-      error = "Falha ao finalizar compra! " +
-          (e is ApplicationException ? e.toString() : "");
+      error = "Falha ao finalizar compra!";
       LoggerUtil.error(e);
-      return false;
     }
+    return false;
   }
 
   String getTipo(String papel) {

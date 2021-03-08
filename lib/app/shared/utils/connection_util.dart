@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/utils/exception_util.dart';
 import 'package:connectivity/connectivity.dart';
 
@@ -9,5 +10,10 @@ class ConnectionUtil {
     } catch (e) {
       ExceptionUtil.throwe(e, "Falha ao verificar conectividade");
     }
+  }
+
+  static Future<void> checkConnection() async {
+    bool online = await isOnline();
+    if (!online) throw ApplicationException("Falha de conexão com a internet!");
   }
 }

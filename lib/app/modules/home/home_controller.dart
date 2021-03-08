@@ -2,6 +2,7 @@ import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
+import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
@@ -138,11 +139,13 @@ abstract class _HomeControllerBase with Store {
       await _carteiraService.create(descricao);
       await AppCore.notifyAddDelCarteira();
       return true;
+    } on ApplicationException catch (e) {
+      error = e.toString();
     } on Exception catch (e) {
       LoggerUtil.error(e);
       error = "Falha ao salvar nova carteira.";
-      return false;
     }
+    return false;
   }
 
   void _startCarteirasReaction() {

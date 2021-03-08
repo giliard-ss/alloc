@@ -1,6 +1,7 @@
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
@@ -42,11 +43,13 @@ abstract class _SubAlocacaoControllerBase with Store {
       await _alocacaoService.save(alocs, alocacaoAtual.autoAlocacao);
       await AppCore.notifyAddDelAlocacao();
       return true;
+    } on ApplicationException catch (e) {
+      novaAlocacaoError = e.toString();
     } on Exception catch (e) {
       LoggerUtil.error(e);
       novaAlocacaoError = "Falha ao salvar nova alocação.";
-      return false;
     }
+    return false;
   }
 
   Future<String> excluir(
@@ -60,10 +63,12 @@ abstract class _SubAlocacaoControllerBase with Store {
       await AppCore.notifyAddDelAtivo();
 
       return null;
+    } on ApplicationException catch (e) {
+      return e.toString();
     } on Exception catch (e) {
       LoggerUtil.error(e);
-      return "Falha ao exlcuir ativo!";
     }
+    return "Falha ao exlcuir ativo!";
   }
 
   Future<String> excluirAlocacao(
@@ -79,9 +84,11 @@ abstract class _SubAlocacaoControllerBase with Store {
           alocacaoExcluir.id, alocs, alocacaoAtual.autoAlocacao);
       await AppCore.notifyAddDelAlocacao();
       return null;
+    } on ApplicationException catch (e) {
+      return e.toString();
     } on Exception catch (e) {
       LoggerUtil.error(e);
-      return "Falha ao exlcuir alocação!";
     }
+    return "Falha ao exlcuir alocação!";
   }
 }

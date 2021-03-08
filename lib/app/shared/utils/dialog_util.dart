@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class DialogUtil {
   static void showMessageDialog(BuildContext context, String message,
-      {String title = "Atenção"}) async {
+      {String title = "Atenção", Function fncFechar}) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -14,6 +14,7 @@ class DialogUtil {
             new FlatButton(
               child: new Text("Fechar"),
               onPressed: () {
+                if (fncFechar != null) fncFechar();
                 Navigator.of(context).pop();
               },
             ),

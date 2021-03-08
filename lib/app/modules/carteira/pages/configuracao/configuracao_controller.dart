@@ -1,6 +1,7 @@
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
+import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
@@ -135,44 +136,46 @@ abstract class _ConfiguracaoControllerBase with Store {
       bool notificarUpdateCarteira = false;
       bool notificarUpdateAlocacao = false;
       bool notificarUpdateAtivos = false;
-      WriteBatch batch = _db.batch();
-      notificarUpdateCarteira = _atualizaCarteiraOuAlocacao(batch);
-      //se nao atualizar a carteira, entao atualiza a alocacao
-      notificarUpdateAlocacao = !notificarUpdateCarteira;
 
-      if (alocacoes.isNotEmpty) {
-        _alocacaoService.saveBatch(batch, alocacoes, autoAlocacao);
-        await AppCore.notifyUpdateAlocacao();
-        notificarUpdateAlocacao = true;
-      } else if (ativos.isNotEmpty) {
-        _ativoService.saveBatch(batch, ativos, autoAlocacao);
-        notificarUpdateAtivos = true;
-      }
+      await _db.runTransaction((tr) async {
+        notificarUpdateCarteira = await _atualizaCarteiraOuAlocacao(tr);
+        //se nao atualizar a carteira, entao atualiza a alocacao
+        notificarUpdateAlocacao = !notificarUpdateCarteira;
 
-      batch.commit();
+        if (alocacoes.isNotEmpty) {
+          await _alocacaoService.saveTransaction(tr, alocacoes, autoAlocacao);
+          //await AppCore.notifyUpdateAlocacao();
+          notificarUpdateAlocacao = true;
+        } else if (ativos.isNotEmpty) {
+          await _ativoService.saveTransaction(tr, ativos, autoAlocacao);
+          notificarUpdateAtivos = true;
+        }
+      });
 
       if (notificarUpdateAtivos) await AppCore.notifyUpdateAtivo();
       if (notificarUpdateAlocacao) await AppCore.notifyUpdateAlocacao();
       if (notificarUpdateCarteira) await AppCore.notifyUpdateCarteira();
 
       return null;
+    } on ApplicationException catch (e) {
+      return e.toString();
     } catch (e) {
       LoggerUtil.error(e);
       return "Falha ao salvar!";
     }
   }
 
-  bool _atualizaCarteiraOuAlocacao(WriteBatch batch) {
+  Future<bool> _atualizaCarteiraOuAlocacao(Transaction tr) async {
     if (!StringUtil.isEmpty(superiorId)) {
       AlocacaoDTO aloc = AppCore.getAlocacaoById(superiorId);
       aloc.autoAlocacao = autoAlocacao;
-      _alocacaoService.updateBatch(batch, aloc);
+      await _alocacaoService.updateTransaction(tr, aloc);
       return false;
     } else {
       CarteiraModel carteira =
           CarteiraModel.fromMap(_carteiraController.carteira.toMap());
       carteira.autoAlocacao = autoAlocacao;
-      _carteiraService.updateBatch(batch, carteira);
+      await _carteiraService.updateTransaction(tr, carteira);
       return true;
     }
   }

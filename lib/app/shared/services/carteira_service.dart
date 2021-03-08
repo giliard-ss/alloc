@@ -11,8 +11,8 @@ import 'package:flutter/material.dart';
 abstract class ICarteiraService {
   Future<List<CarteiraModel>> getCarteiras(String usuarioId, {bool onlyCache});
   Future<void> create(String descricao);
-  void update(CarteiraModel carteira);
-  void updateBatch(WriteBatch batch, CarteiraModel carteira);
+  Future<void> update(CarteiraModel carteira);
+  Future<void> updateTransaction(Transaction tr, CarteiraModel carteira);
   Future<void> delete(String idCarteira);
 }
 
@@ -33,13 +33,13 @@ class CarteiraService implements ICarteiraService {
   }
 
   @override
-  Future<void> create(String descricao) async {
-    await carteiraRepository.create(AppCore.usuario.id, descricao);
+  Future<void> create(String descricao) {
+    return carteiraRepository.create(AppCore.usuario.id, descricao);
   }
 
   @override
-  void update(CarteiraModel carteira) {
-    carteiraRepository.update(carteira);
+  Future<void> update(CarteiraModel carteira) {
+    return carteiraRepository.update(carteira);
   }
 
   @override
@@ -48,22 +48,21 @@ class CarteiraService implements ICarteiraService {
     List<AlocacaoModel> alocacoes =
         await alocacaoRepository.findByCarteira(idCarteira);
 
-    WriteBatch batch = _db.batch();
+    return _db.runTransaction((tr) async {
+      for (AtivoModel a in ativos) {
+        ativoRepository.deleteTransaction(tr, a);
+      }
 
-    for (AtivoModel a in ativos) {
-      ativoRepository.deleteBatch(batch, a);
-    }
+      for (AlocacaoModel a in alocacoes) {
+        alocacaoRepository.deleteTransaction(tr, a.id);
+      }
 
-    for (AlocacaoModel a in alocacoes) {
-      alocacaoRepository.deleteBatch(batch, a.id);
-    }
-
-    carteiraRepository.deleteBatch(batch, idCarteira);
-    batch.commit();
+      carteiraRepository.deleteTransaction(tr, idCarteira);
+    });
   }
 
   @override
-  void updateBatch(WriteBatch batch, CarteiraModel carteira) {
-    carteiraRepository.updateBatch(batch, carteira);
+  Future<void> updateTransaction(Transaction tr, CarteiraModel carteira) {
+    return carteiraRepository.updateTransaction(tr, carteira);
   }
 }

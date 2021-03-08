@@ -48,10 +48,10 @@ class AppCore {
     _startReactionCotacoes();
   }
 
-  static Future<void> _loadAlocacoes() async {
+  static Future<void> _loadAlocacoes({bool onlyCache = true}) async {
     List<AlocacaoDTO> result = [];
-    List<AlocacaoModel> list =
-        await _alocacaoService.getAllAlocacoes(_usuario.id);
+    List<AlocacaoModel> list = await _alocacaoService
+        .getAllAlocacoes(_usuario.id, onlyCache: onlyCache);
     list.forEach((a) => result.add(AlocacaoDTO(a)));
     runInAction(() {
       _alocacoesDTO.value = result;
@@ -104,10 +104,10 @@ class AppCore {
     return result;
   }
 
-  static Future<void> _loadCarteiras() async {
+  static Future<void> _loadCarteiras({bool onlyCache = true}) async {
     await runInAction(() async {
-      List<CarteiraModel> carteiras =
-          await _carteiraService.getCarteiras(_usuario.id);
+      List<CarteiraModel> carteiras = await _carteiraService
+          .getCarteiras(_usuario.id, onlyCache: onlyCache);
       List<CarteiraDTO> result = [];
       carteiras.forEach((e) => result.add(CarteiraDTO(e)));
       _carteirasDTO.value = result;
@@ -123,6 +123,7 @@ class AppCore {
   static CotacaoModel getCotacao(String id) {
     for (CotacaoModel cm in _cotacoes.value) {
       if (cm.id == id) {
+        cm.variacao = cm.variacao == null ? 0.0 : cm.variacao;
         return cm;
       }
     }
@@ -143,12 +144,12 @@ class AppCore {
   }
 
   static Future<void> notifyAddDelCarteira() async {
-    await _loadCarteiras();
+    await _loadCarteiras(onlyCache: false);
     _refreshCarteiraDTO();
   }
 
   static Future<void> notifyAddDelAtivo() async {
-    await _loadAtivos();
+    await _loadAtivos(onlyCache: false);
     //await _loadCotacoes();
     _refreshAtivosDTO();
     _refreshAlocacoesDTO();
@@ -156,20 +157,20 @@ class AppCore {
   }
 
   static Future<void> notifyAddDelAlocacao() async {
-    await _loadAlocacoes();
+    await _loadAlocacoes(onlyCache: false);
     _refreshAlocacoesDTO();
     _refreshCarteiraDTO();
   }
 
   static Future<void> notifyUpdateAtivo() async {
-    await _loadAtivos();
+    await _loadAtivos(onlyCache: false);
     _refreshAtivosDTO();
     _refreshAlocacoesDTO();
     _refreshCarteiraDTO();
   }
 
   static Future<void> notifyUpdateCarteira() async {
-    await _loadCarteiras();
+    await _loadCarteiras(onlyCache: false);
     _refreshAlocacoesDTO();
     _refreshCarteiraDTO();
   }
@@ -177,7 +178,7 @@ class AppCore {
   static Future<void> notifyUpdateAlocacao() async {
     //await _loadAtivos();
     //_refreshAtivosDTO();
-    await _loadAlocacoes();
+    await _loadAlocacoes(onlyCache: false);
     _refreshAlocacoesDTO();
     _refreshCarteiraDTO();
   }
@@ -244,10 +245,13 @@ class AppCore {
     return reaction((_) => _reactionRefreshCarteira.value, func);
   }
 
-  static Future<void> _loadAtivos() async {
+  static Future<void> _loadAtivos({bool onlyCache = true}) async {
     List<AtivoDTO> result = [];
-    List<AtivoModel> ativos = await _ativoService.getAtivos(_usuario.id);
-    ativos.forEach((e) => result.add(AtivoDTO(e, getCotacao(e.id))));
+    List<AtivoModel> ativos =
+        await _ativoService.getAtivos(_usuario.id, onlyCache: onlyCache);
+    ativos.forEach((e) {
+      result.add(AtivoDTO(e, getCotacao(e.papel)));
+    });
 
     runInAction(() {
       _ativosDTO.value = result;

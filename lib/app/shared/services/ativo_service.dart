@@ -8,9 +8,10 @@ import 'package:flutter/material.dart';
 
 abstract class IAtivoService {
   Future<List<AtivoModel>> getAtivos(String usuarioId, {bool onlyCache});
-  void save(List<AtivoModel> ativos, bool autoAlocacao);
-  void saveBatch(WriteBatch batch, List<AtivoModel> ativos, bool autoAlocacao);
-  void delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar,
+  Future<void> save(List<AtivoModel> ativos, bool autoAlocacao);
+  Future<void> saveTransaction(
+      Transaction tr, List<AtivoModel> ativos, bool autoAlocacao);
+  Future<void> delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar,
       bool autoAlocacao);
 }
 
@@ -27,14 +28,15 @@ class AtivoService implements IAtivoService {
   }
 
   @override
-  void save(List<AtivoModel> ativos, bool autoAlocacao) {
-    WriteBatch batch = _db.batch();
-    saveBatch(batch, ativos, autoAlocacao);
-    batch.commit();
+  Future<void> save(List<AtivoModel> ativos, bool autoAlocacao) {
+    return _db.runTransaction((tr) {
+      return saveTransaction(tr, ativos, autoAlocacao);
+    });
   }
 
   @override
-  void saveBatch(WriteBatch batch, List<AtivoModel> ativos, bool autoAlocacao) {
+  Future<void> saveTransaction(
+      Transaction tr, List<AtivoModel> ativos, bool autoAlocacao) async {
     try {
       List<AtivoModel> list = ativos;
       bool isAdicao = ativos.where((a) => a.id == null).isNotEmpty;
@@ -52,8 +54,10 @@ class AtivoService implements IAtivoService {
       }
 
       for (AtivoModel ativo in list) {
-        ativoRepository.saveBatch(batch, ativo);
+        await ativoRepository.saveTransaction(tr, ativo);
       }
+    } on ApplicationException catch (e) {
+      throw e;
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao cadastrar ativos do usuario ${ativos[0].idUsuario} ' +
@@ -119,7 +123,7 @@ class AtivoService implements IAtivoService {
   }
 
   @override
-  void delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar,
+  Future<void> delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar,
       bool autoAlocacao) {
     if (autoAlocacao) {
       double media = GeralUtil.limitaCasasDecimais(
@@ -127,12 +131,12 @@ class AtivoService implements IAtivoService {
           casasDecimais: 3);
       ativosAtualizar.forEach((a) => a.alocacao = media);
     }
-    WriteBatch batch = _db.batch();
 
-    ativoRepository.deleteBatch(batch, ativoDeletar);
-    for (AtivoModel ativo in ativosAtualizar) {
-      ativoRepository.saveBatch(batch, ativo);
-    }
-    batch.commit();
+    return _db.runTransaction((tr) async {
+      await ativoRepository.deleteTransaction(tr, ativoDeletar);
+      for (AtivoModel ativo in ativosAtualizar) {
+        await ativoRepository.saveTransaction(tr, ativo);
+      }
+    });
   }
 }

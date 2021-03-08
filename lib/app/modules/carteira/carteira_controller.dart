@@ -2,6 +2,7 @@ import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
+import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
@@ -64,11 +65,13 @@ abstract class _CarteiraControllerBase with Store {
       await _alocacaoService.save(alocs, _carteira.autoAlocacao);
       await AppCore.notifyAddDelAlocacao();
       return true;
+    } on ApplicationException catch (e) {
+      errorDialog = e.toString();
     } on Exception catch (e) {
       LoggerUtil.error(e);
       errorDialog = "Falha ao salvar nova alocação.";
-      return false;
     }
+    return false;
   }
 
   void refreshAlocacoes() {
@@ -87,11 +90,13 @@ abstract class _CarteiraControllerBase with Store {
       await _carteiraService.update(updated);
       await AppCore.notifyUpdateCarteira();
       return true;
+    } on ApplicationException catch (e) {
+      errorDialog = e.toString();
     } on Exception catch (e) {
       LoggerUtil.error(e);
       errorDialog = "Falha ao salvar nova alocação.";
-      return false;
     }
+    return false;
   }
 
   Future<bool> salvarSaque() async {
@@ -106,11 +111,13 @@ abstract class _CarteiraControllerBase with Store {
       await _carteiraService.update(updated);
       await AppCore.notifyUpdateCarteira();
       return true;
+    } on ApplicationException catch (e) {
+      errorDialog = e.toString();
     } on Exception catch (e) {
       LoggerUtil.error(e);
       errorDialog = "Falha ao salvar nova alocação.";
-      return false;
     }
+    return false;
   }
 
   Future<String> excluir(AtivoDTO ativoDTO) async {
@@ -124,6 +131,8 @@ abstract class _CarteiraControllerBase with Store {
           ativoDTO.getModel(), models, _carteira.autoAlocacao);
       await AppCore.notifyAddDelAtivo();
       return null;
+    } on ApplicationException catch (e) {
+      return e.toString();
     } on Exception catch (e) {
       LoggerUtil.error(e);
       return "Falha ao exlcuir ativo!";
@@ -135,6 +144,8 @@ abstract class _CarteiraControllerBase with Store {
       await _carteiraService.delete(_carteira.id);
       await AppCore.notifyAddDelCarteira();
       return null;
+    } on ApplicationException catch (e) {
+      return e.toString();
     } on Exception catch (e) {
       LoggerUtil.error(e);
       return "Falha ao exlcuir carteira!";
@@ -159,6 +170,8 @@ abstract class _CarteiraControllerBase with Store {
       await AppCore.notifyAddDelAlocacao();
       refreshAlocacoes();
       return null;
+    } on ApplicationException catch (e) {
+      return e.toString();
     } on Exception catch (e) {
       LoggerUtil.error(e);
       return "Falha ao exlcuir alocação!";

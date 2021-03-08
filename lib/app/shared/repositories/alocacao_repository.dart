@@ -1,16 +1,18 @@
 import 'package:alloc/app/shared/config/cf_settings.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
+import 'package:alloc/app/shared/utils/connection_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class IAlocacaoRepository {
   Future<List<AlocacaoModel>> findAlocacoes(String idUsuario, {bool onlyCache});
   Future<List<AlocacaoModel>> findByCarteira(String carteiraId,
       {bool onlyCache});
-  AlocacaoModel saveBatch(WriteBatch batch, AlocacaoModel alocacaoModel);
-  void update(AlocacaoModel alocacaoModel);
-  void updateBatch(WriteBatch batch, AlocacaoModel alocacaoModel);
-  void deleteBatch(WriteBatch batch, String idAlocacao);
+  Future<AlocacaoModel> saveTransaction(
+      Transaction tr, AlocacaoModel alocacaoModel);
+  Future<void> update(AlocacaoModel alocacaoModel);
+  Future<void> updateTransaction(Transaction tr, AlocacaoModel alocacaoModel);
+  Future<void> deleteTransaction(Transaction tr, String idAlocacao);
 }
 
 class AlocacaoRepository implements IAlocacaoRepository {
@@ -54,7 +56,9 @@ class AlocacaoRepository implements IAlocacaoRepository {
   }
 
   @override
-  AlocacaoModel saveBatch(WriteBatch batch, AlocacaoModel alocacaoModel) {
+  Future<AlocacaoModel> saveTransaction(
+      Transaction tr, AlocacaoModel alocacaoModel) async {
+    await ConnectionUtil.checkConnection();
     try {
       DocumentReference ref;
       if (alocacaoModel.id == null) {
@@ -64,7 +68,7 @@ class AlocacaoRepository implements IAlocacaoRepository {
         ref = _db.collection(_table).doc(alocacaoModel.id);
       }
 
-      batch.set(ref, alocacaoModel.toMap());
+      tr.set(ref, alocacaoModel.toMap());
       return alocacaoModel;
     } on Exception catch (e) {
       throw ApplicationException(
@@ -73,10 +77,11 @@ class AlocacaoRepository implements IAlocacaoRepository {
   }
 
   @override
-  void deleteBatch(WriteBatch batch, String idAlocacao) {
+  Future<void> deleteTransaction(Transaction tr, String idAlocacao) async {
+    await ConnectionUtil.checkConnection();
     try {
       DocumentReference ref = _db.collection(_table).doc(idAlocacao);
-      batch.delete(ref);
+      tr.delete(ref);
     } catch (e) {
       throw ApplicationException(
           'Falha ao salvar nova alocação! ' + e.toString());
@@ -84,9 +89,13 @@ class AlocacaoRepository implements IAlocacaoRepository {
   }
 
   @override
-  void update(AlocacaoModel alocacaoModel) {
+  Future<void> update(AlocacaoModel alocacaoModel) async {
+    await ConnectionUtil.checkConnection();
     try {
-      _db.collection(_table).doc(alocacaoModel.id).set(alocacaoModel.toMap());
+      return _db
+          .collection(_table)
+          .doc(alocacaoModel.id)
+          .set(alocacaoModel.toMap());
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao salvar nova alocação! ' + e.toString());
@@ -94,10 +103,12 @@ class AlocacaoRepository implements IAlocacaoRepository {
   }
 
   @override
-  void updateBatch(WriteBatch batch, AlocacaoModel alocacaoModel) {
+  Future<void> updateTransaction(
+      Transaction tr, AlocacaoModel alocacaoModel) async {
+    await ConnectionUtil.checkConnection();
     try {
       DocumentReference ref = _db.collection(_table).doc(alocacaoModel.id);
-      batch.set(ref, alocacaoModel.toMap());
+      tr.set(ref, alocacaoModel.toMap());
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao salvar nova alocação! ' + e.toString());

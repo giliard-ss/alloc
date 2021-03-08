@@ -1,14 +1,15 @@
 import 'package:alloc/app/shared/config/cf_settings.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
+import 'package:alloc/app/shared/utils/connection_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class ICarteiraRepository {
   Future<List<CarteiraModel>> findCarteiras(String idUsuario, {bool onlyCache});
   Future<CarteiraModel> create(String idUsuario, String descricao);
-  void update(CarteiraModel carteira);
-  void updateBatch(WriteBatch batch, CarteiraModel carteira);
-  void deleteBatch(WriteBatch batch, String idCarteira);
+  Future<void> update(CarteiraModel carteira);
+  Future<void> updateTransaction(Transaction tr, CarteiraModel carteira);
+  Future<void> deleteTransaction(Transaction tr, String idCarteira);
 }
 
 class CarteiraRepository implements ICarteiraRepository {
@@ -35,10 +36,11 @@ class CarteiraRepository implements ICarteiraRepository {
 
   @override
   Future<CarteiraModel> create(String idUsuario, String descricao) async {
+    await ConnectionUtil.checkConnection();
     try {
       DocumentReference ref = _db.collection(_table).doc();
       CarteiraModel carteira = CarteiraModel(ref.id, idUsuario, descricao, 0);
-      ref.set(carteira.toMap());
+      await ref.set(carteira.toMap());
       return carteira;
     } on Exception catch (e) {
       throw ApplicationException(
@@ -48,9 +50,10 @@ class CarteiraRepository implements ICarteiraRepository {
   }
 
   @override
-  void update(CarteiraModel carteira) {
+  Future<void> update(CarteiraModel carteira) async {
+    await ConnectionUtil.checkConnection();
     try {
-      _db.collection(_table).doc(carteira.id).set(carteira.toMap());
+      await _db.collection(_table).doc(carteira.id).set(carteira.toMap());
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao atualizar a carteira ${carteira.id}! ' + e.toString());
@@ -58,10 +61,11 @@ class CarteiraRepository implements ICarteiraRepository {
   }
 
   @override
-  void deleteBatch(WriteBatch batch, String idCarteira) {
+  Future<void> deleteTransaction(Transaction tr, String idCarteira) async {
+    await ConnectionUtil.checkConnection();
     try {
       DocumentReference ref = _db.collection(_table).doc(idCarteira);
-      batch.delete(ref);
+      tr.delete(ref);
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao deletar carteira $idCarteira! ' + e.toString());
@@ -69,10 +73,11 @@ class CarteiraRepository implements ICarteiraRepository {
   }
 
   @override
-  void updateBatch(WriteBatch batch, CarteiraModel carteira) {
+  Future<void> updateTransaction(Transaction tr, CarteiraModel carteira) async {
+    await ConnectionUtil.checkConnection();
     try {
       DocumentReference ref = _db.collection(_table).doc(carteira.id);
-      batch.set(ref, carteira.toMap());
+      tr.set(ref, carteira.toMap());
     } on Exception catch (e) {
       throw ApplicationException(
           'Falha ao atualizar a carteira ${carteira.id}! ' + e.toString());

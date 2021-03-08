@@ -74,7 +74,9 @@ class _ConfiguracaoPageState
         });
 
         if (msg != null) {
-          DialogUtil.showMessageDialog(context, msg);
+          DialogUtil.showMessageDialog(context, msg, fncFechar: () {
+            Modular.to.pop();
+          });
         } else {
           Modular.to.pop();
         }

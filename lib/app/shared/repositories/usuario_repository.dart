@@ -1,4 +1,5 @@
 import 'package:alloc/app/shared/models/usuario_model.dart';
+import 'package:alloc/app/shared/utils/connection_util.dart';
 import 'package:alloc/app/shared/utils/exception_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -14,15 +15,15 @@ class UsuarioRepository implements IUsuarioRepository {
   @override
   Future<void> cadastrar(
       String nome, String email, Function(UsuarioModel) fnc) async {
+    await ConnectionUtil.checkConnection();
     try {
       DocumentReference ref = _db.collection(_table).doc();
       UsuarioModel usuario = UsuarioModel(ref.id, nome, email);
 
-      WriteBatch batch = _db.batch();
-      batch.set(ref, usuario.toMap());
-      await fnc(usuario);
-      batch.commit();
-      return usuario;
+      return _db.runTransaction((tr) async {
+        tr.set(ref, usuario.toMap());
+        await fnc(usuario);
+      });
     } catch (e) {
       ExceptionUtil.throwe(
           e, "Falha ao cadastrar novo usuário!" + e.toString());
