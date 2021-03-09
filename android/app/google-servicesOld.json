@@ -14,14 +14,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "652364827855-96arrenvlsioehd7us36umbaegssk22i.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "br.gss.alloc",
-            "certificate_hash": "74dc48bc9a5ae515962ce6e3346bd04229e88081"
-          }
-        },
-        {
           "client_id": "652364827855-nomkbo9d2rjbtqepld25b0m1pdtshtp3.apps.googleusercontent.com",
           "client_type": 3
         }

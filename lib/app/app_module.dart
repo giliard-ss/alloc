@@ -1,6 +1,7 @@
 import 'package:alloc/app/modules/carteira/carteira_module.dart';
 import 'package:alloc/app/shared/repositories/alocacao_repository.dart';
 import 'package:alloc/app/shared/repositories/ativo_repository.dart';
+import 'package:alloc/app/shared/repositories/auth_repository.dart';
 import 'package:alloc/app/shared/repositories/carteira_repository.dart';
 import 'package:alloc/app/shared/repositories/usuario_repository.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
@@ -22,6 +23,7 @@ class AppModule extends MainModule {
   List<Bind> get binds => [
         $SplashController,
         $AppController,
+        Bind<IAuthRepository>((i) => AuthRepository()),
         Bind<IUsuarioRepository>((i) => UsuarioRepository()),
         Bind<ICarteiraRepository>((i) => CarteiraRepository()),
         Bind<IAtivoRepository>((i) => AtivoRepository()),
