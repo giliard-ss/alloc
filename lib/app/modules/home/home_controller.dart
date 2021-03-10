@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
@@ -5,8 +7,10 @@ import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
+import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
+import 'package:flutter/material.dart';
 
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -19,10 +23,14 @@ class HomeController = _HomeControllerBase with _$HomeController;
 abstract class _HomeControllerBase with Store {
   ICarteiraService _carteiraService = Modular.get<CarteiraService>();
   ReactionDisposer _carteirasReactDispose;
+  Timer _schedule;
   String descricao;
 
   @observable
   String error;
+
+  @observable
+  String lastUpdate;
 
   @observable
   List<CarteiraDTO> carteiras = [];
@@ -40,6 +48,7 @@ abstract class _HomeControllerBase with Store {
       loadAcoes();
       loadFiis();
       _startCarteirasReaction();
+      //_runSchedule();
     } catch (e) {
       LoggerUtil.error(e);
     }
@@ -148,6 +157,14 @@ abstract class _HomeControllerBase with Store {
     return false;
   }
 
+  // void _runSchedule() {
+  //   if (_schedule != null) _schedule.cancel();
+
+  //   _schedule = Timer.periodic(new Duration(minutes: 1), (timer) {
+  //     refreshLastUpdate();
+  //   });
+  // }
+
   void _startCarteirasReaction() {
     if (_carteirasReactDispose != null) {
       _carteirasReactDispose();
@@ -157,8 +174,28 @@ abstract class _HomeControllerBase with Store {
       this.carteiras = AppCore.carteiras;
       loadAcoes();
       loadFiis();
+      //refreshLastUpdate();
     });
   }
+
+  // Future<void> refreshLastUpdate() async {
+  //   lastUpdate = await getCotacoesLastUpdate();
+  // }
+
+  // Future<String> getCotacoesLastUpdate() async {
+  //   DateTime last = await AppCore.lastUpdateCotacoes;
+  //   if (last == null || !DateUtil.equals(last, DateTime.now())) return "";
+
+  //   Duration duration = DateUtil.diferenca(last, DateTime.now()).abs();
+  //   if (duration.inDays > 0)
+  //     return "(há ${duration.inDays} ${duration.inDays > 1 ? 'dias' : 'dia'})";
+  //   if (duration.inHours > 0)
+  //     return "(há ${duration.inHours} ${duration.inHours > 1 ? 'horas' : 'hora'})";
+  //   if (duration.inMinutes > 0)
+  //     return "(há ${duration.inMinutes} ${duration.inMinutes > 1 ? 'minutos' : 'minuto'})";
+
+  //   return "(agora)";
+  // }
 
   @action
   Future refresh() async {

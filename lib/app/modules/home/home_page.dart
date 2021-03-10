@@ -7,6 +7,7 @@ import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
+import 'package:alloc/app/shared/widgets/image_base64_widget.dart';
 import 'package:alloc/app/shared/widgets/variacao_percentual_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -30,28 +31,69 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Alloc"),
-        actions: [
-          PopupMenuButton(
-            icon: Icon(Icons.menu),
-            itemBuilder: (BuildContext bc) => [],
-            onSelected: (e) {},
-          )
-        ],
+        appBar: AppBar(
+          elevation: 1,
+          title: Text("Alloc"),
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: drawerHeader(),
+              ),
+              ListTile(
+                leading: Icon(Icons.message),
+                title: Text('Messages'),
+              ),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+              ListTile(
+                leading: Icon(Icons.settings),
+                title: Text('Settings'),
+              ),
+            ],
+          ),
+        ),
+        body: Container(
+            padding: EdgeInsets.all(15),
+            child: WidgetUtil.futureBuild(controller.init, _body)));
+  }
+
+  Widget getImage() {
+    return ImageBase64Widget(
+      base64Image: AppCore.usuario.photoBase64,
+      widgetError: Icon(
+        Icons.person,
+        size: 50,
       ),
-      body: RefreshIndicator(
-          onRefresh: controller.refresh,
-          child: Container(
-              padding: EdgeInsets.all(15),
-              child: WidgetUtil.futureBuild(controller.init, _body))),
+    );
+  }
+
+  Widget drawerHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        getImage(),
+        // Icon(
+        //   Icons.person,
+        //   size: 70,
+        // ),
+        Text(AppCore.usuario.nome),
+        Text(AppCore.usuario.email)
+      ],
     );
   }
 
   _body() {
     return SingleChildScrollView(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        menu(),
+        // menu(),
         resumo(),
         getCarteiras(),
         SizedBox(
@@ -101,7 +143,11 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
             SizedBox(
               height: 10,
             ),
-            Text("Variação Hoje"),
+            Observer(
+              builder: (_) {
+                return Text("Variação " + controller.lastUpdate);
+              },
+            ),
             SizedBox(
               height: 5,
             ),
@@ -185,7 +231,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
           child: CarouselWithIndicator(
             height:
                 ((controller.maiorQuantItemsExistenteListas.toDouble()) * 50) +
-                    105,
+                    110,
             items: cotacaoAtivosCard(),
           ),
         );

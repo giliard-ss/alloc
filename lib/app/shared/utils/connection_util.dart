@@ -12,6 +12,10 @@ class ConnectionUtil {
     }
   }
 
+  static Future<bool> isOffline() async {
+    return !await isOnline();
+  }
+
   static Future<void> checkConnection() async {
     bool online = await isOnline();
     if (!online) throw ApplicationException("Falha de conexão com a internet!");

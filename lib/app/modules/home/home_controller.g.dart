@@ -50,6 +50,21 @@ mixin _$HomeController on _HomeControllerBase, Store {
     });
   }
 
+  final _$lastUpdateAtom = Atom(name: '_HomeControllerBase.lastUpdate');
+
+  @override
+  String get lastUpdate {
+    _$lastUpdateAtom.reportRead();
+    return super.lastUpdate;
+  }
+
+  @override
+  set lastUpdate(String value) {
+    _$lastUpdateAtom.reportWrite(value, super.lastUpdate, () {
+      super.lastUpdate = value;
+    });
+  }
+
   final _$carteirasAtom = Atom(name: '_HomeControllerBase.carteiras');
 
   @override
@@ -122,6 +137,7 @@ mixin _$HomeController on _HomeControllerBase, Store {
   String toString() {
     return '''
 error: ${error},
+lastUpdate: ${lastUpdate},
 carteiras: ${carteiras},
 acoes: ${acoes},
 fiis: ${fiis},

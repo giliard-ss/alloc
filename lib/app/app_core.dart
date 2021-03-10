@@ -11,6 +11,8 @@ import 'package:alloc/app/shared/models/usuario_model.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
+import 'package:alloc/app/shared/services/preference_service.dart';
+import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -308,7 +310,7 @@ class AppCore {
 
       CollectionReference reference =
           FirebaseFirestore.instance.collection(_tableCotacoes);
-      _listenerCotacoes = reference.snapshots().listen((snapshot) {
+      _listenerCotacoes = reference.snapshots().listen((snapshot) async {
         // if (snapshot.docChanges
         //     .where((e) => e.doc.id == "cotacao")
         //     .isNotEmpty) {
@@ -320,7 +322,7 @@ class AppCore {
           return CotacaoModel.fromMap(snapshot.docChanges[i].doc.data());
         });
 
-        _refreshCotacoes(cotacoesChange);
+        await _refreshCotacoes(cotacoesChange);
       });
       LoggerUtil.info("Listener de cotações iniciado.");
     } catch (ex) {
@@ -329,14 +331,31 @@ class AppCore {
     }
   }
 
-  static void _refreshCotacoes(List<CotacaoModel> cotacoesChange) {
+  static Future<List<CotacaoModel>> mergeCotacoes(
+      List<CotacaoModel> cotacoesChanged) async {
+    List<CotacaoModel> list = [];
+    //pega a cotacao atualizada e se nem todas foram atualizadas, pega a existente
+    _cotacoes.value.forEach((existente) {
+      CotacaoModel atualizada = cotacoesChanged.firstWhere(
+          (atualizada) => atualizada.id == existente.id,
+          orElse: () => null);
+
+      if (atualizada != null) {
+        list.add(atualizada);
+      } else {
+        list.add(existente);
+      }
+    });
+
+    return list;
+  }
+
+  static Future<void> _refreshCotacoes(
+      List<CotacaoModel> cotacoesChange) async {
     List<CotacaoModel> list = [];
 
     if (_cotacoes.value.isNotEmpty) {
-      _cotacoes.value.forEach((e) {
-        list.add(
-            cotacoesChange.firstWhere((f) => f.id == e.id, orElse: () => e));
-      });
+      list = await mergeCotacoes(cotacoesChange);
     } else {
       list = cotacoesChange;
     }

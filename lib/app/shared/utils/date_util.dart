@@ -55,4 +55,14 @@ class DateUtil {
     DateFormat formatter = DateFormat(mask);
     return formatter.parse(date);
   }
+
+  static bool equals(DateTime d1, DateTime d2, {String mask = "dd/MM/yyyy"}) {
+    String ds1 = dateToString(d1, mask: mask);
+    String ds2 = dateToString(d2, mask: mask);
+    return ds1 == ds2;
+  }
+
+  static Duration diferenca(DateTime d1, DateTime d2) {
+    return d1.difference(d2);
+  }
 }

@@ -6,10 +6,13 @@ import 'dart:convert';
 abstract class IPreferenceService {
   Future<void> saveUsuario(UsuarioModel usuario);
   Future<UsuarioModel> getUsuario();
+  Future<void> saveLastUpdateCotacoes(DateTime date);
+  Future<DateTime> getLastUpdateCotacoes();
 }
 
 class PreferenceService implements IPreferenceService {
   static final String _keyUsuario = "_user";
+  static final String _keyLastUpdateCotacoes = "_lastUpdateCotacoes";
 
   @override
   Future<void> saveUsuario(UsuarioModel usuario) async {
@@ -42,6 +45,23 @@ class PreferenceService implements IPreferenceService {
       return null;
     } else {
       return sf.getString(key);
+    }
+  }
+
+  @override
+  Future<void> saveLastUpdateCotacoes(DateTime date) {
+    return _setString(
+        _keyLastUpdateCotacoes, date.millisecondsSinceEpoch.toString());
+  }
+
+  @override
+  Future<DateTime> getLastUpdateCotacoes() async {
+    SharedPreferences sf = await _getInstance();
+    if (!sf.containsKey(_keyLastUpdateCotacoes)) {
+      return null;
+    } else {
+      return DateTime.fromMillisecondsSinceEpoch(
+          int.parse(sf.getString(_keyLastUpdateCotacoes)));
     }
   }
 }

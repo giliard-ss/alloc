@@ -1,14 +1,9 @@
-import 'dart:math';
-
-import 'package:alloc/app/shared/models/usuario_model.dart';
 import 'package:alloc/app/shared/repositories/auth_repository.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
 import 'package:alloc/app/shared/services/email_service.dart';
 import 'package:alloc/app/shared/services/preference_service.dart';
-import 'package:alloc/app/shared/services/usuario_service.dart';
-import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -19,7 +14,6 @@ part 'login_controller.g.dart';
 class LoginController = _LoginControllerBase with _$LoginController;
 
 abstract class _LoginControllerBase with Store {
-  IUsuarioService _usuarioService = Modular.get<UsuarioService>();
   IEmailService _emailService = Modular.get<EmailService>();
   IPreferenceService _preferenceService = Modular.get<PreferenceService>();
   IAlocacaoService _alocacaoService = Modular.get<AlocacaoService>();
