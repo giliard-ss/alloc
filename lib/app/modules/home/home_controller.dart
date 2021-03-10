@@ -10,7 +10,6 @@ import 'package:alloc/app/shared/services/carteira_service.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
-import 'package:flutter/material.dart';
 
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -23,14 +22,13 @@ class HomeController = _HomeControllerBase with _$HomeController;
 abstract class _HomeControllerBase with Store {
   ICarteiraService _carteiraService = Modular.get<CarteiraService>();
   ReactionDisposer _carteirasReactDispose;
-  Timer _schedule;
   String descricao;
-
+  Timer _schedule;
   @observable
   String error;
 
   @observable
-  String lastUpdate;
+  String lastUpdate = "";
 
   @observable
   List<CarteiraDTO> carteiras = [];
@@ -48,7 +46,7 @@ abstract class _HomeControllerBase with Store {
       loadAcoes();
       loadFiis();
       _startCarteirasReaction();
-      //_runSchedule();
+      _runSchedule();
     } catch (e) {
       LoggerUtil.error(e);
     }
@@ -63,8 +61,8 @@ abstract class _HomeControllerBase with Store {
 
   void loadAcoes() {
     List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.isAcao).toList();
-    list.sort((e1, e2) => e2.cotacaoModel.variacaoDouble
-        .compareTo(e1.cotacaoModel.variacaoDouble));
+    list.sort((e1, e2) =>
+        e2.cotacaoModel.variacaoHoje.compareTo(e1.cotacaoModel.variacaoHoje));
     if (list.length > 5) {
       list = list.sublist(0, 5);
     }
@@ -73,8 +71,8 @@ abstract class _HomeControllerBase with Store {
 
   void loadFiis() {
     List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.isFII).toList();
-    list.sort((e1, e2) => e2.cotacaoModel.variacaoDouble
-        .compareTo(e1.cotacaoModel.variacaoDouble));
+    list.sort((e1, e2) =>
+        e2.cotacaoModel.variacaoHoje.compareTo(e1.cotacaoModel.variacaoHoje));
     if (list.length > 5) {
       list = list.sublist(0, 5);
     }
@@ -93,37 +91,48 @@ abstract class _HomeControllerBase with Store {
   CotacaoModel getCotacaoIndiceByTipo(TipoAtivo tipo) {
     if (tipo.equals(TipoAtivo.ACAO)) return AppCore.getCotacao("IBOV");
     if (tipo.equals(TipoAtivo.FII)) return AppCore.getCotacao("IFIX");
-    return CotacaoModel("--", 0.0, 0.0);
+    return CotacaoModel(
+      "--",
+      0.0,
+      0.0,
+    );
   }
 
   double getVariacaoTotalAcoes() {
-    return getVariacaoTotal(
-        AppCore.allAtivos.where((e) => e.isAcao).toList())[1];
+    return getVariacaoTotal(AppCore.allAtivos.where((e) => e.isAcao).toList(),
+        onlyHoje: true)[1];
   }
 
   double getVariacaoTotalFiis() {
-    return getVariacaoTotal(
-        AppCore.allAtivos.where((e) => e.isFII).toList())[1];
+    return getVariacaoTotal(AppCore.allAtivos.where((e) => e.isFII).toList(),
+        onlyHoje: true)[1];
   }
 
   double getVariacaoCarteira(String idCarteira) {
-    return getVariacaoTotal(AppCore.allAtivos
-        .where((e) =>
-            e.idCarteira == idCarteira && e.cotacaoModel.variacao != null)
-        .toList())[1];
+    return getVariacaoTotal(
+        AppCore.allAtivos
+            .where((e) =>
+                e.idCarteira == idCarteira && e.cotacaoModel.variacao != null)
+            .toList(),
+        onlyHoje: true)[1];
   }
 
   List getVariacaoPatrimonio() {
-    return getVariacaoTotal(AppCore.allAtivos
-        .where((e) => e.cotacaoModel.variacao != null)
-        .toList());
+    return getVariacaoTotal(
+        AppCore.allAtivos
+            .where((e) => e.cotacaoModel.variacao != null)
+            .toList(),
+        onlyHoje: true);
   }
 
-  List getVariacaoTotal(List<AtivoDTO> ativos) {
+  List getVariacaoTotal(List<AtivoDTO> ativos, {bool onlyHoje = false}) {
     double totalAbertura = 0.0;
     double totalAtual = 0.0;
     ativos.forEach((e) {
-      totalAbertura += e.cotacaoModel.precoAbertura * e.qtd;
+      double precoAbertura = onlyHoje
+          ? e.cotacaoModel.precoAberturaHoje
+          : e.cotacaoModel.precoAbertura;
+      totalAbertura += precoAbertura * e.qtd;
       totalAtual += e.cotacaoModel.ultimo * e.qtd;
     });
 
@@ -157,13 +166,13 @@ abstract class _HomeControllerBase with Store {
     return false;
   }
 
-  // void _runSchedule() {
-  //   if (_schedule != null) _schedule.cancel();
+  void _runSchedule() {
+    if (_schedule != null) _schedule.cancel();
 
-  //   _schedule = Timer.periodic(new Duration(minutes: 1), (timer) {
-  //     refreshLastUpdate();
-  //   });
-  // }
+    _schedule = Timer.periodic(new Duration(minutes: 1), (timer) {
+      refreshLastUpdate();
+    });
+  }
 
   void _startCarteirasReaction() {
     if (_carteirasReactDispose != null) {
@@ -174,28 +183,36 @@ abstract class _HomeControllerBase with Store {
       this.carteiras = AppCore.carteiras;
       loadAcoes();
       loadFiis();
-      //refreshLastUpdate();
+      refreshLastUpdate();
     });
   }
 
-  // Future<void> refreshLastUpdate() async {
-  //   lastUpdate = await getCotacoesLastUpdate();
-  // }
+  void refreshLastUpdate() {
+    lastUpdate = getLastUpdateCotacoes();
+  }
 
-  // Future<String> getCotacoesLastUpdate() async {
-  //   DateTime last = await AppCore.lastUpdateCotacoes;
-  //   if (last == null || !DateUtil.equals(last, DateTime.now())) return "";
+  String getLastUpdateCotacoes() {
+    List<AtivoDTO> list =
+        AppCore.allAtivos.where((e) => e.cotacaoModel.date != null).toList();
+    list.sort((a1, a2) => a2.cotacaoModel.date.compareTo(a1.cotacaoModel.date));
 
-  //   Duration duration = DateUtil.diferenca(last, DateTime.now()).abs();
-  //   if (duration.inDays > 0)
-  //     return "(há ${duration.inDays} ${duration.inDays > 1 ? 'dias' : 'dia'})";
-  //   if (duration.inHours > 0)
-  //     return "(há ${duration.inHours} ${duration.inHours > 1 ? 'horas' : 'hora'})";
-  //   if (duration.inMinutes > 0)
-  //     return "(há ${duration.inMinutes} ${duration.inMinutes > 1 ? 'minutos' : 'minuto'})";
+    if (list.isEmpty) return "";
 
-  //   return "(agora)";
-  // }
+    AtivoDTO ativo = list.first;
+    if (ativo.cotacaoModel.date == null ||
+        !DateUtil.equals(ativo.cotacaoModel.date, DateTime.now())) return "";
+
+    Duration duration =
+        DateUtil.diferenca(ativo.cotacaoModel.date, DateTime.now()).abs();
+    if (duration.inDays > 0)
+      return "(há ${duration.inDays} ${duration.inDays > 1 ? 'dias' : 'dia'})";
+    if (duration.inHours > 0)
+      return "(há ${duration.inHours} ${duration.inHours > 1 ? 'horas' : 'hora'})";
+    if (duration.inMinutes > 0)
+      return "(há ${duration.inMinutes} ${duration.inMinutes > 1 ? 'minutos' : 'minuto'})";
+
+    return "(agora)";
+  }
 
   @action
   Future refresh() async {

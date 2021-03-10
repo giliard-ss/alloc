@@ -25,7 +25,7 @@ abstract class _CotacaoControllerBase with Store {
 
   void loadAtivos(String tipo) {
     ativos = AppCore.allAtivos.where((e) => e.tipo == tipo).toList();
-    ativos.sort((e1, e2) => e2.cotacaoModel.variacaoDouble
-        .compareTo(e1.cotacaoModel.variacaoDouble));
+    ativos.sort((e1, e2) =>
+        e2.cotacaoModel.variacaoHoje.compareTo(e1.cotacaoModel.variacaoHoje));
   }
 }

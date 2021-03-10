@@ -143,11 +143,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
             SizedBox(
               height: 10,
             ),
-            Observer(
-              builder: (_) {
-                return Text("Variação " + controller.lastUpdate);
-              },
-            ),
+            Text("Variação " + controller.lastUpdate),
             SizedBox(
               height: 5,
             ),

@@ -56,7 +56,7 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
                     return itemCotacao(
                         ativo.papel,
                         ativo.cotacaoModel.ultimo.toDouble(),
-                        ativo.cotacaoModel.variacaoDouble);
+                        ativo.cotacaoModel.variacaoHoje);
                   },
                 );
               },

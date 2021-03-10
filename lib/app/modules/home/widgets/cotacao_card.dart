@@ -31,8 +31,8 @@ class CotacaoCard extends StatelessWidget {
               title: title,
               withDivider: true,
             ),
-            resumoCotacao("Total", cotacaoIndice.id,
-                cotacaoIndice.variacaoDouble, variacaoTotal),
+            resumoCotacao("Total", cotacaoIndice.id, cotacaoIndice.variacaoHoje,
+                variacaoTotal),
             Divider(
               height: 10,
               color: Colors.grey,
@@ -46,7 +46,7 @@ class CotacaoCard extends StatelessWidget {
                 return itemCotacao(
                     ativo.papel,
                     ativo.cotacaoModel.ultimo.toDouble(),
-                    ativo.cotacaoModel.variacaoDouble);
+                    ativo.cotacaoModel.variacaoHoje);
               },
             )
           ],
