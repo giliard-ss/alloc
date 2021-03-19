@@ -90,7 +90,7 @@ abstract class _HomeControllerBase with Store {
 
   CotacaoModel getCotacaoIndiceByTipo(TipoAtivo tipo) {
     if (tipo.equals(TipoAtivo.ACAO)) return AppCore.getCotacao("IBOV");
-    if (tipo.equals(TipoAtivo.FII)) return AppCore.getCotacao("IFIX");
+    if (tipo.equals(TipoAtivo.FIIS)) return AppCore.getCotacao("IFIX");
     return CotacaoModel(
       "--",
       0.0,

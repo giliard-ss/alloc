@@ -3,9 +3,11 @@ import 'package:alloc/app/shared/repositories/alocacao_repository.dart';
 import 'package:alloc/app/shared/repositories/ativo_repository.dart';
 import 'package:alloc/app/shared/repositories/auth_repository.dart';
 import 'package:alloc/app/shared/repositories/carteira_repository.dart';
+import 'package:alloc/app/shared/repositories/event_repository.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
+import 'package:alloc/app/shared/services/event_service.dart';
 import 'package:alloc/app/shared/services/preference_service.dart';
 import 'package:alloc/app/splash/splash_page.dart';
 import 'splash/splash_controller.dart';
@@ -22,17 +24,16 @@ class AppModule extends MainModule {
         $SplashController,
         $AppController,
         Bind<IAuthRepository>((i) => AuthRepository()),
+        Bind<IEventRepository>((i) => EventRepository()),
         Bind<ICarteiraRepository>((i) => CarteiraRepository()),
         Bind<IAtivoRepository>((i) => AtivoRepository()),
         Bind<IAlocacaoRepository>((i) => AlocacaoRepository()),
         Bind<IPreferenceService>((i) => PreferenceService()),
         Bind<ICarteiraService>((i) => CarteiraService(
-            carteiraRepository: i.get(),
-            ativoRepository: i.get(),
-            alocacaoRepository: i.get())),
+            carteiraRepository: i.get(), ativoRepository: i.get(), alocacaoRepository: i.get())),
         Bind<IAtivoService>((i) => AtivoService(ativoRepository: i.get())),
-        Bind<IAlocacaoService>(
-            (i) => AlocacaoService(alocacaoRepository: i.get())),
+        Bind<IAlocacaoService>((i) => AlocacaoService(alocacaoRepository: i.get())),
+        Bind<IEventService>((i) => EventService(ativoService: i.get(), eventRepository: i.get())),
       ];
 
   @override

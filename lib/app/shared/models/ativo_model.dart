@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 
 class AtivoModel {
@@ -7,32 +8,15 @@ class AtivoModel {
   String _idCarteira;
   num _alocacao;
   num _qtd;
-  num _precoMedio;
-  DateTime _dataRecente;
   String _tipo;
-  num _precoRecente;
-
   List _superiores;
+  num _totalAplicado;
+  String _indexador;
+  num _vencimento;
+  double _rentabilidade;
 
-  AtivoModel(
-      [this._id,
-      this._idUsuario,
-      this._papel,
-      this._idCarteira,
-      this._alocacao,
-      this._qtd,
-      this._precoMedio,
-      this._superiores,
-      this._dataRecente,
-      this._tipo,
-      this._precoRecente]) {
-    if (this.dataRecente == null) {
-      this.dataRecente = DateTime.now();
-    }
-
-    if (this.superiores == null) {
-      this.superiores = [];
-    }
+  AtivoModel() {
+    this.superiores = [];
   }
 
   AtivoModel.fromMap(Map map) {
@@ -42,13 +26,26 @@ class AtivoModel {
     this._idCarteira = map['idCarteira'];
     this._alocacao = map['alocacao'];
     this._qtd = map['qtd'];
-    this._precoMedio = map['precoMedio'];
-    this._dataRecente = DateTime.fromMillisecondsSinceEpoch(map['dataRecente']);
+    this._vencimento = map['vencimento'];
     this._tipo = map['tipo'];
-    this._precoRecente = map['precoRecente'];
+    this._totalAplicado = map['totalAplicado'];
+    this._rentabilidade = map['rentabilidade'];
+    this._indexador = map['indexador'];
+
     this._superiores = List.generate(map['superiores'].length, (i) {
       return map['superiores'][i];
     });
+  }
+
+  AtivoModel.fromAplicacaoRendaVariavel(
+      AplicacaoRendaVariavel aplicacaoRendaVariavel) {
+    this._idCarteira = aplicacaoRendaVariavel.carteiraId;
+    this._idUsuario = aplicacaoRendaVariavel.usuarioId;
+    this._papel = aplicacaoRendaVariavel.papel;
+    this._totalAplicado = aplicacaoRendaVariavel.valor;
+    this._qtd = aplicacaoRendaVariavel.qtd;
+    this._superiores = aplicacaoRendaVariavel.superiores;
+    this._tipo = aplicacaoRendaVariavel.tipoAtivo;
   }
 
   Map<String, dynamic> toMap() {
@@ -59,13 +56,19 @@ class AtivoModel {
       'idCarteira': this._idCarteira,
       'alocacao': this._alocacao,
       'qtd': this._qtd,
-      'precoMedio': this._precoMedio,
+      'totalAplicado': this._totalAplicado,
       'tipo': this._tipo,
-      'precoRecente': this._precoRecente,
       'superiores': this._superiores,
-      'dataRecente': this._dataRecente.millisecondsSinceEpoch
+      'rentabilidade': this._rentabilidade,
+      'indexador': this._indexador,
+      'vencimento': this._vencimento
     };
   }
+
+  bool get isAcao => _tipo == "ACAO";
+  bool get isETF => _tipo == "ETF";
+  bool get isFII => _tipo == "FII";
+  bool get isCripto => _tipo == "CRIPTO";
 
   String get id => _id;
 
@@ -110,30 +113,31 @@ class AtivoModel {
 
   set qtd(num value) => _qtd = value;
 
-  num get totalAportado => _precoMedio * qtd;
+  num get totalAportado => _totalAplicado;
 
   List get superiores => _superiores;
 
   set superiores(List value) => _superiores = value;
 
-  num get precoMedio => _precoMedio;
-
-  set precoMedio(num value) => _precoMedio = value;
-
-  DateTime get dataRecente => _dataRecente;
-
-  set dataRecente(DateTime value) => _dataRecente = value;
+  num get precoMedio => _totalAplicado / qtd;
 
   String get tipo => _tipo;
 
   set tipo(String value) => _tipo = value;
 
-  num get precoRecente => _precoRecente;
+  get totalAplicado => this._totalAplicado;
 
-  set precoRecente(num value) => _precoRecente = value;
+  set totalAplicado(value) => this._totalAplicado = value;
 
-  bool get isAcao => _tipo == "ACAO";
-  bool get isETF => _tipo == "ETF";
-  bool get isFII => _tipo == "FII";
-  bool get isCripto => _tipo == "CRIPTO";
+  get indexador => this._indexador;
+
+  set indexador(value) => this._indexador = value;
+
+  get vencimento => this._vencimento;
+
+  set vencimento(value) => this._vencimento = value;
+
+  get rentabilidade => this._rentabilidade;
+
+  set rentabilidade(value) => this._rentabilidade = value;
 }

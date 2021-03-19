@@ -256,11 +256,11 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
       list.add(Observer(
         builder: (_) {
           return CotacaoCard(
-            cotacaoIndice: controller.getCotacaoIndiceByTipo(TipoAtivo.FII),
+            cotacaoIndice: controller.getCotacaoIndiceByTipo(TipoAtivo.FIIS),
             variacaoTotal: controller.getVariacaoTotalFiis(),
             ativos: controller.fiis,
             onTap: () {
-              Modular.to.pushNamed("/home/cotacao/${TipoAtivo.FII.code}");
+              Modular.to.pushNamed("/home/cotacao/${TipoAtivo.FIIS.code}");
             },
             title: "Fundos Imobiliários",
           );

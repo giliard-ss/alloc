@@ -24,7 +24,7 @@ class AppCore {
   static IAtivoService _ativoService;
   static IAlocacaoService _alocacaoService;
   static String _tableCotacoes = "cotacao";
-  static StreamSubscription<QuerySnapshot> _listenerCotacoes;
+  static StreamSubscription<DocumentSnapshot> _listenerCotacoes;
   static var _cotacoes = Observable<List<CotacaoModel>>([]);
   static var _ativosDTO = Observable<List<AtivoDTO>>([]);
   static var _carteirasDTO = Observable<List<CarteiraDTO>>([]);
@@ -308,8 +308,9 @@ class AppCore {
         await _stopListenerCotacoes();
       }
 
-      CollectionReference reference =
-          FirebaseFirestore.instance.collection(_tableCotacoes);
+      DocumentReference reference =
+          FirebaseFirestore.instance.collection(_tableCotacoes).doc("ULTIMO");
+
       _listenerCotacoes = reference.snapshots().listen((snapshot) async {
         // if (snapshot.docChanges
         //     .where((e) => e.doc.id == "cotacao")
@@ -318,8 +319,8 @@ class AppCore {
         // }
         //print(snapshot.docChanges.length);
         List<CotacaoModel> cotacoesChange =
-            List.generate(snapshot.docChanges.length, (i) {
-          return CotacaoModel.fromMap(snapshot.docChanges[i].doc.data());
+            List.generate(snapshot.data()['values'].length, (i) {
+          return CotacaoModel.fromMap(snapshot.data()['values'][i]);
         });
 
         await _refreshCotacoes(cotacoesChange);
@@ -459,6 +460,16 @@ class AppCore {
     return result;
   }
 
+  static List<AtivoModel> getAtivosModelByCarteira(String idCarteira) {
+    List<AtivoModel> result = [];
+    _ativosDTO.value
+        .where(
+          (e) => e.idCarteira == idCarteira,
+        )
+        .forEach((e) => result.add(AtivoModel.fromMap(e.toMap())));
+    return result;
+  }
+
   static List<AtivoDTO> getAtivosByIdSuperior(String superiorId) {
     List<AtivoDTO> result = [];
     _ativosDTO.value
@@ -468,6 +479,18 @@ class AppCore {
               : e.superiores.contains(superiorId),
         )
         .forEach((e) => result.add(e.clone()));
+    return result;
+  }
+
+  static List<AtivoModel> getAtivosModelByIdSuperior(String superiorId) {
+    List<AtivoModel> result = [];
+    _ativosDTO.value
+        .where(
+          (e) => StringUtil.isEmpty(superiorId)
+              ? e.superiores.isEmpty
+              : e.superiores.contains(superiorId),
+        )
+        .forEach((e) => result.add(AtivoModel.fromMap(e.toMap())));
     return result;
   }
 

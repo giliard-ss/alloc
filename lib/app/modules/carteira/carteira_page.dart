@@ -16,15 +16,13 @@ import 'carteira_controller.dart';
 class CarteiraPage extends StatefulWidget {
   final String title;
   final String carteiraId;
-  const CarteiraPage(this.carteiraId, {Key key, this.title = "Carteira"})
-      : super(key: key);
+  const CarteiraPage(this.carteiraId, {Key key, this.title = "Carteira"}) : super(key: key);
 
   @override
   _CarteiraPageState createState() => _CarteiraPageState();
 }
 
-class _CarteiraPageState
-    extends ModularState<CarteiraPage, CarteiraController> {
+class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
@@ -44,74 +42,89 @@ class _CarteiraPageState
     return Scaffold(
         appBar: AppBar(
           title: Text(controller.title),
-          actions: [
-            PopupMenuButton(
-              icon: Icon(Icons.menu),
-              itemBuilder: (BuildContext bc) => [
-                PopupMenuItem(
-                  enabled: true,
-                  child: Row(
-                    children: [
-                      Icon(Icons.upload_rounded),
-                      Text("Depósito"),
-                    ],
-                  ),
-                  value: "deposito",
-                ),
-                PopupMenuItem(
-                    enabled: true,
-                    child: Row(
-                      children: [
-                        Icon(Icons.monetization_on_outlined),
-                        Text("Saque"),
-                      ],
-                    ),
-                    value: "saque"),
-                PopupMenuItem(
-                    enabled: true,
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete),
-                        Text("Excluir Carteira"),
-                      ],
-                    ),
-                    value: "excluirCarteira"),
-              ],
-              onSelected: (e) {
-                if (e == 'excluirCarteira') {
-                  _showExcluirCarteiraDialog();
-                }
-                if (e == 'config') {
-                  Modular.to.pushNamed("/carteira/config");
-                }
-
-                switch (e) {
-                  case 'excluirCarteira':
-                    {
-                      _showExcluirCarteiraDialog();
-                    }
-                    break;
-
-                  case "deposito":
-                    {
-                      _showDepositoDialog();
-                    }
-                    break;
-                  case "saque":
-                    {
-                      _showRetiradaDialog();
-                    }
-                    break;
-
-                  default:
-                    break;
-                }
-              },
-            )
-          ],
+          actions: [createPopMenuButton()],
         ),
         key: _scaffoldKey,
         body: WidgetUtil.futureBuild(controller.init, _body));
+  }
+
+  createPopMenuButton() {
+    return PopupMenuButton(
+      icon: Icon(Icons.menu),
+      itemBuilder: (BuildContext bc) => [
+        PopupMenuItem(
+          enabled: true,
+          child: Row(
+            children: [
+              Icon(Icons.upload_rounded),
+              Text("Depósito"),
+            ],
+          ),
+          value: "deposito",
+        ),
+        PopupMenuItem(
+            enabled: true,
+            child: Row(
+              children: [
+                Icon(Icons.monetization_on_outlined),
+                Text("Saque"),
+              ],
+            ),
+            value: "saque"),
+        PopupMenuItem(
+            enabled: true,
+            child: Row(
+              children: [
+                Icon(Icons.delete),
+                Text("Excluir Carteira"),
+              ],
+            ),
+            value: "excluirCarteira"),
+        PopupMenuItem(
+            enabled: true,
+            child: Row(
+              children: [
+                Icon(Icons.article_outlined),
+                Text("Extrato"),
+              ],
+            ),
+            value: "extrato"),
+      ],
+      onSelected: (e) {
+        if (e == 'excluirCarteira') {
+          _showExcluirCarteiraDialog();
+        }
+        if (e == 'config') {
+          Modular.to.pushNamed("/carteira/config");
+        }
+
+        if (e == 'extrato') {
+          Modular.to.pushNamed("/carteira/extrato");
+        }
+
+        switch (e) {
+          case 'excluirCarteira':
+            {
+              _showExcluirCarteiraDialog();
+            }
+            break;
+
+          case "deposito":
+            {
+              _showDepositoDialog();
+            }
+            break;
+          case "saque":
+            {
+              _showRetiradaDialog();
+            }
+            break;
+
+          default:
+            break;
+        }
+      },
+    );
   }
 
   _body() {
@@ -153,8 +166,7 @@ class _CarteiraPageState
             Observer(
               builder: (_) {
                 return Visibility(
-                  visible: controller.alocacoes.isNotEmpty ||
-                      controller.ativos.isNotEmpty,
+                  visible: controller.alocacoes.isNotEmpty || controller.ativos.isNotEmpty,
                   child: _content(),
                 );
               },
@@ -182,8 +194,7 @@ class _CarteiraPageState
             Divider(
               height: 5,
             ),
-            _resumoRow("Saldo", controller.carteira.saldo,
-                valorFW: FontWeight.bold),
+            _resumoRow("Saldo", controller.carteira.saldo, valorFW: FontWeight.bold),
           ],
         );
       },
@@ -278,8 +289,7 @@ class _CarteiraPageState
           RaisedButton(
             child: Text("Continuar"),
             onPressed: () async {
-              bool ok = await LoadingUtil.onLoading(
-                  context, controller.salvarDeposito);
+              bool ok = await LoadingUtil.onLoading(context, controller.salvarDeposito);
             },
           )
         ],
@@ -346,10 +356,8 @@ class _CarteiraPageState
   _showExcluirCarteiraDialog() {
     DialogUtil.showAlertDialog(context,
         title: "Excluir Carteira",
-        content: Text("Tem certeza que deseja excluir esta carteira?"),
-        onConcluir: () async {
-      String msg =
-          await LoadingUtil.onLoading(context, controller.excluirCarteira);
+        content: Text("Tem certeza que deseja excluir esta carteira?"), onConcluir: () async {
+      String msg = await LoadingUtil.onLoading(context, controller.excluirCarteira);
       if (msg != null) {
         Navigator.of(context).pop();
         DialogUtil.showMessageDialog(context, msg);
@@ -407,8 +415,7 @@ class _CarteiraPageState
 
   _showNovaAlocacaoDialog() {
     controller.limparErrorDialog();
-    DialogUtil.showAlertDialog(context, title: "Nova Alocação",
-        content: Observer(
+    DialogUtil.showAlertDialog(context, title: "Nova Alocação", content: Observer(
       builder: (_) {
         return TextField(
           keyboardType: TextInputType.name,
@@ -421,8 +428,7 @@ class _CarteiraPageState
         );
       },
     ), onConcluir: () async {
-      bool ok =
-          await LoadingUtil.onLoading(context, controller.salvarNovaAlocacao);
+      bool ok = await LoadingUtil.onLoading(context, controller.salvarNovaAlocacao);
       if (ok) {
         Navigator.of(context).pop();
       }

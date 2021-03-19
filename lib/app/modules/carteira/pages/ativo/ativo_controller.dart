@@ -4,8 +4,11 @@ import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
+import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
+import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
+import 'package:alloc/app/shared/services/event_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:mobx/mobx.dart';
@@ -19,7 +22,7 @@ class AtivoController = _AtivoControllerBase with _$AtivoController;
 abstract class _AtivoControllerBase with Store {
   CarteiraController _carteiraController = Modular.get();
   AlocacaoDTO _alocacaoAtual;
-  IAtivoService _ativoService = Modular.get<AtivoService>();
+  IEventService _eventService = Modular.get<EventService>();
 
   @observable
   String error = "";
@@ -43,29 +46,9 @@ abstract class _AtivoControllerBase with Store {
         return false;
       }
 
-      AtivoModel ativo = AtivoModel();
-      ativo.idCarteira = _carteiraController.carteira.id;
-      ativo.idUsuario = AppCore.usuario.id;
-      ativo.papel = papel;
-      ativo.precoMedio = preco == null ? 0.0 : preco;
-      ativo.qtd = qtd;
-      ativo.dataRecente = data;
-      ativo.superiores = getIdSuperiores();
-      ativo.tipo = getTipo(papel);
+      AbstractEvent aplicacaoEvent = createEventAplicacaoRendaVariavel();
+      await saveEventAplicacaoVariavel(aplicacaoEvent);
 
-      List<AtivoDTO> dtos = _alocacaoAtual == null
-          ? AppCore.getAtivosByCarteira(_carteiraController.carteira.id)
-          : AppCore.getAtivosByIdSuperior(_alocacaoAtual.id);
-
-      List<AtivoModel> ativos = [];
-      dtos.forEach((e) => ativos.add(AtivoModel.fromMap(e.toMap())));
-
-      ativos.add(ativo);
-      await _ativoService.save(
-          ativos,
-          _alocacaoAtual == null
-              ? _carteiraController.carteira.autoAlocacao
-              : _alocacaoAtual.autoAlocacao);
       await AppCore.notifyAddDelAtivo();
       return true;
     } on ApplicationException catch (e) {
@@ -77,13 +60,25 @@ abstract class _AtivoControllerBase with Store {
     return false;
   }
 
+  AbstractEvent createEventAplicacaoRendaVariavel() {
+    return AplicacaoRendaVariavel.acao(null, DateTime.now(), _carteiraController.carteira.id,
+        AppCore.usuario.id, preco * qtd, getIdSuperiores(), papel, qtd);
+  }
+
+  Future<void> saveEventAplicacaoVariavel(AbstractEvent aplicacaoEvent) {
+    if (_alocacaoAtual == null) {
+      return _eventService.saveNovaAplicacaoVariavelFromCarteira(aplicacaoEvent,
+          _carteiraController.carteira.id, _carteiraController.carteira.autoAlocacao);
+    } else {
+      return _eventService.saveNovaAplicacaoVariavelFromAlocacao(
+          aplicacaoEvent, _alocacaoAtual.id, _alocacaoAtual.autoAlocacao);
+    }
+  }
+
   String getTipo(String papel) {
-    if (allAcoes().where((e) => e == papel).isNotEmpty)
-      return TipoAtivo.ACAO.code;
-    if (allFiis().where((e) => e == papel).isNotEmpty)
-      return TipoAtivo.FII.code;
-    if (allETFsBR().where((e) => e == papel).isNotEmpty)
-      return TipoAtivo.ETF.code;
+    if (allAcoes().where((e) => e == papel).isNotEmpty) return TipoAtivo.ACAO.code;
+    if (allFiis().where((e) => e == papel).isNotEmpty) return TipoAtivo.FIIS.code;
+    if (allETFsBR().where((e) => e == papel).isNotEmpty) return TipoAtivo.ETF.code;
     throw ApplicationException("Tipo não encontrado.");
   }
 
@@ -127,6 +122,7 @@ abstract class _AtivoControllerBase with Store {
   Future<bool> vender() async {
     try {
       //List<AtivoModel> list = Backup.getAllAtivos();
+
       //_ativoService.save(list, true);
 
       //AppCore.allAtivos.forEach((e) => _ativoService.delete(e, [], false));
