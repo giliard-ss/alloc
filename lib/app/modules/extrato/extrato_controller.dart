@@ -1,3 +1,4 @@
+import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/services/event_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
@@ -25,6 +26,8 @@ abstract class _ExtratoControllerBase with Store {
   }
 
   Future<void> _loadEvents() async {
-    events = await _eventService.getAllEvents();
+    List<AbstractEvent> list = await _eventService.getAllEvents(AppCore.usuario.id);
+    list.sort((AbstractEvent a, AbstractEvent b) => b.getData().compareTo(a.getData()));
+    events = list;
   }
 }

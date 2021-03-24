@@ -3,26 +3,30 @@ import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
+import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
+import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/models/usuario_model.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
-import 'package:alloc/app/shared/services/preference_service.dart';
-import 'package:alloc/app/shared/utils/date_util.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
+import 'shared/services/event_service.dart';
+
 class AppCore {
   static ICarteiraService _carteiraService;
   static IAtivoService _ativoService;
   static IAlocacaoService _alocacaoService;
+  static IEventService _eventService;
   static String _tableCotacoes = "cotacao";
   static StreamSubscription<DocumentSnapshot> _listenerCotacoes;
   static var _cotacoes = Observable<List<CotacaoModel>>([]);
@@ -38,10 +42,12 @@ class AppCore {
     _carteiraService = Modular.get<CarteiraService>();
     _ativoService = Modular.get<AtivoService>();
     _alocacaoService = Modular.get<AlocacaoService>();
+    _eventService = Modular.get<EventService>();
+    await _startListenerCotacoes();
     await _loadCarteiras();
     await _loadAtivos();
     //await _loadCotacoes();
-    await _startListenerCotacoes();
+    //await _startListenerCotacoes();
     _refreshAtivosDTO();
     await _loadAlocacoes();
     _refreshAlocacoesDTO();
@@ -52,8 +58,8 @@ class AppCore {
 
   static Future<void> _loadAlocacoes({bool onlyCache = true}) async {
     List<AlocacaoDTO> result = [];
-    List<AlocacaoModel> list = await _alocacaoService
-        .getAllAlocacoes(_usuario.id, onlyCache: onlyCache);
+    List<AlocacaoModel> list =
+        await _alocacaoService.getAllAlocacoes(_usuario.id, onlyCache: onlyCache);
     list.forEach((a) => result.add(AlocacaoDTO(a)));
     runInAction(() {
       _alocacoesDTO.value = result;
@@ -77,11 +83,9 @@ class AppCore {
       CarteiraDTO carteira = getCarteira(aloc.idCarteira);
 
       aloc.totalAportado = getTotalAportadoAtivosByAlocacao(aloc.id);
-      aloc.totalAportadoAtual =
-          aloc.totalAportado + getRendimentoAtivosByAlocacao(aloc.id);
+      aloc.totalAportadoAtual = aloc.totalAportado + getRendimentoAtivosByAlocacao(aloc.id);
 
-      double totalAposAporte =
-          carteira.getTotalAposAporte() * _getAlocacaoReal(aloc);
+      double totalAposAporte = carteira.getTotalAposAporte() * _getAlocacaoReal(aloc);
 
       aloc.totalInvestir = totalAposAporte - aloc.totalAportadoAtual;
 
@@ -108,8 +112,8 @@ class AppCore {
 
   static Future<void> _loadCarteiras({bool onlyCache = true}) async {
     await runInAction(() async {
-      List<CarteiraModel> carteiras = await _carteiraService
-          .getCarteiras(_usuario.id, onlyCache: onlyCache);
+      List<CarteiraModel> carteiras =
+          await _carteiraService.getCarteiras(_usuario.id, onlyCache: onlyCache);
       List<CarteiraDTO> result = [];
       carteiras.forEach((e) => result.add(CarteiraDTO(e)));
       _carteirasDTO.value = result;
@@ -158,6 +162,15 @@ class AppCore {
     _refreshCarteiraDTO();
   }
 
+  static Future<void> notifyAddAtivo(String idAtivo) async {
+    await _ativoService.findById(idAtivo, onlyCache: false);
+    await _loadAtivos();
+    //await _loadCotacoes();
+    _refreshAtivosDTO();
+    _refreshAlocacoesDTO();
+    _refreshCarteiraDTO();
+  }
+
   static Future<void> notifyAddDelAlocacao() async {
     await _loadAlocacoes(onlyCache: false);
     _refreshAlocacoesDTO();
@@ -193,8 +206,7 @@ class AppCore {
         double rendimentoAtivos = _getRendimentoAtivos(carteira.id);
 
         carteira.totalAportado = totalAportadoAtivos;
-        carteira.totalAportadoAtual =
-            (totalAportadoAtivos + (rendimentoAtivos));
+        carteira.totalAportadoAtual = (totalAportadoAtivos + (rendimentoAtivos));
         carteiras.add(carteira);
       });
       _carteirasDTO.value = carteiras;
@@ -207,8 +219,7 @@ class AppCore {
     double totalAportado = 0;
     _ativosDTO.value.forEach((e) {
       if (e.idCarteira == idCarteira) {
-        totalAgora =
-            totalAgora + (e.qtd * getCotacao(e.papel).ultimo.toDouble());
+        totalAgora = totalAgora + (e.qtd * getCotacao(e.papel).ultimo.toDouble());
         totalAportado = totalAportado + (e.totalAportado.toDouble());
       }
     });
@@ -230,34 +241,58 @@ class AppCore {
   }
 
   static bool alocacaoPossuiAtivos(String idAlocacao) {
-    return _ativosDTO.value
-        .where((e) => e.superiores.contains(idAlocacao))
-        .isNotEmpty;
+    return _ativosDTO.value.where((e) => e.superiores.contains(idAlocacao)).isNotEmpty;
   }
 
   ///crie a reacao vinculada a um variavel para que seja possivel chamar o dispose() pra encerrar
-  static ReactionDisposer _createCotacoesReact(
-      Function(List<CotacaoModel> cotacoes) fnc) {
+  static ReactionDisposer _createCotacoesReact(Function(List<CotacaoModel> cotacoes) fnc) {
     return reaction((_) => _cotacoes.value, fnc);
   }
 
   ///toda vez que _carteirasDTO sofrer alteracao de valor, executará a função em parametro
-  static ReactionDisposer createCarteirasReact(
-      Function(double numReacao) func) {
+  static ReactionDisposer createCarteirasReact(Function(double numReacao) func) {
     return reaction((_) => _reactionRefreshCarteira.value, func);
   }
 
   static Future<void> _loadAtivos({bool onlyCache = true}) async {
+    List<AbstractEvent> events = await _eventService.getAllEvents(usuario.id);
     List<AtivoDTO> result = [];
-    List<AtivoModel> ativos =
-        await _ativoService.getAtivos(_usuario.id, onlyCache: onlyCache);
-    ativos.forEach((e) {
-      result.add(AtivoDTO(e, getCotacao(e.papel)));
-    });
 
+    for (AbstractEvent event in events) {
+      if (event is AplicacaoRendaVariavel) {
+        AtivoModel model = AtivoModel.fromAplicacaoRendaVariavel(event);
+        result.add(AtivoDTO(model, getCotacao(model.papel)));
+      }
+    }
+    result = _agruparAtivosPorPapel(result);
     runInAction(() {
       _ativosDTO.value = result;
     });
+  }
+
+  static List<AtivoDTO> _agruparAtivosPorPapel(List<AtivoDTO> ativos) {
+    Map<String, AtivoDTO> temp = {};
+    for (AtivoDTO ativo in ativos) {
+      String key = _getKeyAtivo(ativo);
+
+      if (temp.containsKey(key)) {
+        AtivoDTO ativoTemp = temp[key];
+        ativoTemp.totalAplicado += ativo.totalAplicado;
+        ativoTemp.qtd += ativo.qtd;
+        temp[key] = ativoTemp;
+      } else {
+        temp[key] = ativo;
+      }
+    }
+    return List<AtivoDTO>.from(GeralUtil.mapToList(temp));
+  }
+
+  static String _getKeyAtivo(AtivoDTO ativoDTO) {
+    String key = ativoDTO.papel;
+    for (String superior in ativoDTO.superiores) {
+      key += superior;
+    }
+    return key;
   }
 
   static List<String> _getPapeisAtivos() {
@@ -269,9 +304,7 @@ class AppCore {
   static List<String> _getPapeisObrigatorios() {
     List<String> list = [];
 
-    if (_ativosDTO.value
-        .where((AtivoDTO e) => e.isAcao || e.isETF)
-        .isNotEmpty) {
+    if (_ativosDTO.value.where((AtivoDTO e) => e.isAcao || e.isETF).isNotEmpty) {
       list.add("IBOV");
     }
 
@@ -318,8 +351,7 @@ class AppCore {
         //   _loadCotacoes();
         // }
         //print(snapshot.docChanges.length);
-        List<CotacaoModel> cotacoesChange =
-            List.generate(snapshot.data()['values'].length, (i) {
+        List<CotacaoModel> cotacoesChange = List.generate(snapshot.data()['values'].length, (i) {
           return CotacaoModel.fromMap(snapshot.data()['values'][i]);
         });
 
@@ -327,19 +359,16 @@ class AppCore {
       });
       LoggerUtil.info("Listener de cotações iniciado.");
     } catch (ex) {
-      throw new ApplicationException(
-          'Falha ao iniciar Listener de cotações!', ex);
+      throw new ApplicationException('Falha ao iniciar Listener de cotações!', ex);
     }
   }
 
-  static Future<List<CotacaoModel>> mergeCotacoes(
-      List<CotacaoModel> cotacoesChanged) async {
+  static Future<List<CotacaoModel>> mergeCotacoes(List<CotacaoModel> cotacoesChanged) async {
     List<CotacaoModel> list = [];
     //pega a cotacao atualizada e se nem todas foram atualizadas, pega a existente
     _cotacoes.value.forEach((existente) {
-      CotacaoModel atualizada = cotacoesChanged.firstWhere(
-          (atualizada) => atualizada.id == existente.id,
-          orElse: () => null);
+      CotacaoModel atualizada = cotacoesChanged
+          .firstWhere((atualizada) => atualizada.id == existente.id, orElse: () => null);
 
       if (atualizada != null) {
         list.add(atualizada);
@@ -351,8 +380,7 @@ class AppCore {
     return list;
   }
 
-  static Future<void> _refreshCotacoes(
-      List<CotacaoModel> cotacoesChange) async {
+  static Future<void> _refreshCotacoes(List<CotacaoModel> cotacoesChange) async {
     List<CotacaoModel> list = [];
 
     if (_cotacoes.value.isNotEmpty) {
@@ -393,8 +421,7 @@ class AppCore {
       _listenerCotacoes = null;
       LoggerUtil.info("Listener de cotações interrompido.");
     } on Exception catch (ex) {
-      throw new ApplicationException(
-          'Falha ao interromper Listener de cotações!', ex);
+      throw new ApplicationException('Falha ao interromper Listener de cotações!', ex);
     }
   }
 
@@ -406,9 +433,7 @@ class AppCore {
   }
 
   static bool alocacaoPossuiSubAlocacao(String idAlocacao) {
-    return _alocacoesDTO.value
-        .where((e) => e.idSuperior == idAlocacao)
-        .isNotEmpty;
+    return _alocacoesDTO.value.where((e) => e.idSuperior == idAlocacao).isNotEmpty;
   }
 
   static List<AlocacaoDTO> getAlocacoesByIdSuperior(String idSuperior) {
@@ -419,8 +444,7 @@ class AppCore {
     return result;
   }
 
-  static List<AlocacaoDTO> getAlocacoesByCarteiraId(String carteiraId,
-      [String idSuperior]) {
+  static List<AlocacaoDTO> getAlocacoesByCarteiraId(String carteiraId, [String idSuperior]) {
     List<AlocacaoDTO> result = [];
     _alocacoesDTO.value
         .where((e) => e.idCarteira == carteiraId && e.idSuperior == idSuperior)

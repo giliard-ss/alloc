@@ -19,15 +19,13 @@ import 'package:mobx/mobx.dart';
 class SubAlocacaoPage extends StatefulWidget {
   final String title;
   final String id;
-  const SubAlocacaoPage(this.id, {Key key, this.title = "SubAlocacao"})
-      : super(key: key);
+  const SubAlocacaoPage(this.id, {Key key, this.title = "SubAlocacao"}) : super(key: key);
 
   @override
   _SubAlocacaoPageState createState() => _SubAlocacaoPageState();
 }
 
-class _SubAlocacaoPageState
-    extends ModularState<SubAlocacaoPage, SubAlocacaoController> {
+class _SubAlocacaoPageState extends ModularState<SubAlocacaoPage, SubAlocacaoController> {
   //use 'controller' variable to access controller
 
   Observable<List<AlocacaoDTO>> _alocacoes = Observable<List<AlocacaoDTO>>([]);
@@ -42,8 +40,9 @@ class _SubAlocacaoPageState
       _loadAlocacaoAtual();
       _loadAlocacoes();
       _startCarteirasReaction();
-    } catch (e) {
+    } catch (e, stacktrace) {
       LoggerUtil.error(e);
+      print(stacktrace);
     }
 
     super.initState();
@@ -60,10 +59,8 @@ class _SubAlocacaoPageState
   void _loadAlocacoes() {
     runInAction(() {
       List<AlocacaoDTO> list = AppCore.getAlocacoesByIdSuperior(widget.id);
-      list.forEach(
-          (e) => e.percentualNaAlocacao = _getPercentualAtualAloc(e, list));
-      list.sort((e1, e2) =>
-          e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));
+      list.forEach((e) => e.percentualNaAlocacao = _getPercentualAtualAloc(e, list));
+      list.sort((e1, e2) => e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));
       _alocacoes.value = list;
       if (_alocacoes.value.isEmpty) {
         _loadAtivos();
@@ -80,22 +77,19 @@ class _SubAlocacaoPageState
       list.forEach((e) {
         e.percentualNaAlocacao = _getPercentualAtualAtivo(e, list);
 
-        double totalAposAporte =
-            alocacaoAtual.totalInvestir + alocacaoAtual.totalAportadoAtual;
+        double totalAposAporte = alocacaoAtual.totalInvestir + alocacaoAtual.totalAportadoAtual;
 
-        double totalIdealAtivo = totalAposAporte * e.alocacao;
+        double totalIdealAtivo = totalAposAporte * e.alocacaoDouble;
 
         e.totalInvestir = totalIdealAtivo - e.totalAportadoAtual;
       });
 
-      list.sort((e1, e2) =>
-          e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));
+      list.sort((e1, e2) => e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));
       _ativos.value = list;
     });
   }
 
-  double _getPercentualAtualAloc(
-      AlocacaoDTO aloc, List<AlocacaoDTO> alocacoes) {
+  double _getPercentualAtualAloc(AlocacaoDTO aloc, List<AlocacaoDTO> alocacoes) {
     if (aloc.totalAportadoAtual == 0) return 0;
     double total = 0;
     alocacoes.forEach((e) => total = total + e.totalAportadoAtual);
@@ -127,8 +121,7 @@ class _SubAlocacaoPageState
 
     for (AlocacaoDTO aloc in _alocacoes.value) {
       aloc.totalInvestir =
-          (alocacaoAtual.totalAposInvestir * aloc.alocacao.toDouble()) -
-              aloc.totalAportadoAtual;
+          (alocacaoAtual.totalAposInvestir * aloc.alocacao.toDouble()) - aloc.totalAportadoAtual;
 
       result.add(aloc);
     }
@@ -178,8 +171,7 @@ class _SubAlocacaoPageState
           Observer(
             builder: (_) {
               return Visibility(
-                visible:
-                    _alocacoes.value.isNotEmpty || _ativos.value.isNotEmpty,
+                visible: _alocacoes.value.isNotEmpty || _ativos.value.isNotEmpty,
                 child: _content(),
               );
             },
@@ -264,8 +256,7 @@ class _SubAlocacaoPageState
             Divider(
               height: 5,
             ),
-            _resumoRow("Saldo", alocacaoAtual.totalInvestir,
-                valorFW: FontWeight.bold),
+            _resumoRow("Saldo", alocacaoAtual.totalInvestir, valorFW: FontWeight.bold),
           ],
         );
       },
@@ -282,9 +273,6 @@ class _SubAlocacaoPageState
           showButtonAdd: true,
           autoAlocacao: alocacaoAtual.autoAlocacao,
           fncExcluirSecundario: controller.excluir,
-          fncConfig: () {
-            Modular.to.pushNamed("/carteira/config/${alocacaoAtual.id}");
-          },
           fncAdd: () {
             Modular.to.pushNamed("/carteira/ativo/${alocacaoAtual.id}");
           },

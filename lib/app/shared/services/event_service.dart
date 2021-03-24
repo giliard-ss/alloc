@@ -1,6 +1,4 @@
-import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
-import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/repositories/event_repository.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
@@ -14,7 +12,7 @@ abstract class IEventService {
   Future<void> saveNovaAplicacaoVariavelFromCarteira(
       AplicacaoRendaVariavel aplicacaoEvent, String carteiraId, bool autoAlocacao);
 
-  Future<List<AbstractEvent>> getAllEvents();
+  Future<List<AbstractEvent>> getAllEvents(String usuarioId, {bool onlyCache});
 }
 
 class EventService implements IEventService {
@@ -25,33 +23,18 @@ class EventService implements IEventService {
 
   @override
   Future<void> saveNovaAplicacaoVariavelFromAlocacao(
-      AplicacaoRendaVariavel aplicacaoEvent, String alocacaoId, bool autoAlocacao) async {
-    List<AtivoModel> allAtivosAlocacao = AppCore.getAtivosModelByIdSuperior(alocacaoId);
-    allAtivosAlocacao.add(AtivoModel.fromAplicacaoRendaVariavel(aplicacaoEvent));
-
-    return _db.runTransaction((transaction) async {
-      await eventRepository.saveTransaction(transaction, aplicacaoEvent);
-      await ativoService.save(allAtivosAlocacao, autoAlocacao);
-    });
+      AplicacaoRendaVariavel aplicacaoEvent, String alocacaoId, bool autoAlocacao) {
+    return eventRepository.save(aplicacaoEvent);
   }
 
   @override
   Future<void> saveNovaAplicacaoVariavelFromCarteira(
       AplicacaoRendaVariavel aplicacaoEvent, String carteiraId, bool autoAlocacao) {
-    List<AtivoModel> allAtivosCarteira = AppCore.getAtivosModelByCarteira(carteiraId);
-    allAtivosCarteira.add(AtivoModel.fromAplicacaoRendaVariavel(aplicacaoEvent));
-
-    return _db.runTransaction((transaction) async {
-      String idEvent = await eventRepository.saveTransaction(transaction, aplicacaoEvent);
-      await ativoService.save(allAtivosCarteira, autoAlocacao);
-      return idEvent;
-    }).then((idEvent) async {
-      await eventRepository.findEventById(idEvent, onlyCache: false);
-    });
+    return eventRepository.save(aplicacaoEvent);
   }
 
   @override
-  Future<List<AbstractEvent>> getAllEvents() {
-    return eventRepository.findAllEventos(AppCore.usuario.id);
+  Future<List<AbstractEvent>> getAllEvents(String usuarioId, {bool onlyCache = true}) {
+    return eventRepository.findAllEventos(usuarioId, onlyCache: onlyCache);
   }
 }

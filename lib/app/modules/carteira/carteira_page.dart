@@ -345,9 +345,6 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
           fncAdd: () {
             Modular.to.pushNamed("/carteira/ativo");
           },
-          fncConfig: () {
-            Modular.to.pushNamed("/carteira/config");
-          },
         ),
       );
     });

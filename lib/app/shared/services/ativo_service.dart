@@ -7,11 +7,9 @@ import 'package:flutter/material.dart';
 
 abstract class IAtivoService {
   Future<List<AtivoModel>> getAtivos(String usuarioId, {bool onlyCache});
-  Future<void> save(List<AtivoModel> ativos, bool autoAlocacao);
-  Future<void> saveTransaction(
-      Transaction tr, List<AtivoModel> ativos, bool autoAlocacao);
-  Future<void> delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar,
-      bool autoAlocacao);
+  Future<String> saveTransaction(Transaction tr, List<AtivoModel> ativos, bool autoAlocacao);
+  Future<AtivoModel> findById(String id, {bool onlyCache});
+  Future<void> delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar, bool autoAlocacao);
 }
 
 class AtivoService implements IAtivoService {
@@ -21,58 +19,52 @@ class AtivoService implements IAtivoService {
   AtivoService({@required this.ativoRepository});
 
   @override
-  Future<List<AtivoModel>> getAtivos(String usuarioId,
-      {bool onlyCache = true}) {
+  Future<List<AtivoModel>> getAtivos(String usuarioId, {bool onlyCache = true}) {
     return ativoRepository.findAtivos(usuarioId, onlyCache: onlyCache);
   }
 
   @override
-  Future<void> save(List<AtivoModel> ativos, bool autoAlocacao) {
-    return _db.runTransaction((tr) {
-      return saveTransaction(tr, ativos, autoAlocacao);
-    });
-  }
-
-  @override
-  Future<void> saveTransaction(
-      Transaction tr, List<AtivoModel> ativos, bool autoAlocacao) async {
+  Future<String> saveTransaction(Transaction tr, List<AtivoModel> ativos, bool autoAlocacao) async {
     try {
-      List<AtivoModel> list = ativos;
       bool isAdicao = ativos.where((a) => a.id == null).isNotEmpty;
       if (isAdicao) {
-        list = _agruparAtivos(ativos);
+        ativos = _agruparAtivos(ativos);
       }
 
       if (autoAlocacao) {
-        double media = GeralUtil.limitaCasasDecimais((100 / list.length) / 100,
-            casasDecimais: 3);
-        list.forEach((a) => a.alocacao = media);
+        double media = GeralUtil.limitaCasasDecimais((100 / ativos.length) / 100, casasDecimais: 3);
+        ativos.forEach((a) => a.alocacao = media);
       } else {
         //deixa alocacao em zero se o usuario tiver configurado a alocacao
-        list.where((e) => e.id == null).forEach((e) => e.alocacao = 0);
+        ativos.where((e) => e.id == null).forEach((e) => e.alocacao = 0);
       }
 
-      for (AtivoModel ativo in list) {
-        await ativoRepository.saveTransaction(tr, ativo);
+      String idNovoAtivo;
+      for (AtivoModel ativo in ativos) {
+        bool ativoNovo = ativo.id == null;
+        String idAtivo = await ativoRepository.saveTransaction(tr, ativo);
+        if (ativoNovo) idNovoAtivo = idAtivo;
       }
+      return idNovoAtivo;
     } on ApplicationException catch (e) {
       throw e;
     } on Exception catch (e) {
       throw ApplicationException(
-          'Falha ao cadastrar ativos do usuario ${ativos[0].idUsuario} ' +
-              e.toString());
+          'Falha ao cadastrar ativos do usuario ${ativos[0].idUsuario} ' + e.toString());
     }
   }
 
   _agruparAtivos(List<AtivoModel> ativos) {
     Map<String, AtivoModel> map = {};
 
-    ativos.forEach((a) {
+    ativos.forEach((ativo) {
       //se o mapa ja tiver o papel, entao mantem ele e soma os valores
-      if (map.containsKey(a.papel)) {
-        map[a.papel].qtd = map[a.papel].qtd + a.qtd;
+      if (map.containsKey(ativo.papel)) {
+        AtivoModel ativoDoMap = map[ativo.papel];
+        ativoDoMap.qtd = ativoDoMap.qtd + ativo.qtd;
+        ativoDoMap.totalAplicado = ativoDoMap.totalAplicado + ativo.totalAplicado;
       } else {
-        map[a.papel] = a;
+        map[ativo.papel] = ativo;
       }
     });
 
@@ -80,12 +72,11 @@ class AtivoService implements IAtivoService {
   }
 
   @override
-  Future<void> delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar,
-      bool autoAlocacao) {
+  Future<void> delete(
+      AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar, bool autoAlocacao) {
     if (autoAlocacao) {
-      double media = GeralUtil.limitaCasasDecimais(
-          (100 / ativosAtualizar.length) / 100,
-          casasDecimais: 3);
+      double media =
+          GeralUtil.limitaCasasDecimais((100 / ativosAtualizar.length) / 100, casasDecimais: 3);
       ativosAtualizar.forEach((a) => a.alocacao = media);
     }
 
@@ -95,5 +86,10 @@ class AtivoService implements IAtivoService {
         await ativoRepository.saveTransaction(tr, ativo);
       }
     });
+  }
+
+  @override
+  Future<AtivoModel> findById(String id, {bool onlyCache = true}) {
+    return ativoRepository.findById(id, onlyCache: onlyCache);
   }
 }

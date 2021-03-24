@@ -1,4 +1,6 @@
 import 'package:alloc/app/app_core.dart';
+import 'package:alloc/app/modules/carteira/backup.dart';
+import 'package:alloc/app/modules/carteira/backup_model.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
@@ -23,6 +25,7 @@ abstract class _AtivoControllerBase with Store {
   CarteiraController _carteiraController = Modular.get();
   AlocacaoDTO _alocacaoAtual;
   IEventService _eventService = Modular.get<EventService>();
+  IAtivoService _ativoService = Modular.get<AtivoService>();
 
   @observable
   String error = "";
@@ -126,12 +129,72 @@ abstract class _AtivoControllerBase with Store {
       //_ativoService.save(list, true);
 
       //AppCore.allAtivos.forEach((e) => _ativoService.delete(e, [], false));
-      await AppCore.notifyAddDelAtivo();
+      await _excluirTodosAtivos();
+      //await _restaurarBackup();
+      //await AppCore.notifyAddDelAtivo();
       return true;
     } catch (e) {
       print(e);
       return false;
     }
+  }
+
+  _excluirTodosAtivos() async {
+    for (AtivoDTO ativo in AppCore.allAtivos) await _ativoService.delete(ativo, [], false);
+    return AppCore.notifyAddDelAtivo();
+  }
+
+  _restaurarBackup() async {
+    List<BackupModel> list = Backup.getAllAtivos();
+    List<AplicacaoRendaVariavel> variaveis = [];
+
+    list.where((e) => e.tipo == "ACAO").forEach((backup) {
+      AplicacaoRendaVariavel aplicacao = AplicacaoRendaVariavel.acao(
+          null,
+          backup.data,
+          backup.idCarteira,
+          backup.idUsuario,
+          backup.preco * backup.qtd,
+          backup.superiores,
+          backup.papel,
+          backup.qtd);
+      variaveis.add(aplicacao);
+    });
+
+    list.where((e) => e.tipo == "FII").forEach((backup) {
+      AplicacaoRendaVariavel aplicacao = AplicacaoRendaVariavel.fiis(
+          null,
+          backup.data,
+          backup.idCarteira,
+          backup.idUsuario,
+          backup.preco * backup.qtd,
+          backup.superiores,
+          backup.papel,
+          backup.qtd);
+      variaveis.add(aplicacao);
+    });
+
+    // list.where((e) => e.tipo == "ETF").forEach((backup) {
+    //   AplicacaoRendaVariavel aplicacao = AplicacaoRendaVariavel.etf(
+    //       null,
+    //       backup.data,
+    //       backup.idCarteira,
+    //       backup.idUsuario,
+    //       backup.preco * backup.qtd,
+    //       backup.superiores,
+    //       backup.papel,
+    //       backup.qtd);
+    //   variaveis.add(aplicacao);
+    // });
+
+    for (AplicacaoRendaVariavel ap in variaveis) {
+      if (ap.superiores == null || ap.superiores == []) {
+        await _eventService.saveNovaAplicacaoVariavelFromCarteira(ap, ap.carteiraId, false);
+      } else {
+        await _eventService.saveNovaAplicacaoVariavelFromAlocacao(ap, ap.superiores[0], false);
+      }
+    }
+    return AppCore.notifyAddDelAtivo();
   }
 
   AlocacaoDTO _getAlocacaoDTO(String id) {

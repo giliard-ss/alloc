@@ -7,8 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 abstract class IAtivoRepository {
   Future<List<AtivoModel>> findAtivos(String idUsuario, {onlyCache});
   Future<List<AtivoModel>> findByCarteira(String carteiraId, {onlyCache});
-
-  Future<AtivoModel> saveTransaction(Transaction tr, AtivoModel ativoModel);
+  Future<AtivoModel> findById(String id, {bool onlyCache});
+  Future<String> saveTransaction(Transaction tr, AtivoModel ativoModel);
   Future<void> deleteTransaction(Transaction tr, AtivoModel ativoModel);
 }
 
@@ -17,8 +17,7 @@ class AtivoRepository implements IAtivoRepository {
   FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
-  Future<List<AtivoModel>> findAtivos(String idUsuario,
-      {onlyCache = true}) async {
+  Future<List<AtivoModel>> findAtivos(String idUsuario, {onlyCache = true}) async {
     try {
       QuerySnapshot snapshot = await _db
           .collection(_table)
@@ -29,14 +28,12 @@ class AtivoRepository implements IAtivoRepository {
       });
     } catch (e) {
       throw ApplicationException(
-          'Falha ao consultar os ativos do usuário $idUsuario! ' +
-              e.toString());
+          'Falha ao consultar os ativos do usuário $idUsuario! ' + e.toString());
     }
   }
 
   @override
-  Future<List<AtivoModel>> findByCarteira(String carteiraId,
-      {onlyCache = true}) async {
+  Future<List<AtivoModel>> findByCarteira(String carteiraId, {onlyCache = true}) async {
     try {
       QuerySnapshot snapshot = await _db
           .collection(_table)
@@ -47,14 +44,22 @@ class AtivoRepository implements IAtivoRepository {
       });
     } catch (e) {
       throw ApplicationException(
-          'Falha ao consultar os ativos da carteira $carteiraId! ' +
-              e.toString());
+          'Falha ao consultar os ativos da carteira $carteiraId! ' + e.toString());
     }
   }
 
   @override
-  Future<AtivoModel> saveTransaction(
-      Transaction tr, AtivoModel ativoModel) async {
+  Future<AtivoModel> findById(String id, {bool onlyCache = true}) async {
+    DocumentSnapshot snapshot = await _db
+        .collection(_table)
+        .doc(id)
+        .get(await CfSettrings.getOptions(onlyCache: onlyCache));
+    if (!snapshot.exists) throw ApplicationException("Ativo nao encontrado pelo id: $id");
+    return AtivoModel.fromMap(snapshot.data());
+  }
+
+  @override
+  Future<String> saveTransaction(Transaction tr, AtivoModel ativoModel) async {
     await ConnectionUtil.checkConnection();
     try {
       DocumentReference ref;
@@ -66,11 +71,10 @@ class AtivoRepository implements IAtivoRepository {
       }
 
       tr.set(ref, ativoModel.toMap());
-      return ativoModel;
+      return ref.id;
     } catch (e) {
       throw ApplicationException(
-          'Falha ao cadastrar ativos do usuario ${ativoModel.idUsuario} ' +
-              e.toString());
+          'Falha ao cadastrar ativos do usuario ${ativoModel.idUsuario} ' + e.toString());
     }
   }
 
@@ -82,8 +86,7 @@ class AtivoRepository implements IAtivoRepository {
       tr.delete(ref);
     } catch (e) {
       throw ApplicationException(
-          'Falha ao deletar ativos do usuario ${ativoModel.idUsuario} ' +
-              e.toString());
+          'Falha ao deletar ativos do usuario ${ativoModel.idUsuario} ' + e.toString());
     }
   }
 }

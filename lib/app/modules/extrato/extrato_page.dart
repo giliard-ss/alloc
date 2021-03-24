@@ -1,4 +1,7 @@
+import 'package:alloc/app/modules/carteira/widgets/money_text_widget.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
+import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
+import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -43,8 +46,21 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
                   itemCount: controller.events.length,
                   itemBuilder: (context, index) {
                     AbstractEvent event = controller.events[index];
-
-                    return Text(event.getTipoEvento());
+                    if (event is AplicacaoRendaVariavel) {
+                      AplicacaoRendaVariavel aplicacao = event;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(DateUtil.dateToString(aplicacao.getData())),
+                          Text(aplicacao.papel),
+                          Text("" + aplicacao.qtd.toString()),
+                          MoneyTextWidget(
+                            value: aplicacao.valor,
+                          )
+                        ],
+                      );
+                    }
+                    return Text(DateUtil.dateToString(event.getData()));
                   },
                 );
               },

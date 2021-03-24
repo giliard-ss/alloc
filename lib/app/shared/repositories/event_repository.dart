@@ -12,6 +12,7 @@ abstract class IEventRepository {
   Future<List<AbstractEvent>> findAllEventos(String usuarioId, {bool onlyCache});
   Future<AbstractEvent> findEventById(String id, {bool onlyCache});
   Future<String> saveTransaction(Transaction tr, AbstractEvent event);
+  Future<void> save(AbstractEvent event);
 }
 
 class EventRepository implements IEventRepository {
@@ -54,6 +55,18 @@ class EventRepository implements IEventRepository {
       novoEvento.setId(ref.id);
       tr.set(ref, novoEvento.toMap());
       return ref.id;
+    } catch (e) {
+      throw ApplicationException('Falha ao salvar evento' + e.toString());
+    }
+  }
+
+  @override
+  Future<void> save(AbstractEvent event) async {
+    try {
+      await ConnectionUtil.checkConnection();
+      DocumentReference ref = _db.collection(_table).doc();
+      event.setId(ref.id);
+      await ref.set(event.toMap());
     } catch (e) {
       throw ApplicationException('Falha ao salvar evento' + e.toString());
     }

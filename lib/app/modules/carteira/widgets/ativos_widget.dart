@@ -14,7 +14,6 @@ class AtivosWidget extends StatelessWidget {
   List<AtivoDTO> ativos;
   Function(AtivoDTO) fncExcluir;
   Function(AtivoDTO, List<AtivoDTO>) fncExcluirSecundario;
-  Function fncConfig;
   Function fncAdd;
   bool showButtonAdd;
   bool autoAlocacao;
@@ -23,7 +22,6 @@ class AtivosWidget extends StatelessWidget {
       {@required this.ativos,
       this.fncExcluir,
       this.fncExcluirSecundario,
-      @required this.fncConfig,
       @required this.fncAdd,
       @required this.showButtonAdd,
       @required this.autoAlocacao});
@@ -61,12 +59,6 @@ class AtivosWidget extends StatelessWidget {
                 ),
               ),
             ),
-            IconButton(
-              icon: Icon(
-                Icons.dashboard_outlined,
-              ),
-              onPressed: fncConfig,
-            )
           ],
         ),
         ListView.builder(
@@ -80,8 +72,7 @@ class AtivosWidget extends StatelessWidget {
               double totalAportadoAtual =
                   ativo.qtd.toDouble() * ativo.cotacaoModel.ultimo.toDouble();
 
-              double rendimento =
-                  totalAportadoAtual - ativo.totalAportado.toDouble();
+              double rendimento = totalAportadoAtual - ativo.totalAportado.toDouble();
 
               double variacaoPercentual = GeralUtil.variacaoPercentualDeXparaY(
                   ativo.totalAportado.toDouble(), totalAportadoAtual);
@@ -112,8 +103,7 @@ class AtivosWidget extends StatelessWidget {
                   children: [
                     ExpansionTile(
                       tilePadding: EdgeInsets.only(left: 0),
-                      leading: CircleInfoWidget(
-                          ativo.percentualNaAlocacaoString, index),
+                      leading: CircleInfoWidget(ativo.percentualNaAlocacaoString, index),
                       title: Text(
                         ativo.papel,
                         style: TextStyle(fontSize: _textSize1),
@@ -122,27 +112,19 @@ class AtivosWidget extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            GeralUtil.doubleToMoney(
-                                ativo.cotacaoModel.ultimo.toDouble()),
+                            GeralUtil.doubleToMoney(ativo.cotacaoModel.ultimo.toDouble()),
                             style: TextStyle(
                                 fontSize: _textSize2,
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyText2
-                                    .color),
+                                color: Theme.of(context).textTheme.bodyText2.color),
                           ),
                           VariacaoPercentualWidget(
                             value: variacaoPercentual,
                           ),
                           Text(
-                            GeralUtil.doubleToMoney(totalAportadoAtual,
-                                leftSymbol: ""),
+                            GeralUtil.doubleToMoney(totalAportadoAtual, leftSymbol: ""),
                             style: TextStyle(
                                 fontSize: _textSize2,
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyText2
-                                    .color),
+                                color: Theme.of(context).textTheme.bodyText2.color),
                           )
                         ],
                       ),
@@ -155,14 +137,10 @@ class AtivosWidget extends StatelessWidget {
                               "Rendimento",
                               style: TextStyle(fontSize: _textSize2),
                             ),
-                            trailing: Text(
-                                GeralUtil.doubleToMoney(rendimento,
-                                    leftSymbol: ""),
+                            trailing: Text(GeralUtil.doubleToMoney(rendimento, leftSymbol: ""),
                                 style: TextStyle(
                                     fontSize: _textSize2,
-                                    color: rendimento < 0
-                                        ? Colors.red
-                                        : Colors.green)),
+                                    color: rendimento < 0 ? Colors.red : Colors.green)),
                           ),
                         ),
                         ListTile(
@@ -173,8 +151,7 @@ class AtivosWidget extends StatelessWidget {
                               )}",
                               style: TextStyle(fontSize: _textSize2)),
                           trailing: Text(
-                              GeralUtil.doubleToMoney(ativo.totalAportado,
-                                  leftSymbol: ""),
+                              GeralUtil.doubleToMoney(ativo.totalAportado, leftSymbol: ""),
                               style: TextStyle(fontSize: _textSize2)),
                         ),
                         ListTile(
@@ -196,19 +173,13 @@ class AtivosWidget extends StatelessWidget {
                           child: ListTile(
                             dense: true,
                             title: Text(
-                              "Sugestão: " +
-                                  (ativo.totalInvestir < 0
-                                      ? "Vender"
-                                      : "Aplicar"),
+                              "Sugestão: " + (ativo.totalInvestir < 0 ? "Vender" : "Aplicar"),
                               style: TextStyle(color: Colors.blue),
                             ),
                             trailing: Text(
                                 GeralUtil.doubleToMoney(ativo.totalInvestir,
-                                    leftSymbol:
-                                        (ativo.totalInvestir > 0 ? "+" : "") +
-                                            "R\$ "),
-                                style: TextStyle(
-                                    fontSize: _textSize2, color: Colors.blue)),
+                                    leftSymbol: (ativo.totalInvestir > 0 ? "+" : "") + "R\$ "),
+                                style: TextStyle(fontSize: _textSize2, color: Colors.blue)),
                           ),
                         )
                       ],

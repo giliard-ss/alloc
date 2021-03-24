@@ -61,7 +61,7 @@ class AplicacaoRendaVariavel extends EventoAplicacao implements AbstractEvent {
 
   @override
   DateTime getData() {
-    return DateTime.fromMillisecondsSinceEpoch(super.dataInt);
+    return DateTime.fromMillisecondsSinceEpoch(super.data);
   }
 
   @override

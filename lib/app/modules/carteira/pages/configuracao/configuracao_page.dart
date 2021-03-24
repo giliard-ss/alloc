@@ -11,16 +11,13 @@ import 'configuracao_controller.dart';
 class ConfiguracaoPage extends StatefulWidget {
   final String title;
   final String superiorId;
-  const ConfiguracaoPage(this.superiorId,
-      {Key key, this.title = "Configuracao"})
-      : super(key: key);
+  const ConfiguracaoPage(this.superiorId, {Key key, this.title = "Configuracao"}) : super(key: key);
 
   @override
   _ConfiguracaoPageState createState() => _ConfiguracaoPageState();
 }
 
-class _ConfiguracaoPageState
-    extends ModularState<ConfiguracaoPage, ConfiguracaoController> {
+class _ConfiguracaoPageState extends ModularState<ConfiguracaoPage, ConfiguracaoController> {
   @override
   void initState() {
     controller.superiorId = widget.superiorId;
@@ -39,12 +36,7 @@ class _ConfiguracaoPageState
 
   _body() {
     return SingleChildScrollView(
-      child: Column(children: [
-        _buttonAlocacaoAutomatica(),
-        _getAtivos(),
-        _getAlocacoes(),
-        _buttonSalvar()
-      ]),
+      child: Column(children: [_buttonAlocacaoAutomatica(), _getAlocacoes(), _buttonSalvar()]),
     );
   }
 
@@ -96,9 +88,7 @@ class _ConfiguracaoPageState
                 ListTile(
                   title: Text("Alocações",
                       style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0XFF01579B))),
+                          fontSize: 18, fontWeight: FontWeight.bold, color: Color(0XFF01579B))),
                 ),
                 ListView.builder(
                     scrollDirection: Axis.vertical,
@@ -113,9 +103,8 @@ class _ConfiguracaoPageState
                               subtitle: Text(
                                   "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  "),
                               title: Text(alocacao.descricao),
-                              trailing: Container(
-                                  width: 60.0,
-                                  child: _percentualAlocWidget(alocacao)));
+                              trailing:
+                                  Container(width: 60.0, child: _percentualAlocWidget(alocacao)));
                         },
                       );
                     }),
@@ -148,65 +137,8 @@ class _ConfiguracaoPageState
           suffix: Text("%"),
           counterText: "",
           errorText: controller.percentualRestante < 0 ? " " : null,
-          hintText: controller.percentualRestante < 0
-              ? "0"
-              : controller.percentualRestante.toString()),
+          hintText:
+              controller.percentualRestante < 0 ? "0" : controller.percentualRestante.toString()),
     );
-  }
-
-  Widget _percentualAtivoWidget(AtivoModel ativo) {
-    if (controller.autoAlocacao) {
-      return Text(ativo.alocacaoPercent.toString() + " %");
-    }
-    return _percentualAtivoTextField(ativo);
-  }
-
-  Widget _percentualAtivoTextField(AtivoModel ativo) {
-    return TextFormField(
-      keyboardType: TextInputType.number,
-      maxLength: 4,
-      initialValue: ativo.alocacaoPercent.toString(),
-      onChanged: (value) {
-        if (value.isEmpty) value = "0";
-        ativo.alocacaoPercent = double.parse(value);
-        controller.checkAtivosValues();
-      },
-      decoration: InputDecoration(
-          suffix: Text("%"),
-          counterText: "",
-          errorText: controller.percentualRestante < 0 ? " " : null,
-          hintText: controller.percentualRestante < 0
-              ? "0"
-              : controller.percentualRestante.toString()),
-    );
-  }
-
-  Widget _getAtivos() {
-    return Observer(builder: (_) {
-      return Visibility(
-        //mostrar ativos somente se nao houve subalocacoes , ou seja, se estiver no ultimo nivel
-        visible: controller.ativos.isNotEmpty && controller.alocacoes.isEmpty,
-        child: ListView.builder(
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: controller.ativos.length,
-            itemBuilder: (context, index) {
-              AtivoModel ativo = controller.ativos[index];
-
-              return Observer(
-                builder: (_) {
-                  return ListTile(
-                    subtitle: Text(
-                        "Aportado: ${ativo.totalAportado.toString()} aloc: ${ativo.alocacao.toString()} "),
-                    title: Text(ativo.papel),
-                    trailing: Container(
-                        width: 60.0, child: _percentualAtivoWidget(ativo)),
-                  );
-                },
-              );
-            }),
-      );
-    });
   }
 }

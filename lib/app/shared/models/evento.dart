@@ -31,8 +31,6 @@ class Evento {
 
   get data => this._data;
 
-  int get dataInt => int.parse(this.data);
-
   set data(value) => this._data = value;
 
   get carteiraId => this._carteiraId;

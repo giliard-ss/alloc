@@ -3,6 +3,7 @@ import 'package:alloc/app/shared/services/alocacao_service.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
 import 'package:alloc/app/shared/services/email_service.dart';
+import 'package:alloc/app/shared/services/event_service.dart';
 import 'package:alloc/app/shared/services/preference_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
@@ -18,6 +19,7 @@ abstract class _LoginControllerBase with Store {
   IPreferenceService _preferenceService = Modular.get<PreferenceService>();
   IAlocacaoService _alocacaoService = Modular.get<AlocacaoService>();
   IAtivoService _ativoService = Modular.get<AtivoService>();
+  IEventService _eventService = Modular.get<EventService>();
   ICarteiraService _carteiraService = Modular.get<CarteiraService>();
   IAuthRepository _authRepository = Modular.get<AuthRepository>();
 
@@ -48,7 +50,8 @@ abstract class _LoginControllerBase with Store {
 
   Future<void> baixarInformacoes() async {
     await _alocacaoService.getAllAlocacoes(_usuario.uid, onlyCache: false);
-    await _ativoService.getAtivos(_usuario.uid, onlyCache: false);
+    //await _ativoService.getAtivos(_usuario.uid, onlyCache: false);
+    await _eventService.getAllEvents(_usuario.uid, onlyCache: false);
     await _carteiraService.getCarteiras(_usuario.uid, onlyCache: false);
   }
 

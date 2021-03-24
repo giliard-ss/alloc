@@ -34,21 +34,6 @@ mixin _$ConfiguracaoController on _ConfiguracaoControllerBase, Store {
     });
   }
 
-  final _$ativosAtom = Atom(name: '_ConfiguracaoControllerBase.ativos');
-
-  @override
-  List<AtivoDTO> get ativos {
-    _$ativosAtom.reportRead();
-    return super.ativos;
-  }
-
-  @override
-  set ativos(List<AtivoDTO> value) {
-    _$ativosAtom.reportWrite(value, super.ativos, () {
-      super.ativos = value;
-    });
-  }
-
   final _$percentualRestanteAtom =
       Atom(name: '_ConfiguracaoControllerBase.percentualRestante');
 
@@ -107,21 +92,9 @@ mixin _$ConfiguracaoController on _ConfiguracaoControllerBase, Store {
   }
 
   @override
-  void checkAtivosValues() {
-    final _$actionInfo = _$_ConfiguracaoControllerBaseActionController
-        .startAction(name: '_ConfiguracaoControllerBase.checkAtivosValues');
-    try {
-      return super.checkAtivosValues();
-    } finally {
-      _$_ConfiguracaoControllerBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
   String toString() {
     return '''
 alocacoes: ${alocacoes},
-ativos: ${ativos},
 percentualRestante: ${percentualRestante},
 autoAlocacao: ${autoAlocacao}
     ''';
