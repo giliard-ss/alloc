@@ -40,9 +40,13 @@ abstract class _CarteiraControllerBase with Store {
   String errorDialog;
 
   Future<void> init() async {
-    await _loadAlocacoesOuAtivos();
-    _startCarteirasReaction();
-    refreshAlocacoes();
+    try {
+      await _loadAlocacoesOuAtivos();
+      _startCarteirasReaction();
+      refreshAlocacoes();
+    } catch (e, stacktrace) {
+      print(stacktrace);
+    }
   }
 
   void _startCarteirasReaction() {
@@ -60,8 +64,8 @@ abstract class _CarteiraControllerBase with Store {
   Future<bool> salvarNovaAlocacao() async {
     try {
       List<AlocacaoModel> alocs = List.from(alocacoes);
-      alocs.add(AlocacaoModel(null, AppCore.usuario.id, novaAlocacaoDesc, null,
-          _carteira.id, null));
+      alocs
+          .add(AlocacaoModel(null, AppCore.usuario.id, novaAlocacaoDesc, null, _carteira.id, null));
       await _alocacaoService.save(alocs, _carteira.autoAlocacao);
       await AppCore.notifyAddDelAlocacao();
       return true;
@@ -76,10 +80,8 @@ abstract class _CarteiraControllerBase with Store {
 
   void refreshAlocacoes() {
     List<AlocacaoDTO> list = AppCore.getAlocacoesByCarteiraId(carteira.id);
-    list.forEach(
-        (e) => e.percentualNaAlocacao = _getPercentualAtualAloc(e, list));
-    list.sort(
-        (e1, e2) => e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));
+    list.forEach((e) => e.percentualNaAlocacao = _getPercentualAtualAloc(e, list));
+    list.sort((e1, e2) => e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));
     alocacoes = list;
   }
 
@@ -127,8 +129,7 @@ abstract class _CarteiraControllerBase with Store {
 
       List<AtivoModel> models = [];
       list.forEach((e) => models.add(e.getModel()));
-      await _ativoService.delete(
-          ativoDTO.getModel(), models, _carteira.autoAlocacao);
+      await _ativoService.delete(ativoDTO.getModel(), models, _carteira.autoAlocacao);
       await AppCore.notifyAddDelAtivo();
       return null;
     } on ApplicationException catch (e) {
@@ -165,8 +166,7 @@ abstract class _CarteiraControllerBase with Store {
       List<AlocacaoModel> alocs = List.from(alocacoes);
       alocs = alocs.where((e) => e.id != alocacaoDTO.id).toList();
 
-      await _alocacaoService.delete(
-          alocacaoDTO.id, alocs, _carteira.autoAlocacao);
+      await _alocacaoService.delete(alocacaoDTO.id, alocs, _carteira.autoAlocacao);
       await AppCore.notifyAddDelAlocacao();
       refreshAlocacoes();
       return null;
@@ -185,8 +185,7 @@ abstract class _CarteiraControllerBase with Store {
     }
   }
 
-  double _getPercentualAtualAloc(
-      AlocacaoDTO aloc, List<AlocacaoDTO> alocacoes) {
+  double _getPercentualAtualAloc(AlocacaoDTO aloc, List<AlocacaoDTO> alocacoes) {
     if (aloc.totalAportadoAtual == 0) return 0;
     double total = 0;
     alocacoes.forEach((e) => total = total + e.totalAportadoAtual);
@@ -207,13 +206,12 @@ abstract class _CarteiraControllerBase with Store {
     list.forEach((e) {
       e.percentualNaAlocacao = _getPercentualAtualAtivo(e, list);
 
-      double totalAposAporte = carteira.getTotalAposAporte() * e.alocacao;
+      double totalAposAporte = carteira.getTotalAposAporte() * 1;
 
       e.totalInvestir = totalAposAporte - e.totalAportadoAtual;
     });
 
-    list.sort(
-        (e1, e2) => e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));
+    list.sort((e1, e2) => e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));
     ativos = list;
   }
 

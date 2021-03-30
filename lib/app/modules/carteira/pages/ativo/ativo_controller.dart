@@ -50,8 +50,7 @@ abstract class _AtivoControllerBase with Store {
       }
 
       AbstractEvent aplicacaoEvent = createEventAplicacaoRendaVariavel();
-      await saveEventAplicacaoVariavel(aplicacaoEvent);
-
+      await _eventService.saveAplicacaoRendaVariavel(aplicacaoEvent);
       await AppCore.notifyAddDelAtivo();
       return true;
     } on ApplicationException catch (e) {
@@ -66,16 +65,6 @@ abstract class _AtivoControllerBase with Store {
   AbstractEvent createEventAplicacaoRendaVariavel() {
     return AplicacaoRendaVariavel.acao(null, DateTime.now(), _carteiraController.carteira.id,
         AppCore.usuario.id, preco * qtd, getIdSuperiores(), papel, qtd);
-  }
-
-  Future<void> saveEventAplicacaoVariavel(AbstractEvent aplicacaoEvent) {
-    if (_alocacaoAtual == null) {
-      return _eventService.saveNovaAplicacaoVariavelFromCarteira(aplicacaoEvent,
-          _carteiraController.carteira.id, _carteiraController.carteira.autoAlocacao);
-    } else {
-      return _eventService.saveNovaAplicacaoVariavelFromAlocacao(
-          aplicacaoEvent, _alocacaoAtual.id, _alocacaoAtual.autoAlocacao);
-    }
   }
 
   String getTipo(String papel) {
@@ -129,7 +118,7 @@ abstract class _AtivoControllerBase with Store {
       //_ativoService.save(list, true);
 
       //AppCore.allAtivos.forEach((e) => _ativoService.delete(e, [], false));
-      await _excluirTodosAtivos();
+      //await _excluirTodosAtivos();
       //await _restaurarBackup();
       //await AppCore.notifyAddDelAtivo();
       return true;
@@ -187,14 +176,14 @@ abstract class _AtivoControllerBase with Store {
     //   variaveis.add(aplicacao);
     // });
 
-    for (AplicacaoRendaVariavel ap in variaveis) {
-      if (ap.superiores == null || ap.superiores == []) {
-        await _eventService.saveNovaAplicacaoVariavelFromCarteira(ap, ap.carteiraId, false);
-      } else {
-        await _eventService.saveNovaAplicacaoVariavelFromAlocacao(ap, ap.superiores[0], false);
-      }
-    }
-    return AppCore.notifyAddDelAtivo();
+    // for (AplicacaoRendaVariavel ap in variaveis) {
+    //   if (ap.superiores == null || ap.superiores == []) {
+    //     await _eventService.saveNovaAplicacaoVariavelFromCarteira(ap, ap.carteiraId, false);
+    //   } else {
+    //     await _eventService.saveNovaAplicacaoVariavelFromAlocacao(ap, ap.superiores[0], false);
+    //   }
+    // }
+    // return AppCore.notifyAddDelAtivo();
   }
 
   AlocacaoDTO _getAlocacaoDTO(String id) {

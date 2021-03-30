@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 
@@ -37,8 +38,7 @@ class AtivoModel {
     });
   }
 
-  AtivoModel.fromAplicacaoRendaVariavel(
-      AplicacaoRendaVariavel aplicacaoRendaVariavel) {
+  AtivoModel.fromAplicacaoRendaVariavel(AplicacaoRendaVariavel aplicacaoRendaVariavel) {
     this._idCarteira = aplicacaoRendaVariavel.carteiraId;
     this._idUsuario = aplicacaoRendaVariavel.usuarioId;
     this._papel = aplicacaoRendaVariavel.papel;
@@ -65,10 +65,10 @@ class AtivoModel {
     };
   }
 
-  bool get isAcao => _tipo == "ACAO";
-  bool get isETF => _tipo == "ETF";
-  bool get isFII => _tipo == "FII";
-  bool get isCripto => _tipo == "CRIPTO";
+  bool get isAcao => _tipo == TipoAtivo.ACAO.code;
+  bool get isETF => _tipo == TipoAtivo.ETF.code;
+  bool get isFII => _tipo == TipoAtivo.FIIS.code;
+  bool get isCripto => _tipo == TipoAtivo.CRIPTOMOEDA.code;
 
   String get id => _id;
 
@@ -86,8 +86,7 @@ class AtivoModel {
 
   set papel(String value) => _papel = value;
 
-  double get alocacaoDouble =>
-      this._alocacao == null ? 0 : this._alocacao.toDouble();
+  double get alocacaoDouble => this._alocacao == null ? 0 : this._alocacao.toDouble();
 
   set alocacaoDouble(value) => this._alocacao = value;
 
@@ -98,9 +97,8 @@ class AtivoModel {
   num get alocacaoPercent => alocacaoDouble * 100;
 
   String get alocacaoPercentString {
-    String aloc = GeralUtil.limitaCasasDecimais(alocacaoPercent.toDouble(),
-            casasDecimais: 1)
-        .toString();
+    String aloc =
+        GeralUtil.limitaCasasDecimais(alocacaoPercent.toDouble(), casasDecimais: 1).toString();
     if (aloc.split('.')[1] == '0') {
       return aloc.split('.')[0];
     }

@@ -143,6 +143,7 @@ class AppCore {
     }
     _reactionCotacoesDispose = _createCotacoesReact((e) {
       ///toda vez que as cotacoes forem atualizadas, os valores da carteiraDTO tambem serao
+      _loadAtivos();
       _refreshAtivosDTO();
       _refreshAlocacoesDTO();
       _refreshCarteiraDTO();
@@ -256,24 +257,26 @@ class AppCore {
 
   static Future<void> _loadAtivos({bool onlyCache = true}) async {
     List<AbstractEvent> events = await _eventService.getAllEvents(usuario.id);
-    List<AtivoDTO> result = [];
+    List<AtivoDTO> ativos = [];
 
     for (AbstractEvent event in events) {
       if (event is AplicacaoRendaVariavel) {
         AtivoModel model = AtivoModel.fromAplicacaoRendaVariavel(event);
-        result.add(AtivoDTO(model, getCotacao(model.papel)));
+        CotacaoModel cotacao = getCotacao(model.papel);
+        ativos.add(AtivoDTO(model, cotacao));
       }
     }
-    result = _agruparAtivosPorPapel(result);
+    ativos = _agruparAtivosPorPapel(ativos);
+    _ajustarAlocacaoDosAtivos(ativos);
     runInAction(() {
-      _ativosDTO.value = result;
+      _ativosDTO.value = ativos;
     });
   }
 
   static List<AtivoDTO> _agruparAtivosPorPapel(List<AtivoDTO> ativos) {
     Map<String, AtivoDTO> temp = {};
     for (AtivoDTO ativo in ativos) {
-      String key = _getKeyAtivo(ativo);
+      String key = _getKeyAtivoByPapelAndAlocacoes(ativo);
 
       if (temp.containsKey(key)) {
         AtivoDTO ativoTemp = temp[key];
@@ -287,9 +290,36 @@ class AppCore {
     return List<AtivoDTO>.from(GeralUtil.mapToList(temp));
   }
 
-  static String _getKeyAtivo(AtivoDTO ativoDTO) {
-    String key = ativoDTO.papel;
-    for (String superior in ativoDTO.superiores) {
+  static void _ajustarAlocacaoDosAtivos(List<AtivoDTO> ativos) {
+    Map<String, int> qtdPapeisPorAlocacao = _getQuantidadePapeisPorAlocacao(ativos);
+    for (AtivoDTO ativo in ativos) {
+      String alocacao = _getAllAlocacoesString(ativo);
+      ativo.alocacao = 1 / qtdPapeisPorAlocacao[alocacao];
+    }
+  }
+
+  static Map<String, int> _getQuantidadePapeisPorAlocacao(List<AtivoDTO> ativos) {
+    Map<String, int> qtdPapeisPorAlocacao = {};
+    for (AtivoDTO ativo in ativos) {
+      String alocacao = _getAllAlocacoesString(ativo);
+
+      if (qtdPapeisPorAlocacao.containsKey(alocacao)) {
+        qtdPapeisPorAlocacao[alocacao] += 1;
+      } else {
+        qtdPapeisPorAlocacao[alocacao] = 1;
+      }
+    }
+    return qtdPapeisPorAlocacao;
+  }
+
+  static String _getKeyAtivoByPapelAndAlocacoes(AtivoDTO ativo) {
+    String alocacao = _getAllAlocacoesString(ativo);
+    return ativo.papel + alocacao;
+  }
+
+  static String _getAllAlocacoesString(AtivoDTO ativo) {
+    String key = ativo.idCarteira;
+    for (String superior in ativo.superiores) {
       key += superior;
     }
     return key;
@@ -345,17 +375,10 @@ class AppCore {
           FirebaseFirestore.instance.collection(_tableCotacoes).doc("ULTIMO");
 
       _listenerCotacoes = reference.snapshots().listen((snapshot) async {
-        // if (snapshot.docChanges
-        //     .where((e) => e.doc.id == "cotacao")
-        //     .isNotEmpty) {
-        //   _loadCotacoes();
-        // }
-        //print(snapshot.docChanges.length);
-        List<CotacaoModel> cotacoesChange = List.generate(snapshot.data()['values'].length, (i) {
-          return CotacaoModel.fromMap(snapshot.data()['values'][i]);
+        List<CotacaoModel> cotacoes = snapshotToCotacoes(snapshot);
+        runInAction(() {
+          _cotacoes.value = cotacoes;
         });
-
-        await _refreshCotacoes(cotacoesChange);
       });
       LoggerUtil.info("Listener de cotações iniciado.");
     } catch (ex) {
@@ -363,57 +386,14 @@ class AppCore {
     }
   }
 
-  static Future<List<CotacaoModel>> mergeCotacoes(List<CotacaoModel> cotacoesChanged) async {
-    List<CotacaoModel> list = [];
-    //pega a cotacao atualizada e se nem todas foram atualizadas, pega a existente
-    _cotacoes.value.forEach((existente) {
-      CotacaoModel atualizada = cotacoesChanged
-          .firstWhere((atualizada) => atualizada.id == existente.id, orElse: () => null);
-
-      if (atualizada != null) {
-        list.add(atualizada);
-      } else {
-        list.add(existente);
-      }
+  static List<CotacaoModel> snapshotToCotacoes(DocumentSnapshot snapshot) {
+    List<CotacaoModel> cotacoes = List.generate(snapshot.data()['values'].length, (i) {
+      Map mapCotacao = snapshot.data()['values'][i];
+      mapCotacao["date"] = snapshot.data()['date'];
+      return CotacaoModel.fromMap(mapCotacao);
     });
-
-    return list;
+    return cotacoes;
   }
-
-  static Future<void> _refreshCotacoes(List<CotacaoModel> cotacoesChange) async {
-    List<CotacaoModel> list = [];
-
-    if (_cotacoes.value.isNotEmpty) {
-      list = await mergeCotacoes(cotacoesChange);
-    } else {
-      list = cotacoesChange;
-    }
-
-    runInAction(() {
-      _cotacoes.value = list;
-    });
-  }
-
-  // static Future<void> _loadCotacoes() async {
-  //   List<String> papeis = _getPapeisAtivos();
-  //   papeis.addAll(_getPapeisObrigatorios());
-  //   if (papeis.isEmpty) {
-  //     return;
-  //   }
-
-  //   QuerySnapshot query = await FirebaseFirestore.instance
-  //       .collection(_tableCotacoes)
-  //       //.where( )
-  //       .get();
-
-  //   List<CotacaoModel> cotacoes = List.generate(query.docs.length, (i) {
-  //     return CotacaoModel.fromMap(query.docs[i].data());
-  //   });
-
-  //   runInAction(() async {
-  //     _cotacoes.value = cotacoes;
-  //   });
-  // }
 
   static Future<void> _stopListenerCotacoes() async {
     try {

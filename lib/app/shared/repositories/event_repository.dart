@@ -13,6 +13,7 @@ abstract class IEventRepository {
   Future<AbstractEvent> findEventById(String id, {bool onlyCache});
   Future<String> saveTransaction(Transaction tr, AbstractEvent event);
   Future<void> save(AbstractEvent event);
+  Future<void> delete(AbstractEvent event);
 }
 
 class EventRepository implements IEventRepository {
@@ -62,13 +63,24 @@ class EventRepository implements IEventRepository {
 
   @override
   Future<void> save(AbstractEvent event) async {
+    await ConnectionUtil.checkConnection();
     try {
-      await ConnectionUtil.checkConnection();
       DocumentReference ref = _db.collection(_table).doc();
       event.setId(ref.id);
       await ref.set(event.toMap());
     } catch (e) {
       throw ApplicationException('Falha ao salvar evento' + e.toString());
+    }
+  }
+
+  @override
+  Future<void> delete(AbstractEvent event) async {
+    await ConnectionUtil.checkConnection();
+    try {
+      DocumentReference ref = _db.collection(_table).doc(event.getId());
+      await ref.delete();
+    } catch (e) {
+      throw ApplicationException('Falha ao deletar evento' + e.toString());
     }
   }
 }
