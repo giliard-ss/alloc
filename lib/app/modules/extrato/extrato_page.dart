@@ -1,3 +1,4 @@
+import 'package:alloc/app/modules/carteira/widgets/money_text_widget.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
@@ -106,8 +107,45 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     return Column(
       children: [
         Text(
-          DateUtil.dateToString(data),
-          style: TextStyle(fontWeight: FontWeight.bold),
+          DateUtil.dateToString(data, mask: "dd"),
+          style: TextStyle(fontSize: 24),
+        ),
+        Text(DateUtil.dateToString(data, mask: "MMM").toUpperCase()),
+      ],
+    );
+  }
+
+  Widget createAplicacaoDescricao(AplicacaoRendaVariavel aplicacao) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 10,
+        ),
+        Text(
+          aplicacao.qtdString + " x " + GeralUtil.doubleToMoney(aplicacao.precoUnitario).toString(),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [Text(aplicacao.tipoEvento), Text(aplicacao.tipoAtivo), Text(aplicacao.papel)],
+        )
+      ],
+    );
+  }
+
+  Widget createAplicacaoItemComData(AplicacaoRendaVariavel aplicacao) {
+    return Column(
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.only(top: 10, bottom: 10, right: 10),
+          leading: createDataItem(aplicacao.getData()),
+          title: MoneyTextWidget(
+            value: aplicacao.valor,
+          ),
+          subtitle: createAplicacaoDescricao(aplicacao),
+          onLongPress: () {
+            _showEditarDialog(aplicacao);
+          },
         ),
         Divider(
           height: 3,
@@ -117,31 +155,21 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
   }
 
   Widget createAplicacaoItem(AplicacaoRendaVariavel aplicacao) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       children: [
-        Column(
-          children: [
-            Text(
-              aplicacao.tipoEvento,
-              style: TextStyle(fontSize: 13),
-            ),
-            Text(aplicacao.qtd.toString() + " x " + aplicacao.papel, style: TextStyle(fontSize: 11))
-          ],
+        ListTile(
+          contentPadding: EdgeInsets.only(top: 10, bottom: 10, right: 10),
+          leading: Text(""),
+          title: MoneyTextWidget(
+            value: aplicacao.valor,
+          ),
+          subtitle: createAplicacaoDescricao(aplicacao),
+          onLongPress: () {
+            _showEditarDialog(aplicacao);
+          },
         ),
-        Row(
-          children: [
-            Text(
-              GeralUtil.doubleToMoney(aplicacao.valor, leftSymbol: ""),
-              style: TextStyle(fontSize: 14),
-            ),
-            IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {
-                _showEditarDialog(aplicacao);
-              },
-            )
-          ],
+        Divider(
+          height: 3,
         )
       ],
     );
@@ -151,8 +179,6 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     if (!createItemData) {
       return createAplicacaoItem(aplicacao);
     }
-    return Column(
-      children: [createDataItem(aplicacao.getData()), createAplicacaoItem(aplicacao)],
-    );
+    return createAplicacaoItemComData(aplicacao);
   }
 }

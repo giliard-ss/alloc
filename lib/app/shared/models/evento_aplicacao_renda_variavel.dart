@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao.dart';
 
 import 'abstract_event.dart';
@@ -52,7 +53,16 @@ class AplicacaoRendaVariavel extends EventoAplicacao implements AbstractEvent {
 
   get qtd => this._qtd;
 
+  String get qtdString {
+    if (tipoAtivo == TipoAtivo.CRIPTOMOEDA) {
+      return _qtd.toString();
+    }
+    return _qtd.ceil().toString();
+  }
+
   set qtd(value) => this._qtd = value;
+
+  double get precoUnitario => valor / _qtd;
 
   @override
   void setId(String id) {

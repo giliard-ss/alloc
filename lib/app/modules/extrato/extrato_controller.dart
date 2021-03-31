@@ -18,6 +18,7 @@ abstract class _ExtratoControllerBase with Store {
   ReactionDisposer _carteirasReactDispose;
   @observable
   List<AbstractEvent> events = [];
+  List<int> qtdDiasOpcoes = [7, 15, 30];
 
   Future<void> init() async {
     try {
@@ -30,9 +31,18 @@ abstract class _ExtratoControllerBase with Store {
   }
 
   Future<void> _loadEvents() async {
-    List<AbstractEvent> list = await _eventService.getAllEvents(AppCore.usuario.id);
+    List<AbstractEvent> list = await getUltimosByQtdDias(qtdDiasOpcoes[0]);
+
+    if (list.isEmpty) list = await getUltimosByQtdDias(qtdDiasOpcoes[1]);
+    if (list.isEmpty) list = await getUltimosByQtdDias(qtdDiasOpcoes[2]);
     list.sort((AbstractEvent a, AbstractEvent b) => b.getData().compareTo(a.getData()));
     events = list;
+  }
+
+  Future<List<AbstractEvent>> getUltimosByQtdDias(int qtdDias) async {
+    DateTime inicio = DateTime.now().subtract(Duration(days: qtdDias));
+    DateTime fim = DateTime.now();
+    return await _eventService.getEventsByPeriodo(AppCore.usuario.id, inicio, fim);
   }
 
   void _startCarteirasReaction() {

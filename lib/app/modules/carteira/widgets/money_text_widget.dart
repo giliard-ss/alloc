@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 class MoneyTextWidget extends StatelessWidget {
   double value;
   double fontSize;
+  FontWeight fontWeight;
 
-  MoneyTextWidget({this.value = 0.0, this.fontSize = 16});
+  MoneyTextWidget({this.value = 0.0, this.fontSize = 16, this.fontWeight});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,7 @@ class MoneyTextWidget extends StatelessWidget {
 
     return Text(
       (value > 0 ? "+" : "") + GeralUtil.doubleToMoney(value),
-      style: TextStyle(fontSize: fontSize, color: color),
+      style: TextStyle(fontSize: fontSize, color: color, fontWeight: fontWeight),
     );
   }
 }

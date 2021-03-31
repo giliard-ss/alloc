@@ -10,6 +10,8 @@ import 'package:uuid/uuid.dart';
 
 abstract class IEventRepository {
   Future<List<AbstractEvent>> findAllEventos(String usuarioId, {bool onlyCache});
+  Future<List<AbstractEvent>> findEventosByPeriodo(String usuarioId, DateTime inicio, DateTime fim,
+      {bool onlyCache});
   Future<AbstractEvent> findEventById(String id, {bool onlyCache});
   Future<String> saveTransaction(Transaction tr, AbstractEvent event);
   Future<void> save(AbstractEvent event);
@@ -82,5 +84,19 @@ class EventRepository implements IEventRepository {
     } catch (e) {
       throw ApplicationException('Falha ao deletar evento' + e.toString());
     }
+  }
+
+  @override
+  Future<List<AbstractEvent>> findEventosByPeriodo(String usuarioId, DateTime inicio, DateTime fim,
+      {bool onlyCache = true}) async {
+    QuerySnapshot snapshot = await _db
+        .collection(_table)
+        .where("usuarioId", isEqualTo: usuarioId)
+        .where("data", isGreaterThanOrEqualTo: inicio.millisecondsSinceEpoch)
+        .where("data", isLessThanOrEqualTo: fim.millisecondsSinceEpoch)
+        .get(await CfSettrings.getOptions(onlyCache: onlyCache));
+    return List.generate(snapshot.docs.length, (i) {
+      return mapToEvent(snapshot.docs[i].data());
+    });
   }
 }
