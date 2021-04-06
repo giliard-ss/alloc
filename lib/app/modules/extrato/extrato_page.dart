@@ -122,14 +122,41 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
         SizedBox(
           height: 10,
         ),
-        Text(
-          aplicacao.qtdString + " x " + GeralUtil.doubleToMoney(aplicacao.precoUnitario).toString(),
-        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text(aplicacao.tipoEvento), Text(aplicacao.tipoAtivo), Text(aplicacao.papel)],
+          children: [
+            Text(
+              aplicacao.qtdString +
+                  " x " +
+                  GeralUtil.doubleToMoney(aplicacao.precoUnitario).toString(),
+            ),
+            MoneyTextWidget(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              value: aplicacao.valor,
+              showSinal: false,
+            )
+          ],
         )
       ],
+    );
+  }
+
+  Widget createAplicacaoTitle(AplicacaoRendaVariavel aplicacao) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        createAplicacaoTitleText(aplicacao.tipoEvento),
+        createAplicacaoTitleText(aplicacao.tipoAtivo),
+        createAplicacaoTitleText(aplicacao.papel)
+      ],
+    );
+  }
+
+  Widget createAplicacaoTitleText(String text) {
+    return Text(
+      text,
+      style: TextStyle(color: Colors.grey[600]),
     );
   }
 
@@ -139,9 +166,7 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
         ListTile(
           contentPadding: EdgeInsets.only(top: 10, bottom: 10, right: 10),
           leading: createDataItem(aplicacao.getData()),
-          title: MoneyTextWidget(
-            value: aplicacao.valor,
-          ),
+          title: createAplicacaoTitle(aplicacao),
           subtitle: createAplicacaoDescricao(aplicacao),
           onLongPress: () {
             _showEditarDialog(aplicacao);
@@ -160,9 +185,7 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
         ListTile(
           contentPadding: EdgeInsets.only(top: 10, bottom: 10, right: 10),
           leading: Text(""),
-          title: MoneyTextWidget(
-            value: aplicacao.valor,
-          ),
+          title: createAplicacaoTitle(aplicacao),
           subtitle: createAplicacaoDescricao(aplicacao),
           onLongPress: () {
             _showEditarDialog(aplicacao);

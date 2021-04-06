@@ -10,11 +10,11 @@ class GeralUtil {
     return double.parse((value).toStringAsFixed(casasDecimais));
   }
 
-  static String doubleToMoney(double value, {leftSymbol: 'R\$ '}) {
+  static String doubleToMoney(double value, {leftSymbol: 'R\$ ', bool showSinalNegativo = true}) {
     var moneyController = MoneyMaskedTextController(leftSymbol: leftSymbol);
 
     moneyController.updateValue(value);
-    return (value < 0 ? "-" : "") + moneyController.text;
+    return (showSinalNegativo && value < 0 ? "-" : "") + moneyController.text;
   }
 
   static String numToMoney(num value, {leftSymbol: 'R\$ '}) {
