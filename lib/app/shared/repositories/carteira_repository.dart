@@ -17,8 +17,7 @@ class CarteiraRepository implements ICarteiraRepository {
   FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
-  Future<List<CarteiraModel>> findCarteiras(String idUsuario,
-      {bool onlyCache = true}) async {
+  Future<List<CarteiraModel>> findCarteiras(String idUsuario, {bool onlyCache = true}) async {
     try {
       QuerySnapshot snapshot = await _db
           .collection(_table)
@@ -29,8 +28,7 @@ class CarteiraRepository implements ICarteiraRepository {
       });
     } catch (e) {
       throw ApplicationException(
-          'Falha ao consultar os ativos do usuário $idUsuario! ' +
-              e.toString());
+          'Falha ao consultar os ativos do usuário $idUsuario! ' + e.toString());
     }
   }
 
@@ -44,8 +42,7 @@ class CarteiraRepository implements ICarteiraRepository {
       return carteira;
     } on Exception catch (e) {
       throw ApplicationException(
-          'Falha ao criar nova carteira do usuário $idUsuario! ' +
-              e.toString());
+          'Falha ao criar nova carteira do usuário $idUsuario! ' + e.toString());
     }
   }
 
@@ -55,8 +52,7 @@ class CarteiraRepository implements ICarteiraRepository {
     try {
       await _db.collection(_table).doc(carteira.id).set(carteira.toMap());
     } on Exception catch (e) {
-      throw ApplicationException(
-          'Falha ao atualizar a carteira ${carteira.id}! ' + e.toString());
+      throw ApplicationException('Falha ao atualizar a carteira ${carteira.id}! ' + e.toString());
     }
   }
 
@@ -67,8 +63,7 @@ class CarteiraRepository implements ICarteiraRepository {
       DocumentReference ref = _db.collection(_table).doc(idCarteira);
       tr.delete(ref);
     } on Exception catch (e) {
-      throw ApplicationException(
-          'Falha ao deletar carteira $idCarteira! ' + e.toString());
+      throw ApplicationException('Falha ao deletar carteira $idCarteira! ' + e.toString());
     }
   }
 
@@ -79,8 +74,7 @@ class CarteiraRepository implements ICarteiraRepository {
       DocumentReference ref = _db.collection(_table).doc(carteira.id);
       tr.set(ref, carteira.toMap());
     } on Exception catch (e) {
-      throw ApplicationException(
-          'Falha ao atualizar a carteira ${carteira.id}! ' + e.toString());
+      throw ApplicationException('Falha ao atualizar a carteira ${carteira.id}! ' + e.toString());
     }
   }
 }
