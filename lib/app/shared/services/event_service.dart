@@ -8,7 +8,8 @@ import 'package:flutter/material.dart';
 abstract class IEventService {
   Future<void> saveAplicacaoRendaVariavel(AplicacaoRendaVariavel aplicacaoEvent);
   Future<List<AbstractEvent>> getAllEvents(String usuarioId, {bool onlyCache});
-  Future<List<AbstractEvent>> getEventsByPeriodo(String usuarioId, DateTime inicio, DateTime fim,
+  Future<List<AbstractEvent>> getEventsByCarteiraAndPeriodo(
+      String usuarioId, String carteiraId, DateTime inicio, DateTime fim,
       {bool onlyCache});
   Future<void> delete(AbstractEvent event);
 }
@@ -35,8 +36,10 @@ class EventService implements IEventService {
   }
 
   @override
-  Future<List<AbstractEvent>> getEventsByPeriodo(String usuarioId, DateTime inicio, DateTime fim,
+  Future<List<AbstractEvent>> getEventsByCarteiraAndPeriodo(
+      String usuarioId, String carteiraId, DateTime inicio, DateTime fim,
       {bool onlyCache = true}) {
-    return eventRepository.findEventosByPeriodo(usuarioId, inicio, fim, onlyCache: onlyCache);
+    return eventRepository.findEventosByCarteiraAndPeriodo(usuarioId, carteiraId, inicio, fim,
+        onlyCache: onlyCache);
   }
 }

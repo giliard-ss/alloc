@@ -36,7 +36,6 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
   }
 
   _body() {
-    String ultimaDataLida = "";
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,29 +43,62 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
           SizedBox(
             height: 20,
           ),
-          Container(
-            child: Observer(
-              builder: (_) {
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: controller.events.length,
-                  itemBuilder: (context, index) {
-                    AbstractEvent event = controller.events[index];
-                    if (event is AplicacaoRendaVariavel) {
-                      AplicacaoRendaVariavel aplicacao = event;
-                      bool createItemData =
-                          ultimaDataLida != DateUtil.dateToString(aplicacao.getData());
-                      ultimaDataLida = DateUtil.dateToString(aplicacao.getData());
-                      return createListItem(aplicacao, createItemData);
-                    }
-                    return Text(DateUtil.dateToString(event.getData()));
-                  },
-                );
-              },
-            ),
-          ),
+          createContent(),
         ],
+      ),
+    );
+  }
+
+  Widget createContent() {
+    return Column(
+      children: [
+        Observer(
+          builder: (_) {
+            return Visibility(
+              visible: controller.events.isEmpty,
+              child: createAvisoEventosEmpty(),
+            );
+          },
+        ),
+        Observer(
+          builder: (_) {
+            return Visibility(
+              visible: controller.events.isNotEmpty,
+              child: createExtratoContent(),
+            );
+          },
+        )
+      ],
+    );
+  }
+
+  Widget createAvisoEventosEmpty() {
+    return Center(
+      child: Text("Sem registros"),
+    );
+  }
+
+  Widget createExtratoContent() {
+    String ultimaDataLida = "";
+    return Container(
+      child: Observer(
+        builder: (_) {
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: controller.events.length,
+            itemBuilder: (context, index) {
+              AbstractEvent event = controller.events[index];
+              if (event is AplicacaoRendaVariavel) {
+                AplicacaoRendaVariavel aplicacao = event;
+                bool createItemData = ultimaDataLida != DateUtil.dateToString(aplicacao.getData());
+                ultimaDataLida = DateUtil.dateToString(aplicacao.getData());
+                return createListItem(aplicacao, createItemData);
+              }
+              return Text(DateUtil.dateToString(event.getData()));
+            },
+          );
+        },
       ),
     );
   }
@@ -132,7 +164,6 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
             ),
             MoneyTextWidget(
               color: Colors.black,
-              fontWeight: FontWeight.bold,
               value: aplicacao.valor,
               showSinal: false,
             )

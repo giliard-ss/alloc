@@ -464,6 +464,14 @@ class AppCore {
     return result;
   }
 
+  static bool existsAtivosNaCarteira(String idCarteira) {
+    return _ativosDTO.value
+        .where(
+          (e) => e.idCarteira == idCarteira,
+        )
+        .isNotEmpty;
+  }
+
   static List<AtivoModel> getAtivosModelByCarteira(String idCarteira) {
     List<AtivoModel> result = [];
     _ativosDTO.value

@@ -1,4 +1,5 @@
 import 'package:alloc/app/app_core.dart';
+import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
@@ -15,6 +16,7 @@ class ExtratoController = _ExtratoControllerBase with _$ExtratoController;
 
 abstract class _ExtratoControllerBase with Store {
   IEventService _eventService = Modular.get<EventService>();
+  CarteiraController _carteiraController = Modular.get<CarteiraController>();
   ReactionDisposer _carteirasReactDispose;
   @observable
   List<AbstractEvent> events = [];
@@ -31,6 +33,11 @@ abstract class _ExtratoControllerBase with Store {
   }
 
   Future<void> _loadEvents() async {
+    if (!AppCore.existsAtivosNaCarteira(_carteiraController.carteira.id)) {
+      events = [];
+      return;
+    }
+
     List<AbstractEvent> list = await getUltimosByQtdDias(qtdDiasOpcoes[0]);
 
     if (list.isEmpty) list = await getUltimosByQtdDias(qtdDiasOpcoes[1]);
@@ -42,7 +49,8 @@ abstract class _ExtratoControllerBase with Store {
   Future<List<AbstractEvent>> getUltimosByQtdDias(int qtdDias) async {
     DateTime inicio = DateTime.now().subtract(Duration(days: qtdDias));
     DateTime fim = DateTime.now();
-    return await _eventService.getEventsByPeriodo(AppCore.usuario.id, inicio, fim);
+    return await _eventService.getEventsByCarteiraAndPeriodo(
+        AppCore.usuario.id, _carteiraController.carteira.id, inicio, fim);
   }
 
   void _startCarteirasReaction() {

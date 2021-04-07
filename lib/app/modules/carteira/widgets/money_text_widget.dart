@@ -22,7 +22,7 @@ class MoneyTextWidget extends StatelessWidget {
 
   String getSinal() {
     if (!showSinal || value == 0) return "";
-    return value > 0 ? "+" : "-";
+    return value > 0 ? "+" : "";
   }
 
   definirCor() {

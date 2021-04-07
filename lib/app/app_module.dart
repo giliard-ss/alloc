@@ -30,7 +30,10 @@ class AppModule extends MainModule {
         Bind<IAlocacaoRepository>((i) => AlocacaoRepository()),
         Bind<IPreferenceService>((i) => PreferenceService()),
         Bind<ICarteiraService>((i) => CarteiraService(
-            carteiraRepository: i.get(), ativoRepository: i.get(), alocacaoRepository: i.get())),
+            carteiraRepository: i.get(),
+            ativoRepository: i.get(),
+            alocacaoRepository: i.get(),
+            eventRepository: i.get())),
         Bind<IAtivoService>((i) => AtivoService(ativoRepository: i.get())),
         Bind<IAlocacaoService>((i) => AlocacaoService(alocacaoRepository: i.get())),
         Bind<IEventService>((i) => EventService(ativoService: i.get(), eventRepository: i.get())),

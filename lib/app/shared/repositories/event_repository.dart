@@ -10,12 +10,14 @@ import 'package:uuid/uuid.dart';
 
 abstract class IEventRepository {
   Future<List<AbstractEvent>> findAllEventos(String usuarioId, {bool onlyCache});
-  Future<List<AbstractEvent>> findEventosByPeriodo(String usuarioId, DateTime inicio, DateTime fim,
+  Future<List<AbstractEvent>> findEventosByCarteiraAndPeriodo(
+      String usuarioId, String carteiraId, DateTime inicio, DateTime fim,
       {bool onlyCache});
   Future<AbstractEvent> findEventById(String id, {bool onlyCache});
   Future<String> saveTransaction(Transaction tr, AbstractEvent event);
   Future<void> save(AbstractEvent event);
   Future<void> delete(AbstractEvent event);
+  Future<void> deleteByTransactionAndCarteiraId(Transaction transaction, String carteiraId);
 }
 
 class EventRepository implements IEventRepository {
@@ -87,11 +89,28 @@ class EventRepository implements IEventRepository {
   }
 
   @override
-  Future<List<AbstractEvent>> findEventosByPeriodo(String usuarioId, DateTime inicio, DateTime fim,
+  Future<void> deleteByTransactionAndCarteiraId(Transaction transaction, String carteiraId) async {
+    await ConnectionUtil.checkConnection();
+    try {
+      QuerySnapshot querySnapshot =
+          await _db.collection(_table).where("carteiraId", isEqualTo: carteiraId).get();
+
+      querySnapshot.docs.forEach((QueryDocumentSnapshot doc) {
+        transaction.delete(doc.reference);
+      });
+    } catch (e) {
+      throw ApplicationException('Falha ao deletar evento' + e.toString());
+    }
+  }
+
+  @override
+  Future<List<AbstractEvent>> findEventosByCarteiraAndPeriodo(
+      String usuarioId, String carteiraId, DateTime inicio, DateTime fim,
       {bool onlyCache = true}) async {
     QuerySnapshot snapshot = await _db
         .collection(_table)
         .where("usuarioId", isEqualTo: usuarioId)
+        .where("carteiraId", isEqualTo: carteiraId)
         .where("data", isGreaterThanOrEqualTo: inicio.millisecondsSinceEpoch)
         .where("data", isLessThanOrEqualTo: fim.millisecondsSinceEpoch)
         .get(await CfSettrings.getOptions(onlyCache: onlyCache));
