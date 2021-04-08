@@ -6,13 +6,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class IAlocacaoRepository {
   Future<List<AlocacaoModel>> findAlocacoes(String idUsuario, {bool onlyCache});
-  Future<List<AlocacaoModel>> findByCarteira(String carteiraId,
-      {bool onlyCache});
-  Future<AlocacaoModel> saveTransaction(
-      Transaction tr, AlocacaoModel alocacaoModel);
+  Future<List<AlocacaoModel>> findByCarteira(String carteiraId, {bool onlyCache});
+  AlocacaoModel saveTransaction(Transaction tr, AlocacaoModel alocacaoModel);
   Future<void> update(AlocacaoModel alocacaoModel);
-  Future<void> updateTransaction(Transaction tr, AlocacaoModel alocacaoModel);
-  Future<void> deleteTransaction(Transaction tr, String idAlocacao);
+  void updateTransaction(Transaction tr, AlocacaoModel alocacaoModel);
+  void deleteTransaction(Transaction tr, String idAlocacao);
 }
 
 class AlocacaoRepository implements IAlocacaoRepository {
@@ -20,8 +18,7 @@ class AlocacaoRepository implements IAlocacaoRepository {
   FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
-  Future<List<AlocacaoModel>> findAlocacoes(String idUsuario,
-      {bool onlyCache = true}) async {
+  Future<List<AlocacaoModel>> findAlocacoes(String idUsuario, {bool onlyCache = true}) async {
     try {
       QuerySnapshot snapshot = await _db
           .collection(_table)
@@ -32,14 +29,12 @@ class AlocacaoRepository implements IAlocacaoRepository {
       });
     } catch (e) {
       throw ApplicationException(
-          'Falha ao consultar alocacoes do usuario $idUsuario! ' +
-              e.toString());
+          'Falha ao consultar alocacoes do usuario $idUsuario! ' + e.toString());
     }
   }
 
   @override
-  Future<List<AlocacaoModel>> findByCarteira(String carteiraId,
-      {bool onlyCache = true}) async {
+  Future<List<AlocacaoModel>> findByCarteira(String carteiraId, {bool onlyCache = true}) async {
     try {
       QuerySnapshot snapshot = await _db
           .collection(_table)
@@ -50,15 +45,12 @@ class AlocacaoRepository implements IAlocacaoRepository {
       });
     } catch (e) {
       throw ApplicationException(
-          'Falha ao consultar alocacoes da carteira $carteiraId! ' +
-              e.toString());
+          'Falha ao consultar alocacoes da carteira $carteiraId! ' + e.toString());
     }
   }
 
   @override
-  Future<AlocacaoModel> saveTransaction(
-      Transaction tr, AlocacaoModel alocacaoModel) async {
-    await ConnectionUtil.checkConnection();
+  AlocacaoModel saveTransaction(Transaction tr, AlocacaoModel alocacaoModel) {
     try {
       DocumentReference ref;
       if (alocacaoModel.id == null) {
@@ -71,20 +63,17 @@ class AlocacaoRepository implements IAlocacaoRepository {
       tr.set(ref, alocacaoModel.toMap());
       return alocacaoModel;
     } on Exception catch (e) {
-      throw ApplicationException(
-          'Falha ao salvar nova alocação! ' + e.toString());
+      throw ApplicationException('Falha ao salvar nova alocação! ' + e.toString());
     }
   }
 
   @override
-  Future<void> deleteTransaction(Transaction tr, String idAlocacao) async {
-    await ConnectionUtil.checkConnection();
+  void deleteTransaction(Transaction tr, String idAlocacao) {
     try {
       DocumentReference ref = _db.collection(_table).doc(idAlocacao);
       tr.delete(ref);
     } catch (e) {
-      throw ApplicationException(
-          'Falha ao salvar nova alocação! ' + e.toString());
+      throw ApplicationException('Falha ao salvar nova alocação! ' + e.toString());
     }
   }
 
@@ -92,26 +81,19 @@ class AlocacaoRepository implements IAlocacaoRepository {
   Future<void> update(AlocacaoModel alocacaoModel) async {
     await ConnectionUtil.checkConnection();
     try {
-      return _db
-          .collection(_table)
-          .doc(alocacaoModel.id)
-          .set(alocacaoModel.toMap());
+      return _db.collection(_table).doc(alocacaoModel.id).set(alocacaoModel.toMap());
     } on Exception catch (e) {
-      throw ApplicationException(
-          'Falha ao salvar nova alocação! ' + e.toString());
+      throw ApplicationException('Falha ao salvar nova alocação! ' + e.toString());
     }
   }
 
   @override
-  Future<void> updateTransaction(
-      Transaction tr, AlocacaoModel alocacaoModel) async {
-    await ConnectionUtil.checkConnection();
+  void updateTransaction(Transaction tr, AlocacaoModel alocacaoModel) {
     try {
       DocumentReference ref = _db.collection(_table).doc(alocacaoModel.id);
       tr.set(ref, alocacaoModel.toMap());
     } on Exception catch (e) {
-      throw ApplicationException(
-          'Falha ao salvar nova alocação! ' + e.toString());
+      throw ApplicationException('Falha ao salvar nova alocação! ' + e.toString());
     }
   }
 }

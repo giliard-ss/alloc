@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/adapters/firebase_adapter.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/repositories/ativo_repository.dart';
@@ -7,13 +8,13 @@ import 'package:flutter/material.dart';
 
 abstract class IAtivoService {
   Future<List<AtivoModel>> getAtivos(String usuarioId, {bool onlyCache});
-  Future<String> saveTransaction(Transaction tr, List<AtivoModel> ativos, bool autoAlocacao);
+  String saveTransaction(Transaction tr, List<AtivoModel> ativos, bool autoAlocacao);
   Future<AtivoModel> findById(String id, {bool onlyCache});
   Future<void> delete(AtivoModel ativoDeletar, List<AtivoModel> ativosAtualizar, bool autoAlocacao);
 }
 
 class AtivoService implements IAtivoService {
-  FirebaseFirestore _db = FirebaseFirestore.instance;
+  IFirebaseAdapter _firebaseAdapter = new FirebaseAdapter();
   final IAtivoRepository ativoRepository;
 
   AtivoService({@required this.ativoRepository});
@@ -24,7 +25,7 @@ class AtivoService implements IAtivoService {
   }
 
   @override
-  Future<String> saveTransaction(Transaction tr, List<AtivoModel> ativos, bool autoAlocacao) async {
+  String saveTransaction(Transaction tr, List<AtivoModel> ativos, bool autoAlocacao) {
     try {
       bool isAdicao = ativos.where((a) => a.id == null).isNotEmpty;
       if (isAdicao) {
@@ -42,7 +43,7 @@ class AtivoService implements IAtivoService {
       String idNovoAtivo;
       for (AtivoModel ativo in ativos) {
         bool ativoNovo = ativo.id == null;
-        String idAtivo = await ativoRepository.saveTransaction(tr, ativo);
+        String idAtivo = ativoRepository.saveTransaction(tr, ativo);
         if (ativoNovo) idNovoAtivo = idAtivo;
       }
       return idNovoAtivo;
@@ -80,10 +81,10 @@ class AtivoService implements IAtivoService {
       ativosAtualizar.forEach((a) => a.alocacao = media);
     }
 
-    return _db.runTransaction((tr) async {
-      await ativoRepository.deleteTransaction(tr, ativoDeletar);
+    return _firebaseAdapter.runTransaction((tr) async {
+      ativoRepository.deleteTransaction(tr, ativoDeletar);
       for (AtivoModel ativo in ativosAtualizar) {
-        await ativoRepository.saveTransaction(tr, ativo);
+        ativoRepository.saveTransaction(tr, ativo);
       }
     });
   }

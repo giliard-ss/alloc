@@ -1,4 +1,5 @@
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
+import 'package:alloc/app/shared/adapters/firebase_adapter.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
@@ -21,7 +22,7 @@ part 'configuracao_controller.g.dart';
 class ConfiguracaoController = _ConfiguracaoControllerBase with _$ConfiguracaoController;
 
 abstract class _ConfiguracaoControllerBase with Store {
-  FirebaseFirestore _db = FirebaseFirestore.instance;
+  IFirebaseAdapter _firebaseAdapter = new FirebaseAdapter();
   ICarteiraService _carteiraService = Modular.get<CarteiraService>();
   IAlocacaoService _alocacaoService = Modular.get<AlocacaoService>();
   CarteiraController _carteiraController = Modular.get();
@@ -89,13 +90,13 @@ abstract class _ConfiguracaoControllerBase with Store {
     try {
       bool notificarUpdateCarteira = false;
       bool notificarUpdateAlocacao = false;
-      await _db.runTransaction((tr) async {
-        notificarUpdateCarteira = await _atualizaCarteiraOuAlocacao(tr);
+      await _firebaseAdapter.runTransaction((Transaction transaction) async {
+        notificarUpdateCarteira = await _atualizaCarteiraOuAlocacao(transaction);
         //se nao atualizar a carteira, entao atualiza a alocacao
         notificarUpdateAlocacao = !notificarUpdateCarteira;
 
         if (alocacoes.isNotEmpty) {
-          await _alocacaoService.saveTransaction(tr, alocacoes, autoAlocacao);
+          _alocacaoService.saveTransaction(transaction, alocacoes, autoAlocacao);
           //await AppCore.notifyUpdateAlocacao();
           notificarUpdateAlocacao = true;
         }
@@ -117,12 +118,12 @@ abstract class _ConfiguracaoControllerBase with Store {
     if (!StringUtil.isEmpty(superiorId)) {
       AlocacaoDTO aloc = AppCore.getAlocacaoById(superiorId);
       aloc.autoAlocacao = autoAlocacao;
-      await _alocacaoService.updateTransaction(tr, aloc);
+      _alocacaoService.updateTransaction(tr, aloc);
       return false;
     } else {
       CarteiraModel carteira = CarteiraModel.fromMap(_carteiraController.carteira.toMap());
       carteira.autoAlocacao = autoAlocacao;
-      await _carteiraService.updateTransaction(tr, carteira);
+      _carteiraService.updateTransaction(tr, carteira);
       return true;
     }
   }

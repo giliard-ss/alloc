@@ -8,8 +8,8 @@ abstract class ICarteiraRepository {
   Future<List<CarteiraModel>> findCarteiras(String idUsuario, {bool onlyCache});
   Future<CarteiraModel> create(String idUsuario, String descricao);
   Future<void> update(CarteiraModel carteira);
-  Future<void> updateTransaction(Transaction tr, CarteiraModel carteira);
-  Future<void> deleteTransaction(Transaction tr, String idCarteira);
+  void updateTransaction(Transaction tr, CarteiraModel carteira);
+  void deleteTransaction(Transaction tr, String idCarteira);
 }
 
 class CarteiraRepository implements ICarteiraRepository {
@@ -57,8 +57,7 @@ class CarteiraRepository implements ICarteiraRepository {
   }
 
   @override
-  Future<void> deleteTransaction(Transaction tr, String idCarteira) async {
-    await ConnectionUtil.checkConnection();
+  void deleteTransaction(Transaction tr, String idCarteira) {
     try {
       DocumentReference ref = _db.collection(_table).doc(idCarteira);
       tr.delete(ref);
@@ -68,8 +67,7 @@ class CarteiraRepository implements ICarteiraRepository {
   }
 
   @override
-  Future<void> updateTransaction(Transaction tr, CarteiraModel carteira) async {
-    await ConnectionUtil.checkConnection();
+  void updateTransaction(Transaction tr, CarteiraModel carteira) {
     try {
       DocumentReference ref = _db.collection(_table).doc(carteira.id);
       tr.set(ref, carteira.toMap());

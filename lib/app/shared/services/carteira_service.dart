@@ -1,12 +1,12 @@
 import 'package:alloc/app/app_core.dart';
-import 'package:alloc/app/shared/models/abstract_event.dart';
+import 'package:alloc/app/shared/adapters/firebase_adapter.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
-import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/repositories/alocacao_repository.dart';
 import 'package:alloc/app/shared/repositories/ativo_repository.dart';
 import 'package:alloc/app/shared/repositories/carteira_repository.dart';
 import 'package:alloc/app/shared/repositories/event_repository.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -14,12 +14,12 @@ abstract class ICarteiraService {
   Future<List<CarteiraModel>> getCarteiras(String usuarioId, {bool onlyCache});
   Future<void> create(String descricao);
   Future<void> update(CarteiraModel carteira);
-  Future<void> updateTransaction(Transaction tr, CarteiraModel carteira);
+  void updateTransaction(Transaction tr, CarteiraModel carteira);
   Future<void> delete(String idCarteira);
 }
 
 class CarteiraService implements ICarteiraService {
-  FirebaseFirestore _db = FirebaseFirestore.instance;
+  IFirebaseAdapter _firebaseAdapter = new FirebaseAdapter();
   final CarteiraRepository carteiraRepository;
   final AtivoRepository ativoRepository;
   final AlocacaoRepository alocacaoRepository;
@@ -50,8 +50,8 @@ class CarteiraService implements ICarteiraService {
     //List<AtivoModel> ativos = await ativoRepository.findByCarteira(idCarteira);
     List<AlocacaoModel> alocacoes = await alocacaoRepository.findByCarteira(idCarteira);
 
-    return _db.runTransaction((Transaction transaction) async {
-/*for (AtivoModel a in ativos) {
+    return _firebaseAdapter.runTransaction((Transaction transaction) async {
+      /*for (AtivoModel a in ativos) {
         ativoRepository.deleteTransaction(tr, a);
       }*/
       eventRepository.deleteByTransactionAndCarteiraId(transaction, idCarteira);
@@ -65,7 +65,7 @@ class CarteiraService implements ICarteiraService {
   }
 
   @override
-  Future<void> updateTransaction(Transaction tr, CarteiraModel carteira) {
-    return carteiraRepository.updateTransaction(tr, carteira);
+  void updateTransaction(Transaction tr, CarteiraModel carteira) {
+    carteiraRepository.updateTransaction(tr, carteira);
   }
 }

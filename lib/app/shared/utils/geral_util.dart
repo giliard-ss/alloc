@@ -1,3 +1,5 @@
+import 'package:alloc/app/shared/utils/connection_util.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 
 class GeralUtil {

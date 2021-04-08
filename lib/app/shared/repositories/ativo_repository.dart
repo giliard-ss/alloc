@@ -1,15 +1,14 @@
 import 'package:alloc/app/shared/config/cf_settings.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
-import 'package:alloc/app/shared/utils/connection_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class IAtivoRepository {
   Future<List<AtivoModel>> findAtivos(String idUsuario, {onlyCache});
   Future<List<AtivoModel>> findByCarteira(String carteiraId, {onlyCache});
   Future<AtivoModel> findById(String id, {bool onlyCache});
-  Future<String> saveTransaction(Transaction tr, AtivoModel ativoModel);
-  Future<void> deleteTransaction(Transaction tr, AtivoModel ativoModel);
+  String saveTransaction(Transaction tr, AtivoModel ativoModel);
+  void deleteTransaction(Transaction tr, AtivoModel ativoModel);
 }
 
 class AtivoRepository implements IAtivoRepository {
@@ -59,8 +58,7 @@ class AtivoRepository implements IAtivoRepository {
   }
 
   @override
-  Future<String> saveTransaction(Transaction tr, AtivoModel ativoModel) async {
-    await ConnectionUtil.checkConnection();
+  String saveTransaction(Transaction tr, AtivoModel ativoModel) {
     try {
       DocumentReference ref;
       if (ativoModel.id == null) {
@@ -79,8 +77,7 @@ class AtivoRepository implements IAtivoRepository {
   }
 
   @override
-  Future<void> deleteTransaction(Transaction tr, AtivoModel ativoModel) async {
-    await ConnectionUtil.checkConnection();
+  void deleteTransaction(Transaction tr, AtivoModel ativoModel) {
     try {
       DocumentReference ref = _db.collection(_table).doc(ativoModel.id);
       tr.delete(ref);

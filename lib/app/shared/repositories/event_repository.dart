@@ -14,7 +14,7 @@ abstract class IEventRepository {
       String usuarioId, String carteiraId, DateTime inicio, DateTime fim,
       {bool onlyCache});
   Future<AbstractEvent> findEventById(String id, {bool onlyCache});
-  Future<String> saveTransaction(Transaction tr, AbstractEvent event);
+  String saveTransaction(Transaction tr, AbstractEvent event);
   Future<void> save(AbstractEvent event);
   Future<void> delete(AbstractEvent event);
   Future<void> deleteByTransactionAndCarteiraId(Transaction transaction, String carteiraId);
@@ -53,8 +53,7 @@ class EventRepository implements IEventRepository {
   }
 
   @override
-  Future<String> saveTransaction(Transaction tr, AbstractEvent novoEvento) async {
-    await ConnectionUtil.checkConnection();
+  String saveTransaction(Transaction tr, AbstractEvent novoEvento) {
     try {
       DocumentReference ref = _db.collection(_table).doc();
       novoEvento.setId(ref.id);
@@ -90,7 +89,6 @@ class EventRepository implements IEventRepository {
 
   @override
   Future<void> deleteByTransactionAndCarteiraId(Transaction transaction, String carteiraId) async {
-    await ConnectionUtil.checkConnection();
     try {
       QuerySnapshot querySnapshot =
           await _db.collection(_table).where("carteiraId", isEqualTo: carteiraId).get();
