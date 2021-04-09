@@ -45,6 +45,12 @@ class AppCore {
     _alocacaoService = Modular.get<AlocacaoService>();
     _eventService = Modular.get<EventService>();
     await _startListenerCotacoes();
+    loadAll();
+    //await _startListenerCotacoes();
+    _startReactionCotacoes();
+  }
+
+  static Future<void> loadAll() async {
     await _loadCarteiras();
     await _loadAtivos();
     //await _loadCotacoes();
@@ -53,8 +59,6 @@ class AppCore {
     await _loadAlocacoes();
     _refreshAlocacoesDTO();
     _refreshCarteiraDTO();
-    //await _startListenerCotacoes();
-    _startReactionCotacoes();
   }
 
   static Future<void> _loadAlocacoes({bool onlyCache = true}) async {
@@ -116,24 +120,9 @@ class AppCore {
       List<CarteiraModel> carteiras =
           await _carteiraService.getCarteiras(_usuario.id, onlyCache: onlyCache);
       List<CarteiraDTO> result = [];
-      carteiras.forEach((e) async {
-        e.totalDeposito = await getTotalDepositadoCarteira(e.id);
-        result.add(CarteiraDTO(e));
-      });
+      carteiras.forEach((e) => result.add(CarteiraDTO(e)));
       _carteirasDTO.value = result;
     });
-  }
-
-  static Future<double> getTotalDepositadoCarteira(String idCarteira) async {
-    List<AbstractEvent> depositos =
-        await _eventService.getEventsByTipoAndCarteira(usuario.id, EventoDeposito.name, idCarteira);
-
-    double total = 0;
-    depositos.forEach((e) {
-      EventoDeposito deposito = e;
-      total += deposito.valor;
-    });
-    return total;
   }
 
   // static Future<void> _refreshAtivos() async {
@@ -169,6 +158,10 @@ class AppCore {
   static Future<void> notifyAddDelCarteira() async {
     await _loadCarteiras(onlyCache: false);
     _refreshCarteiraDTO();
+  }
+
+  static Future<void> notifyAddDelEvent() async {
+    return loadAll();
   }
 
   static Future<void> notifyAddDelAtivo() async {

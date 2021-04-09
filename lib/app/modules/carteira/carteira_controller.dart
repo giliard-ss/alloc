@@ -8,6 +8,7 @@ import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/models/evento_deposito.dart';
+import 'package:alloc/app/shared/models/evento_saque.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
@@ -90,14 +91,14 @@ abstract class _CarteiraControllerBase with Store {
 
   Future<bool> salvarDeposito() async {
     try {
-      //CarteiraModel updated = CarteiraModel.fromMap(_carteira.toMap());
-      //updated.totalDeposito = updated.totalDeposito.toDouble() + valorDeposito;
+      if (valorDeposito == null || valorDeposito <= 0)
+        throw new ApplicationException("Valor de depósito inválido!");
+
       EventoDeposito deposito = new EventoDeposito(null, DateTime.now().millisecondsSinceEpoch,
           _carteira.id, AppCore.usuario.id, valorDeposito);
 
       _eventService.save(deposito);
 
-      //await _carteiraService.update(updated);
       await AppCore.notifyUpdateCarteira();
       return true;
     } on ApplicationException catch (e) {
@@ -111,14 +112,16 @@ abstract class _CarteiraControllerBase with Store {
 
   Future<bool> salvarSaque() async {
     try {
-      CarteiraModel updated = CarteiraModel.fromMap(_carteira.toMap());
-      updated.totalDeposito = updated.totalDeposito.toDouble() - valorSaque;
-      if (updated.totalDeposito < 0) {
-        errorDialog = "Saldo disponível ${_carteira.totalDeposito}.";
-        return false;
-      }
+      if (valorSaque == null || valorSaque <= 0)
+        throw new ApplicationException("Valor de saque inválido!");
 
-      await _carteiraService.update(updated);
+      if (carteira.saldo < valorSaque)
+        throw new ApplicationException("Valor de saque acima do saldo!");
+
+      EventoSaque saque = new EventoSaque(null, DateTime.now().millisecondsSinceEpoch, _carteira.id,
+          AppCore.usuario.id, valorSaque);
+
+      _eventService.save(saque);
       await AppCore.notifyUpdateCarteira();
       return true;
     } on ApplicationException catch (e) {

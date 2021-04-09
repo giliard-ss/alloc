@@ -3,6 +3,7 @@ import 'package:alloc/app/modules/extrato/widgets/extrato_item.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/models/evento_deposito.dart';
+import 'package:alloc/app/shared/models/evento_saque.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
@@ -108,6 +109,9 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
               if (event is EventoDeposito) {
                 return createDepositoListItem(event, createItemData);
               }
+              if (event is EventoSaque) {
+                return createSaqueListItem(event, createItemData);
+              }
               return Text(DateUtil.dateToString(event.getData()));
             },
           );
@@ -174,7 +178,7 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     );
   }
 
-  Widget createDepositoDescricao(EventoDeposito deposito) {
+  Widget createDescricaoItemApenasValor(double valor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -186,7 +190,7 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
           children: [
             MoneyTextWidget(
               color: Colors.black,
-              value: deposito.valor,
+              value: valor,
               showSinal: false,
             )
           ],
@@ -226,8 +230,17 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     return ExtratoItem(
       data: createItemData ? deposito.getData() : null,
       title: Text(deposito.getTipoEvento()),
-      subtitle: createDepositoDescricao(deposito),
+      subtitle: createDescricaoItemApenasValor(deposito.valor),
       onLongPress: () => _showEditarDialog(deposito),
+    );
+  }
+
+  Widget createSaqueListItem(EventoSaque saque, bool createItemData) {
+    return ExtratoItem(
+      data: createItemData ? saque.getData() : null,
+      title: Text(saque.getTipoEvento()),
+      subtitle: createDescricaoItemApenasValor(saque.valor),
+      onLongPress: () => _showEditarDialog(saque),
     );
   }
 }

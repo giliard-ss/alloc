@@ -61,7 +61,7 @@ abstract class _ExtratoControllerBase with Store {
   Future<String> excluir(AbstractEvent event) async {
     try {
       await _eventService.delete(event);
-      await AppCore.notifyAddDelAtivo();
+      await AppCore.notifyAddDelEvent();
       return null;
     } on ApplicationException catch (e) {
       return e.toString();

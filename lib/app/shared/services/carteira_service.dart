@@ -1,7 +1,10 @@
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/shared/adapters/firebase_adapter.dart';
+import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
+import 'package:alloc/app/shared/models/evento_deposito.dart';
+import 'package:alloc/app/shared/models/evento_saque.dart';
 import 'package:alloc/app/shared/repositories/alocacao_repository.dart';
 import 'package:alloc/app/shared/repositories/ativo_repository.dart';
 import 'package:alloc/app/shared/repositories/carteira_repository.dart';
@@ -31,8 +34,42 @@ class CarteiraService implements ICarteiraService {
       @required this.eventRepository});
 
   @override
-  Future<List<CarteiraModel>> getCarteiras(String usuarioId, {bool onlyCache = true}) {
-    return carteiraRepository.findCarteiras(usuarioId, onlyCache: onlyCache);
+  Future<List<CarteiraModel>> getCarteiras(String usuarioId, {bool onlyCache = true}) async {
+    List<CarteiraModel> carteiras =
+        await carteiraRepository.findCarteiras(usuarioId, onlyCache: onlyCache);
+
+    for (CarteiraModel carteira in carteiras) {
+      double totalDepositos = await _getTotalDepositadoCarteira(carteira);
+      double totalSaques = await _getTotalSacadoCarteira(carteira);
+
+      carteira.totalDeposito = totalDepositos - totalSaques;
+    }
+
+    return carteiras;
+  }
+
+  Future<double> _getTotalDepositadoCarteira(CarteiraModel carteiraModel) async {
+    List<AbstractEvent> depositos = await eventRepository.getEventsByTipoAndCarteira(
+        carteiraModel.idUsuario, EventoDeposito.name, carteiraModel.id);
+
+    double total = 0;
+    depositos.forEach((e) {
+      EventoDeposito deposito = e;
+      total += deposito.valor;
+    });
+    return total;
+  }
+
+  Future<double> _getTotalSacadoCarteira(CarteiraModel carteiraModel) async {
+    List<AbstractEvent> saques = await eventRepository.getEventsByTipoAndCarteira(
+        carteiraModel.idUsuario, EventoSaque.name, carteiraModel.id);
+
+    double total = 0;
+    saques.forEach((e) {
+      EventoSaque saque = e;
+      total += saque.valor;
+    });
+    return total;
   }
 
   @override
