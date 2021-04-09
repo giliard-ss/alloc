@@ -12,7 +12,7 @@ class EventoAplicacao extends Evento {
       : super(id, dataMilliSeconds, carteiraId, name, usuarioId);
 
   EventoAplicacao.fromMap(Map map)
-      : super(map['id'], map['data'], map['carteiraId'], map['tipo'], map['usuarioId']) {
+      : super(map['id'], map['data'], map['carteiraId'], map['tipoEvento'], map['usuarioId']) {
     this._valor = map['valor'];
     this._custos = map['custos'];
     this._tipoAtivo = map['tipoAtivo'];

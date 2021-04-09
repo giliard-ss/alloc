@@ -9,6 +9,7 @@ import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
+import 'package:alloc/app/shared/models/evento_deposito.dart';
 import 'package:alloc/app/shared/models/usuario_model.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
@@ -115,9 +116,24 @@ class AppCore {
       List<CarteiraModel> carteiras =
           await _carteiraService.getCarteiras(_usuario.id, onlyCache: onlyCache);
       List<CarteiraDTO> result = [];
-      carteiras.forEach((e) => result.add(CarteiraDTO(e)));
+      carteiras.forEach((e) async {
+        e.totalDeposito = await getTotalDepositadoCarteira(e.id);
+        result.add(CarteiraDTO(e));
+      });
       _carteirasDTO.value = result;
     });
+  }
+
+  static Future<double> getTotalDepositadoCarteira(String idCarteira) async {
+    List<AbstractEvent> depositos =
+        await _eventService.getEventsByTipoAndCarteira(usuario.id, EventoDeposito.name, idCarteira);
+
+    double total = 0;
+    depositos.forEach((e) {
+      EventoDeposito deposito = e;
+      total += deposito.valor;
+    });
+    return total;
   }
 
   // static Future<void> _refreshAtivos() async {

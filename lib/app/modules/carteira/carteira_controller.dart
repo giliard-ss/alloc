@@ -7,9 +7,11 @@ import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
+import 'package:alloc/app/shared/models/evento_deposito.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
+import 'package:alloc/app/shared/services/event_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -24,6 +26,7 @@ abstract class _CarteiraControllerBase with Store {
   IAlocacaoService _alocacaoService = Modular.get<AlocacaoService>();
   IAtivoService _ativoService = Modular.get<AtivoService>();
   ICarteiraService _carteiraService = Modular.get<CarteiraService>();
+  IEventService _eventService = Modular.get<EventService>();
 
   String novaAlocacaoDesc;
   double valorDeposito;
@@ -87,9 +90,14 @@ abstract class _CarteiraControllerBase with Store {
 
   Future<bool> salvarDeposito() async {
     try {
-      CarteiraModel updated = CarteiraModel.fromMap(_carteira.toMap());
-      updated.totalDeposito = updated.totalDeposito.toDouble() + valorDeposito;
-      await _carteiraService.update(updated);
+      //CarteiraModel updated = CarteiraModel.fromMap(_carteira.toMap());
+      //updated.totalDeposito = updated.totalDeposito.toDouble() + valorDeposito;
+      EventoDeposito deposito = new EventoDeposito(null, DateTime.now().millisecondsSinceEpoch,
+          _carteira.id, AppCore.usuario.id, valorDeposito);
+
+      _eventService.save(deposito);
+
+      //await _carteiraService.update(updated);
       await AppCore.notifyUpdateCarteira();
       return true;
     } on ApplicationException catch (e) {

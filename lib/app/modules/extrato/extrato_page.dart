@@ -1,12 +1,15 @@
 import 'package:alloc/app/modules/carteira/widgets/money_text_widget.dart';
+import 'package:alloc/app/modules/extrato/widgets/extrato_item.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
+import 'package:alloc/app/shared/models/evento_deposito.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'extrato_controller.dart';
@@ -36,16 +39,23 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
   }
 
   _body() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            height: 20,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Container(
+          height: constraints.maxHeight,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 20,
+                ),
+                createContent(),
+              ],
+            ),
           ),
-          createContent(),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -89,11 +99,14 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
             itemCount: controller.events.length,
             itemBuilder: (context, index) {
               AbstractEvent event = controller.events[index];
+              bool createItemData = ultimaDataLida != DateUtil.dateToString(event.getData());
+              ultimaDataLida = DateUtil.dateToString(event.getData());
+
               if (event is AplicacaoRendaVariavel) {
-                AplicacaoRendaVariavel aplicacao = event;
-                bool createItemData = ultimaDataLida != DateUtil.dateToString(aplicacao.getData());
-                ultimaDataLida = DateUtil.dateToString(aplicacao.getData());
-                return createListItem(aplicacao, createItemData);
+                return createAplicacaoListItem(event, createItemData);
+              }
+              if (event is EventoDeposito) {
+                return createDepositoListItem(event, createItemData);
               }
               return Text(DateUtil.dateToString(event.getData()));
             },
@@ -135,18 +148,6 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     );
   }
 
-  Widget createDataItem(DateTime data) {
-    return Column(
-      children: [
-        Text(
-          DateUtil.dateToString(data, mask: "dd"),
-          style: TextStyle(fontSize: 24),
-        ),
-        Text(DateUtil.dateToString(data, mask: "MMM").toUpperCase()),
-      ],
-    );
-  }
-
   Widget createAplicacaoDescricao(AplicacaoRendaVariavel aplicacao) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,6 +174,27 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     );
   }
 
+  Widget createDepositoDescricao(EventoDeposito deposito) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 10,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            MoneyTextWidget(
+              color: Colors.black,
+              value: deposito.valor,
+              showSinal: false,
+            )
+          ],
+        )
+      ],
+    );
+  }
+
   Widget createAplicacaoTitle(AplicacaoRendaVariavel aplicacao) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -191,48 +213,21 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     );
   }
 
-  Widget createAplicacaoItemComData(AplicacaoRendaVariavel aplicacao) {
-    return Column(
-      children: [
-        ListTile(
-          contentPadding: EdgeInsets.only(top: 10, bottom: 10, right: 10),
-          leading: createDataItem(aplicacao.getData()),
-          title: createAplicacaoTitle(aplicacao),
-          subtitle: createAplicacaoDescricao(aplicacao),
-          onLongPress: () {
-            _showEditarDialog(aplicacao);
-          },
-        ),
-        Divider(
-          height: 3,
-        )
-      ],
+  Widget createAplicacaoListItem(AplicacaoRendaVariavel aplicacao, bool createItemData) {
+    return ExtratoItem(
+      data: createItemData ? aplicacao.getData() : null,
+      title: createAplicacaoTitle(aplicacao),
+      subtitle: createAplicacaoDescricao(aplicacao),
+      onLongPress: () => _showEditarDialog(aplicacao),
     );
   }
 
-  Widget createAplicacaoItem(AplicacaoRendaVariavel aplicacao) {
-    return Column(
-      children: [
-        ListTile(
-          contentPadding: EdgeInsets.only(top: 10, bottom: 10, right: 10),
-          leading: Text(""),
-          title: createAplicacaoTitle(aplicacao),
-          subtitle: createAplicacaoDescricao(aplicacao),
-          onLongPress: () {
-            _showEditarDialog(aplicacao);
-          },
-        ),
-        Divider(
-          height: 3,
-        )
-      ],
+  Widget createDepositoListItem(EventoDeposito deposito, bool createItemData) {
+    return ExtratoItem(
+      data: createItemData ? deposito.getData() : null,
+      title: Text(deposito.getTipoEvento()),
+      subtitle: createDepositoDescricao(deposito),
+      onLongPress: () => _showEditarDialog(deposito),
     );
-  }
-
-  Widget createListItem(AplicacaoRendaVariavel aplicacao, bool createItemData) {
-    if (!createItemData) {
-      return createAplicacaoItem(aplicacao);
-    }
-    return createAplicacaoItemComData(aplicacao);
   }
 }

@@ -6,8 +6,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 abstract class IEventService {
-  Future<void> saveAplicacaoRendaVariavel(AplicacaoRendaVariavel aplicacaoEvent);
+  Future<void> save(AbstractEvent event);
   Future<List<AbstractEvent>> getAllEvents(String usuarioId, {bool onlyCache});
+  Future<List<AbstractEvent>> getEventsByTipoAndCarteira(
+      String usuarioId, String tipoEvento, String carteiraId,
+      {bool onlyCache});
   Future<List<AbstractEvent>> getEventsByCarteiraAndPeriodo(
       String usuarioId, String carteiraId, DateTime inicio, DateTime fim,
       {bool onlyCache});
@@ -21,13 +24,21 @@ class EventService implements IEventService {
   EventService({@required this.eventRepository, @required this.ativoService});
 
   @override
-  Future<void> saveAplicacaoRendaVariavel(AplicacaoRendaVariavel aplicacaoEvent) {
-    return eventRepository.save(aplicacaoEvent);
+  Future<void> save(AbstractEvent event) {
+    return eventRepository.save(event);
   }
 
   @override
   Future<List<AbstractEvent>> getAllEvents(String usuarioId, {bool onlyCache = true}) {
     return eventRepository.findAllEventos(usuarioId, onlyCache: onlyCache);
+  }
+
+  @override
+  Future<List<AbstractEvent>> getEventsByTipoAndCarteira(
+      String usuarioId, String tipoEvento, String carteiraId,
+      {bool onlyCache = true}) {
+    return eventRepository.getEventsByTipoAndCarteira(usuarioId, tipoEvento, carteiraId,
+        onlyCache: onlyCache);
   }
 
   @override

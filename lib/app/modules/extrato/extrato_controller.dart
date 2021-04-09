@@ -33,11 +33,6 @@ abstract class _ExtratoControllerBase with Store {
   }
 
   Future<void> _loadEvents() async {
-    if (!AppCore.existsAtivosNaCarteira(_carteiraController.carteira.id)) {
-      events = [];
-      return;
-    }
-
     List<AbstractEvent> list = await getUltimosByQtdDias(qtdDiasOpcoes[0]);
 
     if (list.isEmpty) list = await getUltimosByQtdDias(qtdDiasOpcoes[1]);

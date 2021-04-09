@@ -4,6 +4,7 @@ import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
+import 'package:alloc/app/shared/models/evento_deposito.dart';
 import 'package:alloc/app/shared/utils/connection_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
@@ -12,6 +13,9 @@ abstract class IEventRepository {
   Future<List<AbstractEvent>> findAllEventos(String usuarioId, {bool onlyCache});
   Future<List<AbstractEvent>> findEventosByCarteiraAndPeriodo(
       String usuarioId, String carteiraId, DateTime inicio, DateTime fim,
+      {bool onlyCache});
+  Future<List<AbstractEvent>> getEventsByTipoAndCarteira(
+      String usuarioId, String tipoEvento, String carteiraId,
       {bool onlyCache});
   Future<AbstractEvent> findEventById(String id, {bool onlyCache});
   String saveTransaction(Transaction tr, AbstractEvent event);
@@ -37,6 +41,21 @@ class EventRepository implements IEventRepository {
   }
 
   @override
+  Future<List<AbstractEvent>> getEventsByTipoAndCarteira(
+      String usuarioId, String tipoEvento, String carteiraId,
+      {bool onlyCache = true}) async {
+    QuerySnapshot snapshot = await _db
+        .collection(_table)
+        .where("usuarioId", isEqualTo: usuarioId)
+        .where("tipoEvento", isEqualTo: tipoEvento)
+        .where("carteiraId", isEqualTo: carteiraId)
+        .get(await CfSettrings.getOptions(onlyCache: onlyCache));
+    return List.generate(snapshot.docs.length, (i) {
+      return mapToEvent(snapshot.docs[i].data());
+    });
+  }
+
+  @override
   Future<AbstractEvent> findEventById(String id, {bool onlyCache = true}) async {
     DocumentSnapshot snapshot = await _db.collection(_table).doc(id).get();
 
@@ -45,6 +64,10 @@ class EventRepository implements IEventRepository {
   }
 
   AbstractEvent mapToEvent(Map map) {
+    if (map['tipoEvento'] == EventoDeposito.name) {
+      return EventoDeposito.fromMap(map);
+    }
+
     if (map['tipoEvento'] == EventoAplicacao.name &&
         TipoAtivo(map["tipoAtivo"]).isRendaVariavel()) {
       return AplicacaoRendaVariavel.fromMap(map);

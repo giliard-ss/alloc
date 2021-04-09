@@ -50,7 +50,7 @@ abstract class _AtivoControllerBase with Store {
       }
 
       AbstractEvent aplicacaoEvent = createEventAplicacaoRendaVariavel();
-      await _eventService.saveAplicacaoRendaVariavel(aplicacaoEvent);
+      await _eventService.save(aplicacaoEvent);
       await AppCore.notifyAddDelAtivo();
       return true;
     } on ApplicationException catch (e) {
