@@ -1,3 +1,4 @@
+import 'provento/provento_controller.dart';
 import 'package:alloc/app/modules/carteira/pages/configuracao/configuracao_page.dart';
 import 'package:alloc/app/modules/extrato/extrato_controller.dart';
 import 'package:alloc/app/modules/extrato/extrato_page.dart';
@@ -15,6 +16,7 @@ import 'carteira_page.dart';
 class CarteiraModule extends ChildModule {
   @override
   List<Bind> get binds => [
+        $ProventoController,
         $ConfiguracaoController,
         $AtivoController,
         $SubAlocacaoController,
@@ -24,8 +26,10 @@ class CarteiraModule extends ChildModule {
 
   @override
   List<ModularRouter> get routers => [
-        ModularRouter("/:id", child: (_, args) => CarteiraPage(args.params['id'])),
-        ModularRouter("/sub-alocacao/:id", child: (_, args) => SubAlocacaoPage(args.params['id'])),
+        ModularRouter("/:id",
+            child: (_, args) => CarteiraPage(args.params['id'])),
+        ModularRouter("/sub-alocacao/:id",
+            child: (_, args) => SubAlocacaoPage(args.params['id'])),
         ModularRouter("/ativo/:idAlocacao",
             child: (_, args) => AtivoPage(args.params['idAlocacao'])),
         ModularRouter("/ativo", child: (_, args) => AtivoPage(null)),

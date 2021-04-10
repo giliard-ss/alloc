@@ -1,8 +1,11 @@
 import 'package:alloc/app/modules/carteira/widgets/money_text_widget.dart';
 import 'package:alloc/app/modules/extrato/widgets/extrato_item.dart';
+import 'package:alloc/app/modules/extrato/widgets/extrato_item_descricao.dart';
+import 'package:alloc/app/modules/extrato/widgets/extrato_item_title.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/models/evento_deposito.dart';
+import 'package:alloc/app/shared/models/evento_provento.dart';
 import 'package:alloc/app/shared/models/evento_saque.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
@@ -112,6 +115,10 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
               if (event is EventoSaque) {
                 return createSaqueListItem(event, createItemData);
               }
+
+              if (event is EventoProvento) {
+                return createProventoListItem(event, createItemData);
+              }
               return Text(DateUtil.dateToString(event.getData()));
             },
           );
@@ -152,32 +159,6 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     );
   }
 
-  Widget createAplicacaoDescricao(AplicacaoRendaVariavel aplicacao) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          height: 10,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              aplicacao.qtdString +
-                  " x " +
-                  GeralUtil.doubleToMoney(aplicacao.precoUnitario).toString(),
-            ),
-            MoneyTextWidget(
-              color: Colors.black,
-              value: aplicacao.valor,
-              showSinal: false,
-            )
-          ],
-        )
-      ],
-    );
-  }
-
   Widget createDescricaoItemApenasValor(double valor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,30 +180,38 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     );
   }
 
-  Widget createAplicacaoTitle(AplicacaoRendaVariavel aplicacao) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        createAplicacaoTitleText(aplicacao.tipoEvento),
-        createAplicacaoTitleText(aplicacao.tipoAtivo),
-        createAplicacaoTitleText(aplicacao.papel)
-      ],
-    );
-  }
-
-  Widget createAplicacaoTitleText(String text) {
-    return Text(
-      text,
-      style: TextStyle(color: Colors.grey[600]),
-    );
-  }
-
   Widget createAplicacaoListItem(AplicacaoRendaVariavel aplicacao, bool createItemData) {
     return ExtratoItem(
       data: createItemData ? aplicacao.getData() : null,
-      title: createAplicacaoTitle(aplicacao),
-      subtitle: createAplicacaoDescricao(aplicacao),
+      title: ExtratoItemTitle(
+        text1: aplicacao.tipoEvento,
+        text2: aplicacao.tipoAtivo,
+        text3: aplicacao.papel,
+      ),
+      subtitle: ExtratoItemSubtitle(
+        text: aplicacao.qtdString +
+            " x " +
+            GeralUtil.doubleToMoney(aplicacao.precoUnitario).toString(),
+        valor: aplicacao.valor,
+      ),
       onLongPress: () => _showEditarDialog(aplicacao),
+    );
+  }
+
+  Widget createProventoListItem(EventoProvento provento, bool createItemData) {
+    return ExtratoItem(
+      data: createItemData ? provento.getData() : null,
+      title: ExtratoItemTitle(
+        text1: provento.tipoEvento,
+        text2: provento.tipoAtivo,
+        text3: provento.papel,
+      ),
+      subtitle: ExtratoItemSubtitle(
+        text:
+            provento.qtdString + " x " + GeralUtil.doubleToMoney(provento.precoUnitario).toString(),
+        valor: provento.valor,
+      ),
+      onLongPress: () => _showEditarDialog(provento),
     );
   }
 

@@ -5,6 +5,7 @@ import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/models/evento_deposito.dart';
+import 'package:alloc/app/shared/models/evento_provento.dart';
 import 'package:alloc/app/shared/models/evento_saque.dart';
 import 'package:alloc/app/shared/utils/connection_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -71,6 +72,10 @@ class EventRepository implements IEventRepository {
 
     if (map['tipoEvento'] == EventoSaque.name) {
       return EventoSaque.fromMap(map);
+    }
+
+    if (map['tipoEvento'] == EventoProvento.name) {
+      return EventoProvento.fromMap(map);
     }
 
     if (map['tipoEvento'] == EventoAplicacao.name &&

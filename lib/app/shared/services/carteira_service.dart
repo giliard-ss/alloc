@@ -4,6 +4,7 @@ import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/models/evento_deposito.dart';
+import 'package:alloc/app/shared/models/evento_provento.dart';
 import 'package:alloc/app/shared/models/evento_saque.dart';
 import 'package:alloc/app/shared/repositories/alocacao_repository.dart';
 import 'package:alloc/app/shared/repositories/ativo_repository.dart';
@@ -41,8 +42,9 @@ class CarteiraService implements ICarteiraService {
     for (CarteiraModel carteira in carteiras) {
       double totalDepositos = await _getTotalDepositadoCarteira(carteira);
       double totalSaques = await _getTotalSacadoCarteira(carteira);
+      double totalProventos = await _getTotalProventosCarteira(carteira);
 
-      carteira.totalDeposito = totalDepositos - totalSaques;
+      carteira.totalDeposito = totalDepositos + totalProventos - totalSaques;
     }
 
     return carteiras;
@@ -68,6 +70,18 @@ class CarteiraService implements ICarteiraService {
     saques.forEach((e) {
       EventoSaque saque = e;
       total += saque.valor;
+    });
+    return total;
+  }
+
+  Future<double> _getTotalProventosCarteira(CarteiraModel carteiraModel) async {
+    List<AbstractEvent> proventos = await eventRepository.getEventsByTipoAndCarteira(
+        carteiraModel.idUsuario, EventoProvento.name, carteiraModel.id);
+
+    double total = 0;
+    proventos.forEach((e) {
+      EventoProvento provento = e;
+      total += provento.valor;
     });
     return total;
   }

@@ -61,8 +61,7 @@ abstract class _HomeControllerBase with Store {
 
   void loadAcoes() {
     List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.isAcao).toList();
-    list.sort((e1, e2) =>
-        e2.cotacaoModel.variacaoHoje.compareTo(e1.cotacaoModel.variacaoHoje));
+    list.sort((e1, e2) => e2.cotacaoModel.variacaoHoje.compareTo(e1.cotacaoModel.variacaoHoje));
     if (list.length > 5) {
       list = list.sublist(0, 5);
     }
@@ -71,8 +70,7 @@ abstract class _HomeControllerBase with Store {
 
   void loadFiis() {
     List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.isFII).toList();
-    list.sort((e1, e2) =>
-        e2.cotacaoModel.variacaoHoje.compareTo(e1.cotacaoModel.variacaoHoje));
+    list.sort((e1, e2) => e2.cotacaoModel.variacaoHoje.compareTo(e1.cotacaoModel.variacaoHoje));
     if (list.length > 5) {
       list = list.sublist(0, 5);
     }
@@ -99,29 +97,24 @@ abstract class _HomeControllerBase with Store {
   }
 
   double getVariacaoTotalAcoes() {
-    return getVariacaoTotal(AppCore.allAtivos.where((e) => e.isAcao).toList(),
-        onlyHoje: true)[1];
+    return getVariacaoTotal(AppCore.allAtivos.where((e) => e.isAcao).toList(), onlyHoje: true)[1];
   }
 
   double getVariacaoTotalFiis() {
-    return getVariacaoTotal(AppCore.allAtivos.where((e) => e.isFII).toList(),
-        onlyHoje: true)[1];
+    return getVariacaoTotal(AppCore.allAtivos.where((e) => e.isFII).toList(), onlyHoje: true)[1];
   }
 
   double getVariacaoCarteira(String idCarteira) {
     return getVariacaoTotal(
         AppCore.allAtivos
-            .where((e) =>
-                e.idCarteira == idCarteira && e.cotacaoModel.variacao != null)
+            .where((e) => e.idCarteira == idCarteira && e.cotacaoModel.variacao != null)
             .toList(),
         onlyHoje: true)[1];
   }
 
   List getVariacaoPatrimonio() {
     return getVariacaoTotal(
-        AppCore.allAtivos
-            .where((e) => e.cotacaoModel.variacao != null)
-            .toList(),
+        AppCore.allAtivos.where((e) => e.cotacaoModel.variacao != null).toList(),
         onlyHoje: true);
   }
 
@@ -129,15 +122,13 @@ abstract class _HomeControllerBase with Store {
     double totalAbertura = 0.0;
     double totalAtual = 0.0;
     ativos.forEach((e) {
-      double precoAbertura = onlyHoje
-          ? e.cotacaoModel.precoAberturaHoje
-          : e.cotacaoModel.precoAbertura;
+      double precoAbertura =
+          onlyHoje ? e.cotacaoModel.precoAberturaHoje : e.cotacaoModel.precoAbertura;
       totalAbertura += precoAbertura * e.qtd;
       totalAtual += e.cotacaoModel.ultimo * e.qtd;
     });
 
-    double percentual =
-        GeralUtil.variacaoPercentualDeXparaY(totalAbertura, totalAtual);
+    double percentual = GeralUtil.variacaoPercentualDeXparaY(totalAbertura, totalAtual);
 
     return [
       GeralUtil.limitaCasasDecimais(totalAtual - totalAbertura),
@@ -192,8 +183,7 @@ abstract class _HomeControllerBase with Store {
   }
 
   String getLastUpdateCotacoes() {
-    List<AtivoDTO> list =
-        AppCore.allAtivos.where((e) => e.cotacaoModel.date != null).toList();
+    List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.cotacaoModel.date != null).toList();
     list.sort((a1, a2) => a2.cotacaoModel.date.compareTo(a1.cotacaoModel.date));
 
     if (list.isEmpty) return "";
@@ -202,8 +192,7 @@ abstract class _HomeControllerBase with Store {
     if (ativo.cotacaoModel.date == null ||
         !DateUtil.equals(ativo.cotacaoModel.date, DateTime.now())) return "";
 
-    Duration duration =
-        DateUtil.diferenca(ativo.cotacaoModel.date, DateTime.now()).abs();
+    Duration duration = DateUtil.diferenca(ativo.cotacaoModel.date, DateTime.now()).abs();
     if (duration.inDays > 0)
       return "(há ${duration.inDays} ${duration.inDays > 1 ? 'dias' : 'dia'})";
     if (duration.inHours > 0)
