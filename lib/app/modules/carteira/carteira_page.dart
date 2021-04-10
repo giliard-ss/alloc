@@ -89,6 +89,15 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
               ],
             ),
             value: "extrato"),
+        PopupMenuItem(
+            enabled: true,
+            child: Row(
+              children: [
+                Icon(Icons.article_outlined),
+                Text("Proventos"),
+              ],
+            ),
+            value: "provento")
       ],
       onSelected: (e) {
         if (e == 'excluirCarteira') {
@@ -100,6 +109,10 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
 
         if (e == 'extrato') {
           Modular.to.pushNamed("/carteira/extrato");
+        }
+
+        if (e == 'provento') {
+          Modular.to.pushNamed("/carteira/provento");
         }
 
         switch (e) {
