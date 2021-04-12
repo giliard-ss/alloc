@@ -248,15 +248,7 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
             SizedBox(
               height: 10,
             ),
-            Row(
-              children: [
-                Container(
-                  width: 180,
-                  child: Text("Rendimento Total"),
-                ),
-                Text("Variação Total")
-              ],
-            ),
+            Text("Valorização do Valor Aplicado"),
             SizedBox(
               height: 5,
             ),
@@ -265,11 +257,11 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
                 Container(
                   width: 180,
                   child: MoneyTextWidget(
-                    value: controller.carteira.rendimentoTotal,
+                    value: controller.carteira.valorizacaoTotal,
                   ),
                 ),
                 VariacaoPercentualWidget(
-                  value: controller.carteira.rendimentoTotalPercent,
+                  value: controller.carteira.valorizacaoTotalPercent,
                 )
               ],
             ),

@@ -26,22 +26,22 @@ class CarteiraDTO extends CarteiraModel {
     return super.totalDeposito.toDouble() + super.totalProventos.toDouble();
   }
 
-  double get totalAtualizado => _totalEntradaDinheiro() + rendimentoTotal;
+  double get totalAtualizado => _totalEntradaDinheiro() + valorizacaoTotal;
 
   ///retorna o total como se ja estivesse aportado (futuro)
   double getTotalAposAporte() {
     return _totalAportadoAtual + getTotalAportar();
   }
 
-  double get rendimentoTotal => _totalAportadoAtual - _totalAportado;
+  double get valorizacaoTotal => _totalAportadoAtual - _totalAportado;
 
-  double get rendimentoTotalPercent {
+  double get valorizacaoTotalPercent {
     if (totalAportado == 0) return 0;
-    return (rendimentoTotal * 100) / totalAportado;
+    return (valorizacaoTotal * 100) / totalAportado;
   }
 
-  String get rendimentoTotalPercentString {
-    String value = GeralUtil.limitaCasasDecimais(rendimentoTotalPercent).toString();
+  String get valorizacaoTotalPercentString {
+    String value = GeralUtil.limitaCasasDecimais(valorizacaoTotalPercent).toString();
     if (value.split('.')[1] == '0') {
       return value.split('.')[0];
     }
