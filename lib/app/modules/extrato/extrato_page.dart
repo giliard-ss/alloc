@@ -218,7 +218,9 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
   Widget createDepositoListItem(EventoDeposito deposito, bool createItemData) {
     return ExtratoItem(
       data: createItemData ? deposito.getData() : null,
-      title: Text(deposito.getTipoEvento()),
+      title: ExtratoItemTitle(
+        text1: deposito.getTipoEvento(),
+      ),
       subtitle: createDescricaoItemApenasValor(deposito.valor),
       onLongPress: () => _showEditarDialog(deposito),
     );
@@ -227,7 +229,9 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
   Widget createSaqueListItem(EventoSaque saque, bool createItemData) {
     return ExtratoItem(
       data: createItemData ? saque.getData() : null,
-      title: Text(saque.getTipoEvento()),
+      title: ExtratoItemTitle(
+        text1: saque.getTipoEvento(),
+      ),
       subtitle: createDescricaoItemApenasValor(saque.valor),
       onLongPress: () => _showEditarDialog(saque),
     );

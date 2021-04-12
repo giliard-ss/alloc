@@ -5,29 +5,28 @@ class CarteiraDTO extends CarteiraModel {
   double _totalAportado;
   double _totalAportadoAtual;
 
-  CarteiraDTO(CarteiraModel carteiraModel,
-      [this._totalAportado = 0, this._totalAportadoAtual = 0])
-      : super(
-            carteiraModel.id,
-            carteiraModel.idUsuario,
-            carteiraModel.descricao,
-            carteiraModel.totalDeposito,
-            carteiraModel.autoAlocacao);
+  CarteiraDTO(CarteiraModel carteiraModel, [this._totalAportado = 0, this._totalAportadoAtual = 0])
+      : super(carteiraModel.id, carteiraModel.idUsuario, carteiraModel.descricao,
+            carteiraModel.totalDeposito, carteiraModel.totalProventos, carteiraModel.autoAlocacao);
 
   CarteiraDTO clone() {
-    return CarteiraDTO(CarteiraModel.fromMap(super.toMap()),
-        this._totalAportado, this._totalAportadoAtual);
+    return CarteiraDTO(
+        CarteiraModel.fromMap(super.toMap()), this._totalAportado, this._totalAportadoAtual);
   }
 
   double get saldo {
-    return super.totalDeposito.toDouble() - _totalAportado;
+    return _totalEntradaDinheiro() - _totalAportado;
   }
 
   double getTotalAportar() {
-    return super.totalDeposito.toDouble() - _totalAportado;
+    return saldo - _totalAportado;
   }
 
-  double get totalAtualizado => super.totalDeposito + rendimentoTotal;
+  double _totalEntradaDinheiro() {
+    return super.totalDeposito.toDouble() + super.totalProventos.toDouble();
+  }
+
+  double get totalAtualizado => _totalEntradaDinheiro() + rendimentoTotal;
 
   ///retorna o total como se ja estivesse aportado (futuro)
   double getTotalAposAporte() {
@@ -42,8 +41,7 @@ class CarteiraDTO extends CarteiraModel {
   }
 
   String get rendimentoTotalPercentString {
-    String value =
-        GeralUtil.limitaCasasDecimais(rendimentoTotalPercent).toString();
+    String value = GeralUtil.limitaCasasDecimais(rendimentoTotalPercent).toString();
     if (value.split('.')[1] == '0') {
       return value.split('.')[0];
     }

@@ -203,6 +203,10 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
             Divider(
               height: 5,
             ),
+            _resumoRow("Total Proventos", controller.carteira.totalProventos),
+            Divider(
+              height: 5,
+            ),
             _resumoRow("Total Aplicado", controller.carteira.totalAportado),
             Divider(
               height: 5,

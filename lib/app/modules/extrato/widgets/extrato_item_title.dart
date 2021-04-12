@@ -13,7 +13,7 @@ class ExtratoItemTitle extends StatelessWidget {
 
     switch (qtdTextsNotNull) {
       case 1:
-        return Text(_getTextsNotNull()[0]);
+        return Text(_getTextsNotNull()[0], style: TextStyle(color: Colors.grey[600]));
       case 2:
         return createRow2Columns();
       case 3:

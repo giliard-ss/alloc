@@ -6,9 +6,11 @@ class CarteiraModel {
   String _idUsuario;
   String _descricao;
   num _totalDeposito;
+  num _totalProventos;
   bool _autoAlocacao;
 
-  CarteiraModel(this._id, this._idUsuario, this._descricao, this._totalDeposito,
+  CarteiraModel(
+      this._id, this._idUsuario, this._descricao, this._totalDeposito, this._totalProventos,
       [this._autoAlocacao = true]);
 
   CarteiraModel.fromMap(Map map) {
@@ -16,6 +18,7 @@ class CarteiraModel {
     this._descricao = map['descricao'];
     this._idUsuario = map['idUsuario'];
     this._totalDeposito = map['totalDeposito'];
+    this._totalProventos = map['totalProvento'];
     this._autoAlocacao = map['autoAlocacao'];
   }
 
@@ -25,6 +28,7 @@ class CarteiraModel {
       "descricao": this._descricao,
       "idUsuario": this._idUsuario,
       "totalDeposito": this._totalDeposito,
+      "totalProvento": this._totalProventos,
       "autoAlocacao": this._autoAlocacao
     };
   }
@@ -48,4 +52,8 @@ class CarteiraModel {
   num get totalDeposito => _totalDeposito;
 
   set totalDeposito(num value) => _totalDeposito = value;
+
+  num get totalProventos => _totalProventos;
+
+  set totalProventos(num value) => _totalProventos = value;
 }

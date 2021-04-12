@@ -44,7 +44,8 @@ class CarteiraService implements ICarteiraService {
       double totalSaques = await _getTotalSacadoCarteira(carteira);
       double totalProventos = await _getTotalProventosCarteira(carteira);
 
-      carteira.totalDeposito = totalDepositos + totalProventos - totalSaques;
+      carteira.totalDeposito = totalDepositos - totalSaques;
+      carteira.totalProventos = totalProventos;
     }
 
     return carteiras;
