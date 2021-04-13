@@ -1,14 +1,12 @@
 import 'package:alloc/app/app_core.dart';
-import 'package:alloc/app/modules/carteira/backup.dart';
-import 'package:alloc/app/modules/carteira/backup_model.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
+import 'package:alloc/app/shared/config/backup.dart';
+import 'package:alloc/app/shared/config/backup_vendas.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
-import 'package:alloc/app/shared/dtos/ativo_dto.dart';
-import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
-import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
+import 'package:alloc/app/shared/models/evento_venda_renda_variavel.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/services/event_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
@@ -51,7 +49,8 @@ abstract class _AtivoControllerBase with Store {
 
       AbstractEvent aplicacaoEvent = createEventAplicacaoRendaVariavel();
       await _eventService.save(aplicacaoEvent);
-      await AppCore.notifyAddDelAtivo();
+
+      await AppCore.notifyAddDelEvent();
       return true;
     } on ApplicationException catch (e) {
       error = e.toString();
@@ -60,6 +59,13 @@ abstract class _AtivoControllerBase with Store {
       LoggerUtil.error(e);
     }
     return false;
+  }
+
+  Future<void> backupVendas() async {
+    List<VendaRendaVariavel> vendas = BackupVendas.getVendas();
+    for (VendaRendaVariavel venda in vendas) {
+      await _eventService.save(venda);
+    }
   }
 
   AbstractEvent createEventAplicacaoRendaVariavel() {
@@ -105,78 +111,10 @@ abstract class _AtivoControllerBase with Store {
 
   @action
   Future<bool> vender() async {
-    try {
-      //List<AtivoModel> list = Backup.getAllAtivos();
-
-      //_ativoService.save(list, true);
-
-      //AppCore.allAtivos.forEach((e) => _ativoService.delete(e, [], false));
-      //await _excluirTodosAtivos();
-      //await _restaurarBackup();
-      //await AppCore.notifyAddDelAtivo();
-      return true;
-    } catch (e) {
+    try {} catch (e) {
       print(e);
       return false;
     }
-  }
-
-  _excluirTodosAtivos() async {
-    for (AtivoDTO ativo in AppCore.allAtivos) await _ativoService.delete(ativo, [], false);
-    return AppCore.notifyAddDelAtivo();
-  }
-
-  _restaurarBackup() async {
-    List<BackupModel> list = Backup.getAllAtivos();
-    List<AplicacaoRendaVariavel> variaveis = [];
-
-    list.where((e) => e.tipo == "ACAO").forEach((backup) {
-      AplicacaoRendaVariavel aplicacao = AplicacaoRendaVariavel.acao(
-          null,
-          backup.data,
-          backup.idCarteira,
-          backup.idUsuario,
-          backup.preco * backup.qtd,
-          backup.superiores,
-          backup.papel,
-          backup.qtd);
-      variaveis.add(aplicacao);
-    });
-
-    list.where((e) => e.tipo == "FII").forEach((backup) {
-      AplicacaoRendaVariavel aplicacao = AplicacaoRendaVariavel.fiis(
-          null,
-          backup.data,
-          backup.idCarteira,
-          backup.idUsuario,
-          backup.preco * backup.qtd,
-          backup.superiores,
-          backup.papel,
-          backup.qtd);
-      variaveis.add(aplicacao);
-    });
-
-    // list.where((e) => e.tipo == "ETF").forEach((backup) {
-    //   AplicacaoRendaVariavel aplicacao = AplicacaoRendaVariavel.etf(
-    //       null,
-    //       backup.data,
-    //       backup.idCarteira,
-    //       backup.idUsuario,
-    //       backup.preco * backup.qtd,
-    //       backup.superiores,
-    //       backup.papel,
-    //       backup.qtd);
-    //   variaveis.add(aplicacao);
-    // });
-
-    // for (AplicacaoRendaVariavel ap in variaveis) {
-    //   if (ap.superiores == null || ap.superiores == []) {
-    //     await _eventService.saveNovaAplicacaoVariavelFromCarteira(ap, ap.carteiraId, false);
-    //   } else {
-    //     await _eventService.saveNovaAplicacaoVariavelFromAlocacao(ap, ap.superiores[0], false);
-    //   }
-    // }
-    // return AppCore.notifyAddDelAtivo();
   }
 
   AlocacaoDTO _getAlocacaoDTO(String id) {

@@ -37,7 +37,7 @@ class CarteiraRepository implements ICarteiraRepository {
     await ConnectionUtil.checkConnection();
     try {
       DocumentReference ref = _db.collection(_table).doc();
-      CarteiraModel carteira = CarteiraModel(ref.id, idUsuario, descricao, 0, 0);
+      CarteiraModel carteira = CarteiraModel(ref.id, idUsuario, descricao, 0, 0, 0);
       await ref.set(carteira.toMap());
       return carteira;
     } on Exception catch (e) {

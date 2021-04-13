@@ -6,8 +6,14 @@ class CarteiraDTO extends CarteiraModel {
   double _totalAportadoAtual;
 
   CarteiraDTO(CarteiraModel carteiraModel, [this._totalAportado = 0, this._totalAportadoAtual = 0])
-      : super(carteiraModel.id, carteiraModel.idUsuario, carteiraModel.descricao,
-            carteiraModel.totalDeposito, carteiraModel.totalProventos, carteiraModel.autoAlocacao);
+      : super(
+            carteiraModel.id,
+            carteiraModel.idUsuario,
+            carteiraModel.descricao,
+            carteiraModel.totalDeposito,
+            carteiraModel.totalProventos,
+            carteiraModel.totalLucroVendas,
+            carteiraModel.autoAlocacao);
 
   CarteiraDTO clone() {
     return CarteiraDTO(
@@ -23,7 +29,9 @@ class CarteiraDTO extends CarteiraModel {
   }
 
   double _totalEntradaDinheiro() {
-    return super.totalDeposito.toDouble() + super.totalProventos.toDouble();
+    return super.totalDeposito.toDouble() +
+        super.totalProventos.toDouble() +
+        super.totalLucroVendas;
   }
 
   double get totalAtualizado => _totalEntradaDinheiro() + valorizacaoTotal;

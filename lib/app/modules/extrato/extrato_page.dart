@@ -7,6 +7,7 @@ import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/models/evento_deposito.dart';
 import 'package:alloc/app/shared/models/evento_provento.dart';
 import 'package:alloc/app/shared/models/evento_saque.dart';
+import 'package:alloc/app/shared/models/evento_venda_renda_variavel.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/dialog_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
@@ -109,6 +110,11 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
               if (event is AplicacaoRendaVariavel) {
                 return createAplicacaoListItem(event, createItemData);
               }
+
+              if (event is VendaRendaVariavel) {
+                return createVendaListItem(event, createItemData);
+              }
+
               if (event is EventoDeposito) {
                 return createDepositoListItem(event, createItemData);
               }
@@ -195,6 +201,22 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
         valor: aplicacao.valor,
       ),
       onLongPress: () => _showEditarDialog(aplicacao),
+    );
+  }
+
+  Widget createVendaListItem(VendaRendaVariavel venda, bool createItemData) {
+    return ExtratoItem(
+      data: createItemData ? venda.getData() : null,
+      title: ExtratoItemTitle(
+        text1: venda.tipoEvento,
+        text2: venda.tipoAtivo,
+        text3: venda.papel,
+      ),
+      subtitle: ExtratoItemSubtitle(
+        text: venda.qtdString + " x " + GeralUtil.doubleToMoney(venda.precoUnitario).toString(),
+        valor: venda.valor,
+      ),
+      onLongPress: () => _showEditarDialog(venda),
     );
   }
 

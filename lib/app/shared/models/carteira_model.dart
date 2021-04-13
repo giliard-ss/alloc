@@ -1,5 +1,3 @@
-import 'package:alloc/app/shared/utils/geral_util.dart';
-
 class CarteiraModel {
   String _id;
 
@@ -7,10 +5,11 @@ class CarteiraModel {
   String _descricao;
   num _totalDeposito;
   num _totalProventos;
+  num _totalLucroVendas;
   bool _autoAlocacao;
 
-  CarteiraModel(
-      this._id, this._idUsuario, this._descricao, this._totalDeposito, this._totalProventos,
+  CarteiraModel(this._id, this._idUsuario, this._descricao, this._totalDeposito,
+      this._totalProventos, this._totalLucroVendas,
       [this._autoAlocacao = true]);
 
   CarteiraModel.fromMap(Map map) {
@@ -19,6 +18,7 @@ class CarteiraModel {
     this._idUsuario = map['idUsuario'];
     this._totalDeposito = map['totalDeposito'];
     this._totalProventos = map['totalProvento'];
+    this._totalLucroVendas = map['totalLucroVendas'];
     this._autoAlocacao = map['autoAlocacao'];
   }
 
@@ -29,6 +29,7 @@ class CarteiraModel {
       "idUsuario": this._idUsuario,
       "totalDeposito": this._totalDeposito,
       "totalProvento": this._totalProventos,
+      "totalLucroVendas": this._totalLucroVendas,
       "autoAlocacao": this._autoAlocacao
     };
   }
@@ -56,4 +57,8 @@ class CarteiraModel {
   num get totalProventos => _totalProventos;
 
   set totalProventos(num value) => _totalProventos = value;
+
+  num get totalLucroVendas => _totalLucroVendas;
+
+  set totalLucroVendas(num value) => _totalLucroVendas = value;
 }
