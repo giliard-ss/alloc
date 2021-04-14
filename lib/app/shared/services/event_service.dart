@@ -1,8 +1,6 @@
 import 'package:alloc/app/shared/models/abstract_event.dart';
-import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/repositories/event_repository.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 abstract class IEventService {
@@ -11,6 +9,9 @@ abstract class IEventService {
   Future<List<AbstractEvent>> getEventsByTipoAndCarteira(
       String usuarioId, String tipoEvento, String carteiraId,
       {bool onlyCache});
+
+  Future<List<AbstractEvent>> getEventsByTipo(String usuarioId, String tipoEvento,
+      {bool onlyCache});
   Future<List<AbstractEvent>> getEventsByCarteiraAndPeriodo(
       String usuarioId, String carteiraId, DateTime inicio, DateTime fim,
       {bool onlyCache});
@@ -18,7 +19,6 @@ abstract class IEventService {
 }
 
 class EventService implements IEventService {
-  FirebaseFirestore _db = FirebaseFirestore.instance;
   IEventRepository eventRepository;
   IAtivoService ativoService;
   EventService({@required this.eventRepository, @required this.ativoService});
@@ -52,5 +52,11 @@ class EventService implements IEventService {
       {bool onlyCache = true}) {
     return eventRepository.findEventosByCarteiraAndPeriodo(usuarioId, carteiraId, inicio, fim,
         onlyCache: onlyCache);
+  }
+
+  @override
+  Future<List<AbstractEvent>> getEventsByTipo(String usuarioId, String tipoEvento,
+      {bool onlyCache = true}) {
+    return eventRepository.getEventsByTipo(usuarioId, tipoEvento, onlyCache: onlyCache);
   }
 }

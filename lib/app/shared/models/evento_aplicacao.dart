@@ -30,8 +30,6 @@ class EventoAplicacao extends Evento {
     return map;
   }
 
-  bool isRendaVariavel() {}
-
   double get valor => this._valor;
 
   set valor(double value) => this._valor = value;

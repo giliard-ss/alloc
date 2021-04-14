@@ -111,7 +111,7 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
                 return createAplicacaoListItem(event, createItemData);
               }
 
-              if (event is VendaRendaVariavel) {
+              if (event is VendaRendaVariavelEvent) {
                 return createVendaListItem(event, createItemData);
               }
 
@@ -204,7 +204,7 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     );
   }
 
-  Widget createVendaListItem(VendaRendaVariavel venda, bool createItemData) {
+  Widget createVendaListItem(VendaRendaVariavelEvent venda, bool createItemData) {
     return ExtratoItem(
       data: createItemData ? venda.getData() : null,
       title: ExtratoItemTitle(

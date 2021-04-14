@@ -20,7 +20,7 @@ abstract class _ExtratoControllerBase with Store {
   ReactionDisposer _carteirasReactDispose;
   @observable
   List<AbstractEvent> events = [];
-  List<int> qtdDiasOpcoes = [360, 15, 90];
+  List<int> qtdDiasOpcoes = [7, 15, 90];
 
   Future<void> init() async {
     try {

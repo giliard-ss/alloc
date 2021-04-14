@@ -27,6 +27,11 @@ class AplicacaoRendaVariavel extends EventoAplicacao implements AbstractEvent {
     return map;
   }
 
+  AplicacaoRendaVariavel(String id, DateTime data, String carteiraId, String usuarioId,
+      double valor, List<String> superiores, this._papel, this._qtd, {double custos = 0})
+      : super(id, data.millisecondsSinceEpoch, carteiraId, valor, custos, superiores,
+            TipoAtivo.byPapel(_papel).code, usuarioId);
+
   AplicacaoRendaVariavel.acao(String id, DateTime data, String carteiraId, String usuarioId,
       double valor, List<String> superiores, this._papel, this._qtd, {double custos = 0})
       : super(id, data.millisecondsSinceEpoch, carteiraId, valor, custos, superiores, "ACAO",

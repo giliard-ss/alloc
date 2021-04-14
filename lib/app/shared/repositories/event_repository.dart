@@ -21,6 +21,9 @@ abstract class IEventRepository {
   Future<List<AbstractEvent>> getEventsByTipoAndCarteira(
       String usuarioId, String tipoEvento, String carteiraId,
       {bool onlyCache});
+
+  Future<List<AbstractEvent>> getEventsByTipo(String usuarioId, String tipoEvento,
+      {bool onlyCache});
   Future<AbstractEvent> findEventById(String id, {bool onlyCache});
   String saveTransaction(Transaction tr, AbstractEvent event);
   Future<void> save(AbstractEvent event);
@@ -81,7 +84,7 @@ class EventRepository implements IEventRepository {
     }
 
     if (map['tipoEvento'] == EventoVenda.name && TipoAtivo(map["tipoAtivo"]).isRendaVariavel()) {
-      return VendaRendaVariavel.fromMap(map);
+      return VendaRendaVariavelEvent.fromMap(map);
     }
 
     if (map['tipoEvento'] == EventoAplicacao.name &&
@@ -150,6 +153,19 @@ class EventRepository implements IEventRepository {
         .where("carteiraId", isEqualTo: carteiraId)
         .where("data", isGreaterThanOrEqualTo: inicio.millisecondsSinceEpoch)
         .where("data", isLessThanOrEqualTo: fim.millisecondsSinceEpoch)
+        .get(await CfSettrings.getOptions(onlyCache: onlyCache));
+    return List.generate(snapshot.docs.length, (i) {
+      return mapToEvent(snapshot.docs[i].data());
+    });
+  }
+
+  @override
+  Future<List<AbstractEvent>> getEventsByTipo(String usuarioId, String tipoEvento,
+      {bool onlyCache = true}) async {
+    QuerySnapshot snapshot = await _db
+        .collection(_table)
+        .where("usuarioId", isEqualTo: usuarioId)
+        .where("tipoEvento", isEqualTo: tipoEvento)
         .get(await CfSettrings.getOptions(onlyCache: onlyCache));
     return List.generate(snapshot.docs.length, (i) {
       return mapToEvent(snapshot.docs[i].data());

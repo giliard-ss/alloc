@@ -4,10 +4,11 @@ class EventoVenda extends Evento {
   static final name = "VENDA";
   double _valor;
   double _custos;
+  List _superiores;
   String _tipoAtivo;
 
   EventoVenda(String id, int dataMilliSeconds, String carteiraId, this._valor, this._custos,
-      this._tipoAtivo, String usuarioId)
+      this._superiores, this._tipoAtivo, String usuarioId)
       : super(id, dataMilliSeconds, carteiraId, name, usuarioId);
 
   EventoVenda.fromMap(Map map)
@@ -15,6 +16,9 @@ class EventoVenda extends Evento {
     this._valor = map['valor'];
     this._custos = map['custos'];
     this._tipoAtivo = map['tipoAtivo'];
+    this._superiores = List.generate(map['superiores'].length, (i) {
+      return map['superiores'][i];
+    });
   }
 
   Map<String, dynamic> toMap() {
@@ -22,6 +26,7 @@ class EventoVenda extends Evento {
     map['valor'] = this._valor;
     map['custos'] = this._custos;
     map['tipoAtivo'] = this._tipoAtivo;
+    map['superiores'] = this._superiores;
     return map;
   }
 
@@ -29,11 +34,13 @@ class EventoVenda extends Evento {
 
   set valor(double value) => this._valor = value;
 
-  get custos => this._custos;
+  get custos => this._custos == null ? 0.0 : this._custos;
 
   set custos(valor) => this._custos = valor;
 
   get tipoAtivo => this._tipoAtivo;
 
   set tipoAtivo(value) => this._tipoAtivo = value;
+
+  get superiores => this._superiores;
 }

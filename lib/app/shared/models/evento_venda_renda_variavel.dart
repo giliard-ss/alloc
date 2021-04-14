@@ -3,22 +3,22 @@ import 'package:alloc/app/shared/models/evento_venda.dart';
 
 import 'abstract_event.dart';
 
-class VendaRendaVariavel extends EventoVenda implements AbstractEvent {
+class VendaRendaVariavelEvent extends EventoVenda implements AbstractEvent {
   String _papel;
   double _qtd;
   double _valorMedioCompra;
 
-  VendaRendaVariavel.fromMap(Map map)
+  VendaRendaVariavelEvent.fromMap(Map map)
       : super(map['id'], map['data'], map['carteiraId'], map['valor'], map['custos'],
-            map['tipoAtivo'], map['usuarioId']) {
+            map['superiores'], map['tipoAtivo'], map['usuarioId']) {
     this._papel = map['papel'];
     this._qtd = map['qtd'];
     this._valorMedioCompra = map['valorMedioCompra'];
   }
 
   @override
-  VendaRendaVariavel fromMap(Map map) {
-    return VendaRendaVariavel.fromMap(map);
+  VendaRendaVariavelEvent fromMap(Map map) {
+    return VendaRendaVariavelEvent.fromMap(map);
   }
 
   @override
@@ -30,25 +30,35 @@ class VendaRendaVariavel extends EventoVenda implements AbstractEvent {
     return map;
   }
 
-  VendaRendaVariavel.acao(String id, DateTime data, String carteiraId, String usuarioId,
-      this._valorMedioCompra, double valor, this._papel, this._qtd,
+  VendaRendaVariavelEvent(String id, DateTime data, String carteiraId, String usuarioId,
+      this._valorMedioCompra, double valor, List<String> superiores, this._papel, this._qtd,
       {double custos = 0})
-      : super(id, data.millisecondsSinceEpoch, carteiraId, valor, custos, "ACAO", usuarioId);
+      : super(id, data.millisecondsSinceEpoch, carteiraId, valor, custos, superiores,
+            TipoAtivo.byPapel(_papel).code, usuarioId);
 
-  VendaRendaVariavel.fiis(String id, DateTime data, String carteiraId, String usuarioId,
-      this._valorMedioCompra, double valor, this._papel, this._qtd,
+  VendaRendaVariavelEvent.acao(String id, DateTime data, String carteiraId, String usuarioId,
+      this._valorMedioCompra, double valor, List<String> superiores, this._papel, this._qtd,
       {double custos = 0})
-      : super(id, data.millisecondsSinceEpoch, carteiraId, valor, custos, "FIIS", usuarioId);
+      : super(id, data.millisecondsSinceEpoch, carteiraId, valor, custos, superiores, "ACAO",
+            usuarioId);
 
-  VendaRendaVariavel.criptomoeda(String id, DateTime data, String carteiraId, String usuarioId,
-      this._valorMedioCompra, double valor, this._papel, this._qtd,
+  VendaRendaVariavelEvent.fiis(String id, DateTime data, String carteiraId, String usuarioId,
+      this._valorMedioCompra, double valor, List<String> superiores, this._papel, this._qtd,
       {double custos = 0})
-      : super(id, data.millisecondsSinceEpoch, carteiraId, valor, custos, "CRIPTOMOEDA", usuarioId);
+      : super(id, data.millisecondsSinceEpoch, carteiraId, valor, custos, superiores, "FIIS",
+            usuarioId);
 
-  VendaRendaVariavel.etf(String id, DateTime data, String carteiraId, String usuarioId,
-      this._valorMedioCompra, double valor, this._papel, this._qtd,
+  VendaRendaVariavelEvent.criptomoeda(String id, DateTime data, String carteiraId, String usuarioId,
+      this._valorMedioCompra, double valor, List<String> superiores, this._papel, this._qtd,
       {double custos = 0})
-      : super(id, data.millisecondsSinceEpoch, carteiraId, valor, custos, "ETF", usuarioId);
+      : super(id, data.millisecondsSinceEpoch, carteiraId, valor, custos, superiores, "CRIPTOMOEDA",
+            usuarioId);
+
+  VendaRendaVariavelEvent.etf(String id, DateTime data, String carteiraId, String usuarioId,
+      this._valorMedioCompra, double valor, List<String> superiores, this._papel, this._qtd,
+      {double custos = 0})
+      : super(id, data.millisecondsSinceEpoch, carteiraId, valor, custos, superiores, "ETF",
+            usuarioId);
 
   String get papel => this._papel;
 

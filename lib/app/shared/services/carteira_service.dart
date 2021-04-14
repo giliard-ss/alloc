@@ -12,7 +12,6 @@ import 'package:alloc/app/shared/repositories/alocacao_repository.dart';
 import 'package:alloc/app/shared/repositories/ativo_repository.dart';
 import 'package:alloc/app/shared/repositories/carteira_repository.dart';
 import 'package:alloc/app/shared/repositories/event_repository.dart';
-import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -85,7 +84,7 @@ class CarteiraService implements ICarteiraService {
 
     double total = 0;
     vendas.forEach((e) {
-      if (e is VendaRendaVariavel) total += e.lucro;
+      if (e is VendaRendaVariavelEvent) total += e.lucro;
     });
     return total;
   }

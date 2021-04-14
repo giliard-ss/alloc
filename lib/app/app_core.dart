@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'package:alloc/app/shared/config/backup_vendas.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
+import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
+import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
@@ -9,11 +12,12 @@ import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/carteira_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
-import 'package:alloc/app/shared/models/evento_deposito.dart';
+import 'package:alloc/app/shared/models/evento_venda_renda_variavel.dart';
 import 'package:alloc/app/shared/models/usuario_model.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
+import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
@@ -44,6 +48,16 @@ class AppCore {
     _ativoService = Modular.get<AtivoService>();
     _alocacaoService = Modular.get<AlocacaoService>();
     _eventService = Modular.get<EventService>();
+
+    // List<AbstractEvent> events = BackupVendas.getVendas();
+
+    //for (AbstractEvent e in events) await _eventService.save(e);
+
+    //List<AbstractEvent> events = await _eventService.getEventsByTipoAndCarteira(
+    //    _usuario.id, "VENDA", "eyyokB82WciaQB1vf0C4");
+
+    //for (AbstractEvent e in events) await _eventService.delete(e);
+
     await _startListenerCotacoes();
     loadAll();
     //await _startListenerCotacoes();
@@ -265,21 +279,76 @@ class AppCore {
   }
 
   static Future<void> _loadAtivos({bool onlyCache = true}) async {
-    List<AbstractEvent> events = await _eventService.getAllEvents(usuario.id);
+    List<AtivoDTO> ativos = await _getAtivosAtuais();
+
+    ativos = _agruparAtivosPorPapel(ativos);
+
+    _ajustarPorcentagemDeAlocacaoDosAtivos(ativos);
+    runInAction(() {
+      _ativosDTO.value = ativos;
+    });
+  }
+
+  static Future<List<AbstractEvent>> _getEventosAplicacaoAndVendaOrdenado() async {
+    List<AbstractEvent> events =
+        await _eventService.getEventsByTipo(usuario.id, TipoEvento.APLICACAO.code);
+    events.addAll(await _eventService.getEventsByTipo(usuario.id, TipoEvento.VENDA.code));
+    events.sort((a, b) => a.getData().compareTo(b.getData()));
+    return events;
+  }
+
+  static AtivoDTO _convertEventToAtivoDTO(AbstractEvent event) {
+    AtivoModel model = AtivoModel.fromAplicacaoRendaVariavel(event);
+    CotacaoModel cotacao = getCotacao(model.papel);
+    return AtivoDTO(model, cotacao);
+  }
+
+  static Future<List<AtivoDTO>> _getAtivosAtuais() async {
+    List<AbstractEvent> events = await _getEventosAplicacaoAndVendaOrdenado();
     List<AtivoDTO> ativos = [];
 
     for (AbstractEvent event in events) {
       if (event is AplicacaoRendaVariavel) {
-        AtivoModel model = AtivoModel.fromAplicacaoRendaVariavel(event);
-        CotacaoModel cotacao = getCotacao(model.papel);
-        ativos.add(AtivoDTO(model, cotacao));
+        ativos.add(_convertEventToAtivoDTO(event));
+      }
+
+      if (event is VendaRendaVariavelEvent) {
+        _excludeAtivosJaVendidos(ativos, event);
       }
     }
-    ativos = _agruparAtivosPorPapel(ativos);
-    _ajustarAlocacaoDosAtivos(ativos);
-    runInAction(() {
-      _ativosDTO.value = ativos;
-    });
+    ativos.removeWhere((e) => e.qtd <= 0);
+    return ativos;
+  }
+
+  static void _excludeAtivosJaVendidos(List<AtivoDTO> ativos, VendaRendaVariavelEvent event) {
+    double qtdRemover = event.qtd;
+
+    for (int i = ativos.length - 1; i >= 0; i--) {
+      AtivoDTO a = ativos[i];
+      if (a.idCarteira != event.carteiraId) continue;
+      if (!_listEquals(a.superiores, event.superiores)) continue;
+      if (a.papel != event.papel) continue;
+
+      if (a.qtd >= qtdRemover) {
+        a.totalAplicado -= (a.precoMedio * qtdRemover);
+        a.qtd -= qtdRemover;
+
+        break;
+      } else {
+        qtdRemover -= a.qtd;
+        a.qtd = 0;
+        a.totalAplicado = 0;
+      }
+    }
+  }
+
+  static bool _listEquals(List list1, List list2) {
+    if (list1.isEmpty && list2.isEmpty) return true;
+    if (list1.length != list2.length) return false;
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i] != list2[i]) return false;
+    }
+    return true;
   }
 
   static List<AtivoDTO> _agruparAtivosPorPapel(List<AtivoDTO> ativos) {
@@ -299,7 +368,7 @@ class AppCore {
     return List<AtivoDTO>.from(GeralUtil.mapToList(temp));
   }
 
-  static void _ajustarAlocacaoDosAtivos(List<AtivoDTO> ativos) {
+  static void _ajustarPorcentagemDeAlocacaoDosAtivos(List<AtivoDTO> ativos) {
     Map<String, int> qtdPapeisPorAlocacao = _getQuantidadePapeisPorAlocacao(ativos);
     for (AtivoDTO ativo in ativos) {
       String alocacao = _getAllAlocacoesString(ativo);
@@ -501,6 +570,21 @@ class AppCore {
         )
         .forEach((e) => result.add(e.clone()));
     return result;
+  }
+
+  static AtivoDTO getAtivo(String carteiraId, String superiorId, String papel) {
+    AtivoDTO ativo = _ativosDTO.value.firstWhere(
+        (e) =>
+            (StringUtil.isEmpty(superiorId)
+                ? e.superiores.isEmpty
+                : e.superiores.contains(superiorId)) &&
+            e.idCarteira == carteiraId &&
+            e.papel == papel,
+        orElse: null);
+
+    if (ativo == null) throw new ApplicationException("Ativo não encontrado!");
+
+    return ativo.clone();
   }
 
   static List<AtivoModel> getAtivosModelByIdSuperior(String superiorId) {

@@ -1,13 +1,12 @@
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
-import 'package:alloc/app/shared/config/backup.dart';
 import 'package:alloc/app/shared/config/backup_vendas.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
+import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/models/evento_venda_renda_variavel.dart';
-import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/services/event_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
@@ -23,7 +22,6 @@ abstract class _AtivoControllerBase with Store {
   CarteiraController _carteiraController = Modular.get();
   AlocacaoDTO _alocacaoAtual;
   IEventService _eventService = Modular.get<EventService>();
-  IAtivoService _ativoService = Modular.get<AtivoService>();
 
   @observable
   String error = "";
@@ -33,6 +31,7 @@ abstract class _AtivoControllerBase with Store {
   String papel;
   double qtd;
   double preco;
+  double custos = 0.0;
 
   @action
   Future<bool> comprar() async {
@@ -62,14 +61,14 @@ abstract class _AtivoControllerBase with Store {
   }
 
   Future<void> backupVendas() async {
-    List<VendaRendaVariavel> vendas = BackupVendas.getVendas();
-    for (VendaRendaVariavel venda in vendas) {
+    List<VendaRendaVariavelEvent> vendas = BackupVendas.getVendas();
+    for (VendaRendaVariavelEvent venda in vendas) {
       await _eventService.save(venda);
     }
   }
 
   AbstractEvent createEventAplicacaoRendaVariavel() {
-    return AplicacaoRendaVariavel.acao(null, DateTime.now(), _carteiraController.carteira.id,
+    return AplicacaoRendaVariavel(null, DateTime.now(), _carteiraController.carteira.id,
         AppCore.usuario.id, preco * qtd, getIdSuperiores(), papel, qtd);
   }
 
@@ -111,10 +110,42 @@ abstract class _AtivoControllerBase with Store {
 
   @action
   Future<bool> vender() async {
-    try {} catch (e) {
-      print(e);
-      return false;
+    try {
+      if (!papelValido) {
+        error = "Papel não encontrado.";
+        return false;
+      }
+
+      if (preco == 0 || preco == null) {
+        error = "Informe a cotação!";
+        return false;
+      }
+
+      AtivoDTO ativo = AppCore.getAtivo(
+          _carteiraController.carteira.id, _alocacaoAtual == null ? "" : _alocacaoAtual.id, papel);
+
+      AbstractEvent venda = VendaRendaVariavelEvent(
+          null,
+          DateTime.now(),
+          _carteiraController.carteira.id,
+          AppCore.usuario.id,
+          ativo.precoMedio * qtd,
+          preco * qtd,
+          getIdSuperiores(),
+          papel,
+          qtd,
+          custos: custos);
+
+      await _eventService.save(venda);
+      await AppCore.notifyAddDelEvent();
+      return true;
+    } on ApplicationException catch (e) {
+      error = e.toString();
+    } catch (e) {
+      error = "Falha ao finalizar venda!";
+      LoggerUtil.error(e);
     }
+    return false;
   }
 
   AlocacaoDTO _getAlocacaoDTO(String id) {
