@@ -120,7 +120,7 @@ class CarteiraService implements ICarteiraService {
       /*for (AtivoModel a in ativos) {
         ativoRepository.deleteTransaction(tr, a);
       }*/
-      eventRepository.deleteByTransactionAndCarteiraId(transaction, idCarteira);
+      eventRepository.deleteTransactionByCarteira(transaction, idCarteira);
 
       for (AlocacaoModel a in alocacoes) {
         alocacaoRepository.deleteTransaction(transaction, a.id);

@@ -3,6 +3,7 @@ import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
+import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
@@ -134,13 +135,10 @@ abstract class _CarteiraControllerBase with Store {
 
   Future<String> excluir(AtivoDTO ativoDTO) async {
     try {
-      List<AtivoDTO> list = List.from(ativos);
-      list = list.where((e) => e.id != ativoDTO.id).toList();
-
-      List<AtivoModel> models = [];
-      list.forEach((e) => models.add(e.getModel()));
-      await _ativoService.delete(ativoDTO.getModel(), models, _carteira.autoAlocacao);
-      await AppCore.notifyAddDelAtivo();
+      List<AbstractEvent> events = await _eventService.getEventsByCarteiraAndPapel(
+          AppCore.usuario.id, _carteira.id, ativoDTO.papel);
+      await _eventService.deleteAll(events);
+      await AppCore.notifyAddDelEvent();
       return null;
     } on ApplicationException catch (e) {
       return e.toString();

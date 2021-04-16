@@ -59,7 +59,7 @@ class AppCore {
     //for (AbstractEvent e in events) await _eventService.delete(e);
 
     await _startListenerCotacoes();
-    loadAll();
+    await loadAll();
     //await _startListenerCotacoes();
     _startReactionCotacoes();
   }

@@ -21,14 +21,20 @@ abstract class IEventRepository {
   Future<List<AbstractEvent>> getEventsByTipoAndCarteira(
       String usuarioId, String tipoEvento, String carteiraId,
       {bool onlyCache});
-
+  Future<List<AbstractEvent>> getEventsByCarteiraAndAlocacaoAndPapel(
+      String usuarioId, String carteiraId, String idAlocacao, String papel,
+      {bool onlyCache});
+  Future<List<AbstractEvent>> getEventsByCarteiraAndPapel(
+      String usuarioId, String carteiraId, String papel,
+      {bool onlyCache});
   Future<List<AbstractEvent>> getEventsByTipo(String usuarioId, String tipoEvento,
       {bool onlyCache});
   Future<AbstractEvent> findEventById(String id, {bool onlyCache});
   String saveTransaction(Transaction tr, AbstractEvent event);
   Future<void> save(AbstractEvent event);
   Future<void> delete(AbstractEvent event);
-  Future<void> deleteByTransactionAndCarteiraId(Transaction transaction, String carteiraId);
+  Future<void> deleteTransactionByCarteira(Transaction transaction, String carteiraId);
+  void deleteTransaction(Transaction transaction, AbstractEvent event);
 }
 
 class EventRepository implements IEventRepository {
@@ -130,7 +136,7 @@ class EventRepository implements IEventRepository {
   }
 
   @override
-  Future<void> deleteByTransactionAndCarteiraId(Transaction transaction, String carteiraId) async {
+  Future<void> deleteTransactionByCarteira(Transaction transaction, String carteiraId) async {
     try {
       QuerySnapshot querySnapshot =
           await _db.collection(_table).where("carteiraId", isEqualTo: carteiraId).get();
@@ -170,5 +176,46 @@ class EventRepository implements IEventRepository {
     return List.generate(snapshot.docs.length, (i) {
       return mapToEvent(snapshot.docs[i].data());
     });
+  }
+
+  @override
+  Future<List<AbstractEvent>> getEventsByCarteiraAndAlocacaoAndPapel(
+      String usuarioId, String carteiraId, String alocacaoId, String papel,
+      {bool onlyCache = true}) async {
+    QuerySnapshot snapshot = await _db
+        .collection(_table)
+        .where("usuarioId", isEqualTo: usuarioId)
+        .where("carteiraId", isEqualTo: carteiraId)
+        .where("superiores", arrayContains: alocacaoId)
+        .where("papel", isEqualTo: papel)
+        .get(await CfSettrings.getOptions(onlyCache: onlyCache));
+    return List.generate(snapshot.docs.length, (i) {
+      return mapToEvent(snapshot.docs[i].data());
+    });
+  }
+
+  @override
+  Future<List<AbstractEvent>> getEventsByCarteiraAndPapel(
+      String usuarioId, String carteiraId, String papel,
+      {bool onlyCache}) async {
+    QuerySnapshot snapshot = await _db
+        .collection(_table)
+        .where("usuarioId", isEqualTo: usuarioId)
+        .where("carteiraId", isEqualTo: carteiraId)
+        .where("papel", isEqualTo: papel)
+        .get(await CfSettrings.getOptions(onlyCache: onlyCache));
+    return List.generate(snapshot.docs.length, (i) {
+      return mapToEvent(snapshot.docs[i].data());
+    });
+  }
+
+  @override
+  void deleteTransaction(Transaction transaction, AbstractEvent event) {
+    try {
+      DocumentReference reference = _db.collection(_table).doc(event.getId());
+      transaction.delete(reference);
+    } catch (e) {
+      throw ApplicationException('Falha ao deletar evento' + e.toString());
+    }
   }
 }
