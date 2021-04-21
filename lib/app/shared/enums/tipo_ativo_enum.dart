@@ -22,19 +22,26 @@ class TipoAtivo {
   }
 
   TipoAtivo.byPapel(String papel) {
-    if (allAcoes().where((e) => e == papel).isNotEmpty) {
+    if (_allAcoes().where((e) => e == papel).isNotEmpty) {
       this._code = TipoAtivo.ACAO.code;
       return;
     }
-    if (allFiis().where((e) => e == papel).isNotEmpty) {
+    if (_allFiis().where((e) => e == papel).isNotEmpty) {
       this._code = TipoAtivo.FIIS.code;
       return;
     }
-    if (allETFsBR().where((e) => e == papel).isNotEmpty) {
+    if (_allETFsBR().where((e) => e == papel).isNotEmpty) {
       this._code = TipoAtivo.ETF.code;
       return;
     }
     throw ApplicationException("Tipo não identificado: " + papel);
+  }
+
+  static List<String> allTickets() {
+    List<String> all = _allAcoes();
+    all.addAll(_allFiis());
+    all.addAll(_allETFsBR());
+    return all;
   }
 
   static TipoAtivo get ACAO => TipoAtivo(_codigoAcao());
@@ -74,7 +81,7 @@ class TipoAtivo {
     return _codigos[4];
   }
 
-  List<String> allETFsBR() {
+  static List<String> _allETFsBR() {
     return [
       'BBSD11',
       'XBOV11',
@@ -96,7 +103,7 @@ class TipoAtivo {
     ];
   }
 
-  List<String> allFiis() {
+  static List<String> _allFiis() {
     return [
       'CXCO11',
       'GTWR11',
@@ -424,7 +431,7 @@ class TipoAtivo {
     ];
   }
 
-  List<String> allAcoes() {
+  static List<String> _allAcoes() {
     return [
       'AALR3',
       'ABCB4',

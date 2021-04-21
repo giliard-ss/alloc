@@ -3,6 +3,7 @@ import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/shared/config/backup_vendas.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
+import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
@@ -68,8 +69,8 @@ abstract class _AtivoControllerBase with Store {
   }
 
   AbstractEvent createEventAplicacaoRendaVariavel() {
-    return AplicacaoRendaVariavel(null, DateTime.now(), _carteiraController.carteira.id,
-        AppCore.usuario.id, preco * qtd, getIdSuperiores(), papel, qtd);
+    return AplicacaoRendaVariavel(null, data, _carteiraController.carteira.id, AppCore.usuario.id,
+        preco * qtd, getIdSuperiores(), papel, qtd);
   }
 
   @computed
@@ -84,7 +85,7 @@ abstract class _AtivoControllerBase with Store {
 
   List<String> getSugestoes(String text) {
     if (text.trim().isEmpty || text.trim().length < 2) return null;
-    return AppCore.allPapeis
+    return TipoAtivo.allTickets()
         .where((e) => e.toUpperCase().indexOf(text.trim().toUpperCase()) >= 0)
         .toList();
   }
@@ -124,16 +125,8 @@ abstract class _AtivoControllerBase with Store {
       AtivoDTO ativo = AppCore.getAtivo(
           _carteiraController.carteira.id, _alocacaoAtual == null ? "" : _alocacaoAtual.id, papel);
 
-      AbstractEvent venda = VendaRendaVariavelEvent(
-          null,
-          DateTime.now(),
-          _carteiraController.carteira.id,
-          AppCore.usuario.id,
-          ativo.precoMedio * qtd,
-          preco * qtd,
-          getIdSuperiores(),
-          papel,
-          qtd,
+      AbstractEvent venda = VendaRendaVariavelEvent(null, data, _carteiraController.carteira.id,
+          AppCore.usuario.id, ativo.precoMedio * qtd, preco * qtd, getIdSuperiores(), papel, qtd,
           custos: custos);
 
       await _eventService.save(venda);
