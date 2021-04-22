@@ -75,7 +75,7 @@ abstract class _AtivoControllerBase with Store {
 
   @computed
   bool get papelValido {
-    return AppCore.allPapeis.where((e) => e == papel).isNotEmpty;
+    return TipoAtivo.allTickets().where((e) => e == papel).isNotEmpty;
   }
 
   @action

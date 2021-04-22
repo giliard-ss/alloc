@@ -281,7 +281,7 @@ class AppCore {
   static Future<void> _loadAtivos({bool onlyCache = true}) async {
     List<AtivoDTO> ativos = await _getAtivosAtuais();
 
-    ativos = _agruparAtivosPorPapel(ativos);
+    ativos = _agruparAtivosPorPapelAndAlocacao(ativos);
 
     _ajustarPorcentagemDeAlocacaoDosAtivos(ativos);
     runInAction(() {
@@ -309,7 +309,8 @@ class AppCore {
 
     for (AbstractEvent event in events) {
       if (event is AplicacaoRendaVariavel) {
-        ativos.add(_convertEventToAtivoDTO(event));
+        AtivoDTO ativoDTO = _convertEventToAtivoDTO(event);
+        ativos.add(ativoDTO);
       }
 
       if (event is VendaRendaVariavelEvent) {
@@ -351,10 +352,27 @@ class AppCore {
     return true;
   }
 
-  static List<AtivoDTO> _agruparAtivosPorPapel(List<AtivoDTO> ativos) {
+  static List<AtivoDTO> _agruparAtivosPorPapelAndAlocacao(List<AtivoDTO> ativos) {
     Map<String, AtivoDTO> temp = {};
     for (AtivoDTO ativo in ativos) {
       String key = _getKeyAtivoByPapelAndAlocacoes(ativo);
+
+      if (temp.containsKey(key)) {
+        AtivoDTO ativoTemp = temp[key];
+        ativoTemp.totalAplicado += ativo.totalAplicado;
+        ativoTemp.qtd += ativo.qtd;
+        temp[key] = ativoTemp;
+      } else {
+        temp[key] = ativo;
+      }
+    }
+    return List<AtivoDTO>.from(GeralUtil.mapToList(temp));
+  }
+
+  static List<AtivoDTO> _agruparAtivosPorPapel(List<AtivoDTO> ativos) {
+    Map<String, AtivoDTO> temp = {};
+    for (AtivoDTO ativo in ativos) {
+      String key = ativo.papel;
 
       if (temp.containsKey(key)) {
         AtivoDTO ativoTemp = temp[key];
@@ -522,7 +540,8 @@ class AppCore {
 
   static List<AtivoDTO> get allAtivos {
     List<AtivoDTO> result = [];
-    _ativosDTO.value.forEach((e) => result.add(e.clone()));
+    List<AtivoDTO> ativosAgrupados = _agruparAtivosPorPapel(_ativosDTO.value);
+    ativosAgrupados.forEach((e) => result.add(e.clone()));
     return result;
   }
 

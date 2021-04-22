@@ -60,7 +60,7 @@ abstract class _HomeControllerBase with Store {
   }
 
   void loadAcoes() {
-    List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.isAcao).toList();
+    List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.isAcao || e.isETF).toList();
     list.sort((e1, e2) => e2.cotacaoModel.variacaoHoje.compareTo(e1.cotacaoModel.variacaoHoje));
     if (list.length > 5) {
       list = list.sublist(0, 5);
@@ -97,7 +97,8 @@ abstract class _HomeControllerBase with Store {
   }
 
   double getVariacaoTotalAcoes() {
-    return getVariacaoTotal(AppCore.allAtivos.where((e) => e.isAcao).toList(), onlyHoje: true)[1];
+    return getVariacaoTotal(AppCore.allAtivos.where((e) => e.isAcao || e.isETF).toList(),
+        onlyHoje: true)[1];
   }
 
   double getVariacaoTotalFiis() {
@@ -126,6 +127,10 @@ abstract class _HomeControllerBase with Store {
           onlyHoje ? e.cotacaoModel.precoAberturaHoje : e.cotacaoModel.precoAbertura;
       totalAbertura += precoAbertura * e.qtd;
       totalAtual += e.cotacaoModel.ultimo * e.qtd;
+      print("papel: " + e.papel);
+      print("abertura: " + precoAbertura.toString() + " qtd: " + e.qtd.toString());
+      print("atual: " + e.cotacaoModel.ultimo.toString() + " qtd: " + e.qtd.toString());
+      print("======================================================");
     });
 
     double percentual = GeralUtil.variacaoPercentualDeXparaY(totalAbertura, totalAtual);
