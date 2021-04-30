@@ -48,4 +48,9 @@ class EventoDeposito extends Evento implements AbstractEvent {
   void setId(String id) {
     super.id = id;
   }
+
+  @override
+  double getValor() {
+    return _valor;
+  }
 }

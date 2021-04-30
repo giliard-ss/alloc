@@ -26,8 +26,7 @@ class AppWidget extends StatelessWidget {
           appBarTheme: AppBarTheme(
             elevation: 0,
           ),
-          buttonTheme: ButtonThemeData(
-              minWidth: double.infinity, buttonColor: Color(0xff24509d))),
+          buttonTheme: ButtonThemeData(minWidth: double.infinity, buttonColor: Color(0xff24509d))),
       initialRoute: '/',
       onGenerateRoute: Modular.generateRoute,
       builder: (BuildContext context, Widget widget) {

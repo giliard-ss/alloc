@@ -127,10 +127,6 @@ abstract class _HomeControllerBase with Store {
           onlyHoje ? e.cotacaoModel.precoAberturaHoje : e.cotacaoModel.precoAbertura;
       totalAbertura += precoAbertura * e.qtd;
       totalAtual += e.cotacaoModel.ultimo * e.qtd;
-      print("papel: " + e.papel);
-      print("abertura: " + precoAbertura.toString() + " qtd: " + e.qtd.toString());
-      print("atual: " + e.cotacaoModel.ultimo.toString() + " qtd: " + e.qtd.toString());
-      print("======================================================");
     });
 
     double percentual = GeralUtil.variacaoPercentualDeXparaY(totalAbertura, totalAtual);

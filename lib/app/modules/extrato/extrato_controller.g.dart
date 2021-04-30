@@ -34,10 +34,55 @@ mixin _$ExtratoController on _ExtratoControllerBase, Store {
     });
   }
 
+  final _$_mesAnoAtom = Atom(name: '_ExtratoControllerBase._mesAno');
+
+  @override
+  DateTime get _mesAno {
+    _$_mesAnoAtom.reportRead();
+    return super._mesAno;
+  }
+
+  @override
+  set _mesAno(DateTime value) {
+    _$_mesAnoAtom.reportWrite(value, super._mesAno, () {
+      super._mesAno = value;
+    });
+  }
+
+  final _$resumoAtom = Atom(name: '_ExtratoControllerBase.resumo');
+
+  @override
+  List<ExtratoResumoDTO> get resumo {
+    _$resumoAtom.reportRead();
+    return super.resumo;
+  }
+
+  @override
+  set resumo(List<ExtratoResumoDTO> value) {
+    _$resumoAtom.reportWrite(value, super.resumo, () {
+      super.resumo = value;
+    });
+  }
+
+  final _$_ExtratoControllerBaseActionController =
+      ActionController(name: '_ExtratoControllerBase');
+
+  @override
+  void selectMesAno(DateTime value) {
+    final _$actionInfo = _$_ExtratoControllerBaseActionController.startAction(
+        name: '_ExtratoControllerBase.selectMesAno');
+    try {
+      return super.selectMesAno(value);
+    } finally {
+      _$_ExtratoControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''
-events: ${events}
+events: ${events},
+resumo: ${resumo}
     ''';
   }
 }

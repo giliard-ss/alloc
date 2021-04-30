@@ -4,4 +4,5 @@ abstract class AbstractEvent extends IRepository {
   String getId();
   DateTime getData();
   String getTipoEvento();
+  double getValor();
 }

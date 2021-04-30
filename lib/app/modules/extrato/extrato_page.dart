@@ -1,4 +1,5 @@
 import 'package:alloc/app/modules/carteira/widgets/money_text_widget.dart';
+import 'package:alloc/app/modules/extrato/dtos/extrato_resumo_dto.dart';
 import 'package:alloc/app/modules/extrato/widgets/extrato_item.dart';
 import 'package:alloc/app/modules/extrato/widgets/extrato_item_descricao.dart';
 import 'package:alloc/app/modules/extrato/widgets/extrato_item_title.dart';
@@ -17,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'extrato_controller.dart';
 
 class ExtratoPage extends StatefulWidget {
@@ -67,6 +69,7 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
   Widget createContent() {
     return Column(
       children: [
+        createDataSelect(),
         Observer(
           builder: (_) {
             return Visibility(
@@ -87,6 +90,33 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     );
   }
 
+  Widget createDataSelect() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Observer(
+          builder: (_) {
+            return Text(DateUtil.dateToString(controller.mesAno, mask: "MMMM/y").toUpperCase());
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.calendar_today),
+          onPressed: () {
+            showMonthPicker(
+              context: context,
+              firstDate: DateTime(1900),
+              lastDate: DateTime(2100),
+              initialDate: controller.mesAno,
+              locale: Locale("pt"),
+            ).then((DateTime date) {
+              controller.selectMesAno(date);
+            });
+          },
+        )
+      ],
+    );
+  }
+
   Widget createAvisoEventosEmpty() {
     return Center(
       child: Text("Sem registros"),
@@ -94,6 +124,37 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
   }
 
   Widget createExtratoContent() {
+    return Column(
+      children: [createExtratoResumo(), createExtratoEvents()],
+    );
+  }
+
+  Widget createExtratoResumo() {
+    return Card(
+      child: Observer(
+        builder: (_) {
+          return ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: controller.resumo.length,
+              itemBuilder: (context, index) {
+                ExtratoResumoDTO resumo = controller.resumo[index];
+                return ListTile(
+                  dense: true,
+                  title: Text(resumo.descricao),
+                  trailing: MoneyTextWidget(
+                    value: resumo.valor,
+                    showSinal: false,
+                    color: Colors.black,
+                  ),
+                );
+              });
+        },
+      ),
+    );
+  }
+
+  Widget createExtratoEvents() {
     String ultimaDataLida = "";
     return Container(
       child: Observer(

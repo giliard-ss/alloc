@@ -65,4 +65,12 @@ class DateUtil {
   static Duration diferenca(DateTime d1, DateTime d2) {
     return d1.difference(d2);
   }
+
+  static DateTime getUltimaDataHoraDoMesByDate(DateTime date) {
+    return DateTime(date.year, date.month + 1, 0, 23, 59, 59, 999);
+  }
+
+  static DateTime getPrimeiraDataHoraDoMesByDate(DateTime date) {
+    return DateTime(date.year, date.month, 1, 0, 0, 0, 0, 0);
+  }
 }

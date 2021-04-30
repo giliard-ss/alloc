@@ -88,4 +88,9 @@ class AplicacaoRendaVariavel extends EventoAplicacao implements AbstractEvent {
   String getTipoEvento() {
     return super.tipoEvento;
   }
+
+  @override
+  double getValor() {
+    return super.valor;
+  }
 }

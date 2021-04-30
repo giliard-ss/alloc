@@ -98,4 +98,9 @@ class VendaRendaVariavelEvent extends EventoVenda implements AbstractEvent {
   String getTipoEvento() {
     return super.tipoEvento;
   }
+
+  @override
+  double getValor() {
+    return super.valor;
+  }
 }

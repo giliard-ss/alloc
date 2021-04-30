@@ -1,10 +1,10 @@
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
-import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
+import 'package:alloc/app/modules/extrato/dtos/extrato_resumo_dto.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
-import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/services/event_service.dart';
+import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -20,10 +20,14 @@ abstract class _ExtratoControllerBase with Store {
   ReactionDisposer _carteirasReactDispose;
   @observable
   List<AbstractEvent> events = [];
-  List<int> qtdDiasOpcoes = [7, 15, 90];
+  @observable
+  DateTime _mesAno;
+  @observable
+  List<ExtratoResumoDTO> resumo;
 
   Future<void> init() async {
     try {
+      _mesAno = DateTime.now();
       await _loadEvents();
       _startCarteirasReaction();
     } catch (e, stacktrace) {
@@ -33,17 +37,30 @@ abstract class _ExtratoControllerBase with Store {
   }
 
   Future<void> _loadEvents() async {
-    List<AbstractEvent> list = await getUltimosByQtdDias(qtdDiasOpcoes[0]);
+    List<AbstractEvent> events = await getUltimosByQtdDias();
+    events.sort((AbstractEvent a, AbstractEvent b) => b.getData().compareTo(a.getData()));
 
-    if (list.isEmpty) list = await getUltimosByQtdDias(qtdDiasOpcoes[1]);
-    if (list.isEmpty) list = await getUltimosByQtdDias(qtdDiasOpcoes[2]);
-    list.sort((AbstractEvent a, AbstractEvent b) => b.getData().compareTo(a.getData()));
-    events = list;
+    resumo = _createResumoByEvents(events);
+    this.events = events;
   }
 
-  Future<List<AbstractEvent>> getUltimosByQtdDias(int qtdDias) async {
-    DateTime inicio = DateTime.now().subtract(Duration(days: qtdDias));
-    DateTime fim = DateTime.now();
+  List<ExtratoResumoDTO> _createResumoByEvents(List<AbstractEvent> events) {
+    Map resumo = new Map();
+
+    events.forEach((AbstractEvent i) {
+      if (!resumo.containsKey(i.getTipoEvento())) {
+        resumo[i.getTipoEvento()] = 0;
+      }
+      resumo[i.getTipoEvento()] = resumo[i.getTipoEvento()] + i.getValor();
+    });
+    return resumo.entries.map((entry) => ExtratoResumoDTO(entry.key, entry.value)).toList();
+  }
+
+  Future<List<AbstractEvent>> getUltimosByQtdDias() async {
+    DateTime inicio = DateUtil.getPrimeiraDataHoraDoMesByDate(_mesAno);
+    DateTime fim = DateUtil.getUltimaDataHoraDoMesByDate(_mesAno);
+    print(inicio);
+    print(fim);
     return await _eventService.getEventsByCarteiraAndPeriodo(
         AppCore.usuario.id, _carteiraController.carteira.id, inicio, fim);
   }
@@ -70,4 +87,13 @@ abstract class _ExtratoControllerBase with Store {
       return "Falha ao exlcuir!";
     }
   }
+
+  @action
+  void selectMesAno(DateTime value) {
+    _mesAno = value;
+    events = [];
+    _loadEvents();
+  }
+
+  get mesAno => _mesAno;
 }
