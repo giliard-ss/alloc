@@ -1,6 +1,7 @@
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
+import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -11,8 +12,13 @@ import 'provento_controller.dart';
 
 class ProventoPage extends StatefulWidget {
   final String title;
+  final String id;
 
-  const ProventoPage({Key key, this.title = "Proventos"}) : super(key: key);
+  const ProventoPage({
+    this.id,
+    Key key,
+    this.title = "Proventos",
+  }) : super(key: key);
 
   @override
   _ProventoPageState createState() => _ProventoPageState();
@@ -20,12 +26,19 @@ class ProventoPage extends StatefulWidget {
 
 class _ProventoPageState extends ModularState<ProventoPage, ProventoController> {
   //use 'controller' variable to access controller
-  TextEditingController _controller =
+  TextEditingController _dataController =
       TextEditingController(text: DateUtil.dateToString(DateTime.now()));
   var maskFormatter =
       new MaskTextInputFormatter(mask: '##/##/####', filter: {"#": RegExp(r'[0-9]')});
   final _moneyController = new MoneyMaskedTextController(leftSymbol: "R\$ ");
-  final TextEditingController _typeAheadController = TextEditingController();
+  final TextEditingController _papelController = TextEditingController();
+  TextEditingController _qtdController = TextEditingController();
+
+  @override
+  void initState() {
+    controller.id = widget.id;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +46,12 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
         appBar: AppBar(
           title: Text(widget.title),
         ),
-        body: Container(
-          padding: EdgeInsets.all(10),
-          child: _body(),
-        ));
+        body: WidgetUtil.futureBuild(controller.init, () {
+          return Container(
+            padding: EdgeInsets.all(10),
+            child: _body(),
+          );
+        }));
   }
 
   _body() {
@@ -64,58 +79,15 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
           SizedBox(
             height: 10,
           ),
-          Observer(
-            builder: (_) {
-              return TypeAheadField(
-                hideOnEmpty: true,
-                textFieldConfiguration: TextFieldConfiguration(
-                  controller: _typeAheadController,
-                  keyboardType: TextInputType.text,
-                  onChanged: (text) => controller.setPapel(text.toUpperCase()),
-                  autofocus: true,
-                  decoration: InputDecoration(
-                      errorText: StringUtil.isEmpty(controller.papel) || controller.papelValido
-                          ? null
-                          : "",
-                      border: OutlineInputBorder(),
-                      labelText: "Papel"),
-                ),
-                suggestionsCallback: (pattern) {
-                  return controller.getSugestoes(pattern);
-                },
-                itemBuilder: (context, suggestion) {
-                  return ListTile(
-                    title: Text(suggestion),
-                  );
-                },
-                onSuggestionSelected: (suggestion) {
-                  this._typeAheadController.text = suggestion;
-                  controller.papel = suggestion.toUpperCase();
-                },
-              );
-            },
-          ),
+          _createPapelTextField(),
           SizedBox(
             height: 10,
           ),
-          TextField(
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
-            onChanged: (text) => controller.qtd = double.parse(text),
-            decoration:
-                InputDecoration(labelText: "Quantidade", border: const OutlineInputBorder()),
-          ),
+          _createQtdTextField(),
           SizedBox(
             height: 10,
           ),
-          TextField(
-            decoration:
-                InputDecoration(labelText: "Valor Total", border: const OutlineInputBorder()),
-            controller: _moneyController,
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
-              controller.valorTotal = _moneyController.numberValue;
-            },
-          ),
+          _createValorTextField(),
           SizedBox(
             height: 10,
           ),
@@ -136,14 +108,71 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
     );
   }
 
+  Widget _createValorTextField() {
+    _moneyController.text = controller.valorTotal != null ? controller.valorTotal.toString() : null;
+    return TextField(
+      decoration: InputDecoration(labelText: "Valor Total", border: const OutlineInputBorder()),
+      controller: _moneyController,
+      keyboardType: TextInputType.number,
+      onChanged: (value) {
+        controller.valorTotal = _moneyController.numberValue;
+      },
+    );
+  }
+
+  Widget _createQtdTextField() {
+    _qtdController.text = controller.qtd != null ? controller.qtd.toString() : null;
+    return TextField(
+      controller: _qtdController,
+      keyboardType: TextInputType.numberWithOptions(decimal: true),
+      onChanged: (text) => controller.qtd = double.parse(text),
+      decoration: InputDecoration(labelText: "Quantidade", border: const OutlineInputBorder()),
+    );
+  }
+
+  Widget _createPapelTextField() {
+    _papelController.text = controller.papel;
+    return Observer(
+      builder: (_) {
+        return TypeAheadField(
+          hideOnEmpty: true,
+          textFieldConfiguration: TextFieldConfiguration(
+            controller: _papelController,
+            keyboardType: TextInputType.text,
+            onChanged: (text) => controller.setPapel(text.toUpperCase()),
+            autofocus: controller.papel == null,
+            decoration: InputDecoration(
+                errorText:
+                    StringUtil.isEmpty(controller.papel) || controller.papelValido ? null : "",
+                border: OutlineInputBorder(),
+                labelText: "Papel"),
+          ),
+          suggestionsCallback: (pattern) {
+            return controller.getSugestoes(pattern);
+          },
+          itemBuilder: (context, suggestion) {
+            return ListTile(
+              title: Text(suggestion),
+            );
+          },
+          onSuggestionSelected: (suggestion) {
+            this._papelController.text = suggestion;
+            controller.papel = suggestion.toUpperCase();
+          },
+        );
+      },
+    );
+  }
+
   Widget _dataTextField() {
+    _dataController.text = DateUtil.dateToString(controller.data);
     return TextField(
       onChanged: (e) {
         if (e.length == 10) {
           controller.data = DateUtil.StringToDate(e);
         }
       },
-      controller: _controller,
+      controller: _dataController,
       inputFormatters: [maskFormatter],
       keyboardType: TextInputType.number,
       maxLength: 10,

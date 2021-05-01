@@ -10,6 +10,7 @@ import 'package:alloc/app/shared/models/evento_saque.dart';
 import 'package:alloc/app/shared/models/evento_venda.dart';
 import 'package:alloc/app/shared/models/evento_venda_renda_variavel.dart';
 import 'package:alloc/app/shared/utils/connection_util.dart';
+import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
@@ -116,8 +117,14 @@ class EventRepository implements IEventRepository {
   Future<void> save(AbstractEvent event) async {
     await ConnectionUtil.checkConnection();
     try {
-      DocumentReference ref = _db.collection(_table).doc();
-      event.setId(ref.id);
+      DocumentReference ref;
+      if (StringUtil.isEmpty(event.getId())) {
+        ref = _db.collection(_table).doc();
+        event.setId(ref.id);
+      } else {
+        ref = _db.collection(_table).doc(event.getId());
+      }
+
       await ref.set(event.toMap());
     } catch (e) {
       throw ApplicationException('Falha ao salvar evento' + e.toString());

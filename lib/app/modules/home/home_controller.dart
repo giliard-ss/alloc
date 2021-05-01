@@ -208,4 +208,10 @@ abstract class _HomeControllerBase with Store {
   Future refresh() async {
     // await SharedMain.refreshCarteiras();
   }
+
+  void dispose() {
+    if (_carteirasReactDispose != null) {
+      _carteirasReactDispose();
+    }
+  }
 }

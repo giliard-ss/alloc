@@ -1,10 +1,12 @@
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
+import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_provento.dart';
 
 import 'package:alloc/app/shared/services/event_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
+import 'package:alloc/app/shared/utils/string_util.dart';
 
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -17,7 +19,7 @@ class ProventoController = _ProventoControllerBase with _$ProventoController;
 abstract class _ProventoControllerBase with Store {
   CarteiraController _carteiraController = Modular.get();
   IEventService _eventService = Modular.get<EventService>();
-
+  String _id;
   @observable
   String error = "";
 
@@ -26,6 +28,21 @@ abstract class _ProventoControllerBase with Store {
   String papel;
   double qtd;
   double valorTotal;
+
+  Future<void> init() async {
+    try {
+      if (!StringUtil.isEmpty(_id)) {
+        EventoProvento provento = await _eventService.getEventById(_id);
+        data = provento.getData();
+        papel = provento.papel;
+        qtd = provento.qtd;
+        valorTotal = provento.valor;
+      }
+    } catch (e) {
+      LoggerUtil.error(e);
+      error = e.toString();
+    }
+  }
 
   @action
   Future<bool> salvar() async {
@@ -40,7 +57,7 @@ abstract class _ProventoControllerBase with Store {
         return false;
       }
 
-      EventoProvento provento = new EventoProvento(null, data.millisecondsSinceEpoch,
+      EventoProvento provento = new EventoProvento(_id, data.millisecondsSinceEpoch,
           _carteiraController.carteira.id, AppCore.usuario.id, valorTotal, qtd, papel);
 
       await _eventService.save(provento);
@@ -71,4 +88,6 @@ abstract class _ProventoControllerBase with Store {
         .where((e) => e.toUpperCase().indexOf(text.trim().toUpperCase()) >= 0)
         .toList();
   }
+
+  set id(value) => _id = value;
 }

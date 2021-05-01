@@ -1,6 +1,7 @@
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/modules/extrato/dtos/extrato_resumo_dto.dart';
+import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/services/event_service.dart';
@@ -31,7 +32,6 @@ abstract class _ExtratoControllerBase with Store {
       await _loadEvents();
       _startCarteirasReaction();
     } catch (e, stacktrace) {
-      print(stacktrace);
       LoggerUtil.error(e);
     }
   }
@@ -59,8 +59,6 @@ abstract class _ExtratoControllerBase with Store {
   Future<List<AbstractEvent>> getUltimosByQtdDias() async {
     DateTime inicio = DateUtil.getPrimeiraDataHoraDoMesByDate(_mesAno);
     DateTime fim = DateUtil.getUltimaDataHoraDoMesByDate(_mesAno);
-    print(inicio);
-    print(fim);
     return await _eventService.getEventsByCarteiraAndPeriodo(
         AppCore.usuario.id, _carteiraController.carteira.id, inicio, fim);
   }
@@ -88,6 +86,12 @@ abstract class _ExtratoControllerBase with Store {
     }
   }
 
+  void editarEvent(AbstractEvent event) {
+    if (event.getTipoEvento() == TipoEvento.PROVENTO.code) {
+      Modular.to.pushNamed("/carteira/provento/${event.getId()}");
+    }
+  }
+
   @action
   void selectMesAno(DateTime value) {
     _mesAno = value;
@@ -96,4 +100,10 @@ abstract class _ExtratoControllerBase with Store {
   }
 
   get mesAno => _mesAno;
+
+  void dispose() {
+    if (_carteirasReactDispose != null) {
+      _carteirasReactDispose();
+    }
+  }
 }

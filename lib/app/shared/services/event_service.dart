@@ -25,6 +25,8 @@ abstract class IEventService {
       {bool onlyCache});
   Future<void> delete(AbstractEvent event);
   Future<void> deleteAll(List<AbstractEvent> events);
+
+  Future<AbstractEvent> getEventById(String id);
 }
 
 class EventService implements IEventService {
@@ -112,5 +114,10 @@ class EventService implements IEventService {
     } on ApplicationException catch (e) {
       return false;
     }
+  }
+
+  @override
+  Future<AbstractEvent> getEventById(String id) {
+    return eventRepository.findEventById(id);
   }
 }

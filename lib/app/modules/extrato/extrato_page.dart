@@ -215,6 +215,13 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
               },
             ),
             TextButton(
+              child: Text('Editar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                controller.editarEvent(event);
+              },
+            ),
+            TextButton(
               child: Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();

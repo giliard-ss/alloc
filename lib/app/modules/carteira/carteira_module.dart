@@ -37,6 +37,10 @@ class CarteiraModule extends ChildModule {
             child: (_, args) => ConfiguracaoPage(args.params['idAlocacao'])),
         ModularRouter("/extrato", child: (_, args) => ExtratoPage()),
         ModularRouter("/provento", child: (_, args) => ProventoPage()),
+        ModularRouter("/provento/:id",
+            child: (_, args) => ProventoPage(
+                  id: args.params['id'],
+                )),
       ];
 
   static Inject get to => Inject<CarteiraModule>.of();
