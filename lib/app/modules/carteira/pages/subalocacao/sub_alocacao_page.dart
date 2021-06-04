@@ -27,11 +27,9 @@ class SubAlocacaoPage extends StatefulWidget {
 
 class _SubAlocacaoPageState extends ModularState<SubAlocacaoPage, SubAlocacaoController> {
   //use 'controller' variable to access controller
-
   Observable<List<AlocacaoDTO>> _alocacoes = Observable<List<AlocacaoDTO>>([]);
   Observable<List<AtivoDTO>> _ativos = Observable<List<AtivoDTO>>([]);
   Observable<List<AlocacaoDTO>> _alocAtual = Observable<List<AlocacaoDTO>>([]);
-
   ReactionDisposer _alocacaoReactDispose;
 
   @override
@@ -294,6 +292,7 @@ class _SubAlocacaoPageState extends ModularState<SubAlocacaoPage, SubAlocacaoCon
               },
               fncAdd: _showNovaAlocacaoDialog,
               title: "Sub-Alocações",
+              isSubAlocacao: true,
             ));
       },
     );

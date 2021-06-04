@@ -339,6 +339,7 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
                 Modular.to.pushNamed("/carteira/config");
               },
               fncAdd: _showNovaAlocacaoDialog,
+              isSubAlocacao: false,
             ));
       },
     );

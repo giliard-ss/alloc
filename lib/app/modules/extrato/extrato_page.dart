@@ -109,7 +109,7 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
               initialDate: controller.mesAno,
               locale: Locale("pt"),
             ).then((DateTime date) {
-              controller.selectMesAno(date);
+              if (date != null) controller.selectMesAno(date);
             });
           },
         )

@@ -21,7 +21,7 @@ class VariacaoPercentualWidget extends StatelessWidget {
     if (!withSinal) return "";
 
     if (value > 0) return "+";
-    if (value < 0) return "-";
+    //if (value < 0) return "-";
     return "";
   }
 

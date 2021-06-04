@@ -57,6 +57,7 @@ abstract class _ExtratoControllerBase with Store {
   }
 
   Future<List<AbstractEvent>> getUltimosByQtdDias() async {
+    if (mesAno == null) _mesAno = DateTime.now();
     DateTime inicio = DateUtil.getPrimeiraDataHoraDoMesByDate(_mesAno);
     DateTime fim = DateUtil.getUltimaDataHoraDoMesByDate(_mesAno);
     return await _eventService.getEventsByCarteiraAndPeriodo(

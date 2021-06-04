@@ -15,6 +15,7 @@ class AlocacoesWidget extends StatelessWidget {
   Function fncConfig;
   Function fncAdd;
   String title;
+  bool isSubAlocacao;
 
   AlocacoesWidget(
       {@required this.alocacoes,
@@ -22,7 +23,8 @@ class AlocacoesWidget extends StatelessWidget {
       this.fncExcluirSecundario,
       this.title = "Alocações da carteira",
       @required this.fncConfig,
-      @required this.fncAdd});
+      @required this.fncAdd,
+      @required this.isSubAlocacao});
 
   @override
   Widget build(BuildContext context) {
@@ -137,21 +139,16 @@ class AlocacoesWidget extends StatelessWidget {
           height: 10,
         ),
         Text(
-          (alocacao.rendimento > 0 ? '+' : '') +
-              alocacao.rendimentoPercentString +
-              "%",
+          (alocacao.rendimento > 0 ? '+' : '') + alocacao.rendimentoPercentString + "%",
           style: TextStyle(
-              fontSize: _textSize2,
-              color: alocacao.rendimento < 0 ? Colors.red : Colors.green),
+              fontSize: _textSize2, color: alocacao.rendimento < 0 ? Colors.red : Colors.green),
         ),
         SizedBox(
           height: 10,
         ),
         Text(
             (alocacao.totalInvestir < 0
-                ? ('Vender ' +
-                    (GeralUtil.doubleToMoney(alocacao.totalInvestir * -1))
-                        .toString())
+                ? ('Vender ' + (GeralUtil.doubleToMoney(alocacao.totalInvestir * -1)).toString())
                 : 'Aplicar ' + GeralUtil.doubleToMoney(alocacao.totalInvestir)),
             style: TextStyle(color: Colors.grey)),
         SizedBox(
@@ -172,8 +169,7 @@ class AlocacoesWidget extends StatelessWidget {
           trailing: Text(
             GeralUtil.doubleToMoney(alocacao.rendimento, leftSymbol: ""),
             style: TextStyle(
-                fontSize: _textSize2,
-                color: alocacao.rendimento < 0 ? Colors.red : Colors.green),
+                fontSize: _textSize2, color: alocacao.rendimento < 0 ? Colors.red : Colors.green),
           ),
         ),
         Divider(
@@ -182,8 +178,7 @@ class AlocacoesWidget extends StatelessWidget {
         ListTile(
           dense: true,
           title: Text("Total Aportado", style: TextStyle(fontSize: _textSize2)),
-          trailing: Text(
-              GeralUtil.doubleToMoney(alocacao.totalAportado, leftSymbol: ""),
+          trailing: Text(GeralUtil.doubleToMoney(alocacao.totalAportado, leftSymbol: ""),
               style: TextStyle(fontSize: _textSize2)),
         ),
         Divider(
@@ -194,19 +189,21 @@ class AlocacoesWidget extends StatelessWidget {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Alocação Configurada",
-                  style: TextStyle(fontSize: _textSize2)),
+              Text("Alocação Configurada", style: TextStyle(fontSize: _textSize2)),
               Visibility(
-                  visible: alocacao.alocacaoPercent == 0,
-                  child: Icon(Icons.notification_important))
+                  visible: alocacao.alocacaoPercent == 0, child: Icon(Icons.notification_important))
             ],
           ),
-          trailing: Text(alocacao.alocacaoPercentString + "%",
-              style: TextStyle(fontSize: _textSize2)),
+          trailing:
+              Text(alocacao.alocacaoPercentString + "%", style: TextStyle(fontSize: _textSize2)),
         ),
         GestureDetector(
           onTap: () {
-            Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
+            if (isSubAlocacao) {
+              Modular.to.pushReplacementNamed("/carteira/sub-alocacao/${alocacao.id}");
+            } else {
+              Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
+            }
           },
           child: Container(
             height: 40,
@@ -214,8 +211,7 @@ class AlocacoesWidget extends StatelessWidget {
             decoration: BoxDecoration(
                 color: Color(0xffe7ecf4),
                 borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(23),
-                    bottomRight: Radius.circular(23))),
+                    bottomLeft: Radius.circular(23), bottomRight: Radius.circular(23))),
             child: Icon(Icons.search),
           ),
         )

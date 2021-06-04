@@ -284,6 +284,7 @@ class AppCore {
     ativos = _agruparAtivosPorPapelAndAlocacao(ativos);
 
     _ajustarPorcentagemDeAlocacaoDosAtivos(ativos);
+
     runInAction(() {
       _ativosDTO.value = ativos;
     });
@@ -323,6 +324,10 @@ class AppCore {
 
   static void _excludeAtivosJaVendidos(List<AtivoDTO> ativos, VendaRendaVariavelEvent event) {
     double qtdRemover = event.qtd;
+
+    if (event.papel == "MALL11") {
+      print(event);
+    }
 
     for (int i = ativos.length - 1; i >= 0; i--) {
       AtivoDTO a = ativos[i];
@@ -540,8 +545,15 @@ class AppCore {
 
   static List<AtivoDTO> get allAtivos {
     List<AtivoDTO> result = [];
-    List<AtivoDTO> ativosAgrupados = _agruparAtivosPorPapel(_ativosDTO.value);
-    ativosAgrupados.forEach((e) => result.add(e.clone()));
+    double xx = 0.0;
+    for (AtivoDTO ab in _ativosDTO.value) {
+      if (ab.papel == "MALL11") {
+        xx += ab.qtd;
+      }
+    }
+
+    // List<AtivoDTO> ativosAgrupados = _agruparAtivosPorPapel(_ativosDTO.value);
+    _ativosDTO.value.forEach((e) => result.add(e.clone()));
     return result;
   }
 
