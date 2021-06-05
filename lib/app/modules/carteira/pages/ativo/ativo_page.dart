@@ -169,7 +169,6 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
 
   Widget _buttonSalvar() {
     return RaisedButton(
-      color: Colors.green[900],
       child: Text('Salvar', style: TextStyle(color: Colors.white)),
       onPressed: () async {
         bool ok = await LoadingUtil.onLoading(context, controller.salvar);

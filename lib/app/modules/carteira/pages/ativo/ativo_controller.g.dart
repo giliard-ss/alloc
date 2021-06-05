@@ -71,6 +71,13 @@ mixin _$AtivoController on _AtivoControllerBase, Store {
     return _$venderAsyncAction.run(() => super.vender());
   }
 
+  final _$salvarAsyncAction = AsyncAction('_AtivoControllerBase.salvar');
+
+  @override
+  Future<bool> salvar() {
+    return _$salvarAsyncAction.run(() => super.salvar());
+  }
+
   final _$_AtivoControllerBaseActionController =
       ActionController(name: '_AtivoControllerBase');
 

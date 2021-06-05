@@ -79,6 +79,17 @@ mixin _$ExtratoController on _ExtratoControllerBase, Store {
   }
 
   @override
+  void selectTipoEvento(TipoEvento tipoEvento) {
+    final _$actionInfo = _$_ExtratoControllerBaseActionController.startAction(
+        name: '_ExtratoControllerBase.selectTipoEvento');
+    try {
+      return super.selectTipoEvento(tipoEvento);
+    } finally {
+      _$_ExtratoControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 events: ${events},

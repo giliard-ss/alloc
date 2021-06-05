@@ -5,6 +5,7 @@ import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
+import 'package:alloc/app/shared/models/evento_venda_renda_variavel.dart';
 import 'package:alloc/app/shared/services/event_service.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
@@ -100,12 +101,14 @@ abstract class _ExtratoControllerBase with Store {
     if (event.getTipoEvento() == TipoEvento.PROVENTO.code)
       Modular.to.pushNamed("/carteira/provento/${event.getId()}");
 
-    if (event is AplicacaoRendaVariavel) Modular.to.pushNamed("/carteira/ativo/id/${event.id}");
+    if (event is AplicacaoRendaVariavel || event is VendaRendaVariavelEvent)
+      Modular.to.pushNamed("/carteira/ativo/id/${event.getId()}");
   }
 
   bool isPermiteEdicao(AbstractEvent event) {
     if (event.getTipoEvento() == TipoEvento.PROVENTO.code) return true;
     if (event is AplicacaoRendaVariavel) return true;
+    if (event is VendaRendaVariavelEvent) return true;
     return false;
   }
 

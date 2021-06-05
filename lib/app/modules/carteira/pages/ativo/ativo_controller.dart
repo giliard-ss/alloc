@@ -38,18 +38,33 @@ abstract class _AtivoControllerBase with Store {
   Future<void> init() async {
     try {
       if (!StringUtil.isEmpty(_id)) {
-        AplicacaoRendaVariavel aplicacaoEvent = await _eventService.getEventById(_id);
-        papel = aplicacaoEvent.papel;
-        qtd = aplicacaoEvent.qtd;
-        preco = aplicacaoEvent.precoUnitario;
-        custos = aplicacaoEvent.getCustos;
-        _id = aplicacaoEvent.id;
-        data = aplicacaoEvent.getData();
+        AbstractEvent event = await _eventService.getEventById(_id);
+        if (event is AplicacaoRendaVariavel) _preencheCamposByAplicacaoRendaVariavel(event);
+
+        if (event is VendaRendaVariavelEvent) _preencheCamposByVendaRendaVariavel(event);
       }
     } catch (e) {
       LoggerUtil.error(e);
       error = e.toString();
     }
+  }
+
+  void _preencheCamposByAplicacaoRendaVariavel(AplicacaoRendaVariavel aplicacaoEvent) {
+    papel = aplicacaoEvent.papel;
+    qtd = aplicacaoEvent.qtd;
+    preco = aplicacaoEvent.precoUnitario;
+    custos = aplicacaoEvent.getCustos;
+    _id = aplicacaoEvent.id;
+    data = aplicacaoEvent.getData();
+  }
+
+  void _preencheCamposByVendaRendaVariavel(VendaRendaVariavelEvent vendaEvent) {
+    papel = vendaEvent.papel;
+    qtd = vendaEvent.qtd;
+    preco = vendaEvent.precoUnitario;
+    custos = vendaEvent.custos;
+    _id = vendaEvent.id;
+    data = vendaEvent.getData();
   }
 
   bool isEdicao() {
