@@ -33,21 +33,44 @@ abstract class _AtivoControllerBase with Store {
   double qtd;
   double preco;
   double custos = 0.0;
+  String _id;
+
+  Future<void> init() async {
+    try {
+      if (!StringUtil.isEmpty(_id)) {
+        AplicacaoRendaVariavel aplicacaoEvent = await _eventService.getEventById(_id);
+        papel = aplicacaoEvent.papel;
+        qtd = aplicacaoEvent.qtd;
+        preco = aplicacaoEvent.precoUnitario;
+        custos = aplicacaoEvent.getCustos;
+        _id = aplicacaoEvent.id;
+        data = aplicacaoEvent.getData();
+      }
+    } catch (e) {
+      LoggerUtil.error(e);
+      error = e.toString();
+    }
+  }
+
+  bool isEdicao() {
+    return _id != null;
+  }
 
   @action
   Future<bool> comprar() async {
     try {
-      if (!papelValido) {
-        error = "Papel não encontrado.";
-        return false;
-      }
+      _checkRegras();
 
-      if (preco == 0 || preco == null) {
-        error = "Informe a cotação!";
-        return false;
-      }
+      AbstractEvent aplicacaoEvent = AplicacaoRendaVariavel(
+          _id,
+          data,
+          _carteiraController.carteira.id,
+          AppCore.usuario.id,
+          preco * qtd,
+          getIdSuperiores(),
+          papel,
+          qtd);
 
-      AbstractEvent aplicacaoEvent = createEventAplicacaoRendaVariavel();
       await _eventService.save(aplicacaoEvent);
 
       await AppCore.notifyAddDelEvent();
@@ -61,16 +84,79 @@ abstract class _AtivoControllerBase with Store {
     return false;
   }
 
+  @action
+  Future<bool> vender() async {
+    try {
+      _checkRegras();
+
+      AtivoDTO ativo = AppCore.getAtivo(
+          _carteiraController.carteira.id, _alocacaoAtual == null ? "" : _alocacaoAtual.id, papel);
+
+      AbstractEvent venda = VendaRendaVariavelEvent(null, data, _carteiraController.carteira.id,
+          AppCore.usuario.id, ativo.precoMedio * qtd, preco * qtd, getIdSuperiores(), papel, qtd,
+          custos: custos);
+
+      await _eventService.save(venda);
+      await AppCore.notifyAddDelEvent();
+      return true;
+    } on ApplicationException catch (e) {
+      error = e.toString();
+    } catch (e) {
+      error = "Falha ao finalizar venda!";
+      LoggerUtil.error(e);
+    }
+    return false;
+  }
+
+  @action
+  Future<bool> salvar() async {
+    try {
+      _checkRegras();
+
+      AbstractEvent event = await _eventService.getEventById(_id);
+      if (event is AplicacaoRendaVariavel) {
+        setNewValuesAplicacaoRendaVariavel(event);
+      } else if (event is VendaRendaVariavelEvent) {
+        setNewValuesVendaRendaVariavel(event);
+      }
+
+      await _eventService.save(event);
+      await AppCore.notifyAddDelEvent();
+      return true;
+    } on ApplicationException catch (e) {
+      error = e.toString();
+    } catch (e) {
+      error = "Falha ao salvar!";
+      LoggerUtil.error(e);
+    }
+    return false;
+  }
+
+  void setNewValuesAplicacaoRendaVariavel(AplicacaoRendaVariavel event) {
+    event.papel = papel;
+    event.valor = preco * qtd;
+    event.qtd = qtd;
+    event.data = data.millisecondsSinceEpoch;
+  }
+
+  void setNewValuesVendaRendaVariavel(VendaRendaVariavelEvent event) {
+    event.papel = papel;
+    event.valor = preco * qtd;
+    event.qtd = qtd;
+    event.data = data.millisecondsSinceEpoch;
+  }
+
+  void _checkRegras() {
+    if (!papelValido) throw new ApplicationException("Papel não encontrado.");
+
+    if (preco == 0 || preco == null) throw new ApplicationException("Informe a cotação!");
+  }
+
   Future<void> backupVendas() async {
     List<VendaRendaVariavelEvent> vendas = BackupVendas.getVendas();
     for (VendaRendaVariavelEvent venda in vendas) {
       await _eventService.save(venda);
     }
-  }
-
-  AbstractEvent createEventAplicacaoRendaVariavel() {
-    return AplicacaoRendaVariavel(null, data, _carteiraController.carteira.id, AppCore.usuario.id,
-        preco * qtd, getIdSuperiores(), papel, qtd);
   }
 
   @computed
@@ -109,38 +195,6 @@ abstract class _AtivoControllerBase with Store {
     }
   }
 
-  @action
-  Future<bool> vender() async {
-    try {
-      if (!papelValido) {
-        error = "Papel não encontrado.";
-        return false;
-      }
-
-      if (preco == 0 || preco == null) {
-        error = "Informe a cotação!";
-        return false;
-      }
-
-      AtivoDTO ativo = AppCore.getAtivo(
-          _carteiraController.carteira.id, _alocacaoAtual == null ? "" : _alocacaoAtual.id, papel);
-
-      AbstractEvent venda = VendaRendaVariavelEvent(null, data, _carteiraController.carteira.id,
-          AppCore.usuario.id, ativo.precoMedio * qtd, preco * qtd, getIdSuperiores(), papel, qtd,
-          custos: custos);
-
-      await _eventService.save(venda);
-      await AppCore.notifyAddDelEvent();
-      return true;
-    } on ApplicationException catch (e) {
-      error = e.toString();
-    } catch (e) {
-      error = "Falha ao finalizar venda!";
-      LoggerUtil.error(e);
-    }
-    return false;
-  }
-
   AlocacaoDTO _getAlocacaoDTO(String id) {
     return AppCore.getAlocacaoById(id);
   }
@@ -149,5 +203,9 @@ abstract class _AtivoControllerBase with Store {
     if (!StringUtil.isEmpty(idAlocacao)) {
       _alocacaoAtual = _getAlocacaoDTO(idAlocacao);
     }
+  }
+
+  void setId(String id) {
+    this._id = id;
   }
 }

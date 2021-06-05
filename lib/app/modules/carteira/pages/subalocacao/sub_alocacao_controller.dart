@@ -20,7 +20,6 @@ class SubAlocacaoController = _SubAlocacaoControllerBase with _$SubAlocacaoContr
 abstract class _SubAlocacaoControllerBase with Store {
   IAlocacaoService _alocacaoService = Modular.get<AlocacaoService>();
   CarteiraController _carteiraController = Modular.get();
-  IAtivoService _ativoService = Modular.get<AtivoService>();
   IEventService _eventService = Modular.get<EventService>();
   AlocacaoDTO alocacaoAtual;
   String novaAlocacaoDesc;

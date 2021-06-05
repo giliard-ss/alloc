@@ -121,7 +121,10 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
   }
 
   Widget _createQtdTextField() {
-    _qtdController.text = controller.qtd != null ? controller.qtd.toString() : null;
+    if (controller.qtd != null)
+      _qtdController.text =
+          controller.qtd % 1 == 0 ? controller.qtd.round().toString() : controller.qtd.toString();
+
     return TextField(
       controller: _qtdController,
       keyboardType: TextInputType.numberWithOptions(decimal: true),

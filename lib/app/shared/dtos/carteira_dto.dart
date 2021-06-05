@@ -25,7 +25,7 @@ class CarteiraDTO extends CarteiraModel {
   }
 
   double getTotalAportar() {
-    return saldo - _totalAportado;
+    return saldo;
   }
 
   double _totalEntradaDinheiro() {

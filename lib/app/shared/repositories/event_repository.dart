@@ -1,5 +1,6 @@
 import 'package:alloc/app/shared/config/cf_settings.dart';
 import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
+import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao.dart';
@@ -18,6 +19,9 @@ abstract class IEventRepository {
   Future<List<AbstractEvent>> findAllEventos(String usuarioId, {bool onlyCache});
   Future<List<AbstractEvent>> findEventosByCarteiraAndPeriodo(
       String usuarioId, String carteiraId, DateTime inicio, DateTime fim,
+      {bool onlyCache});
+  Future<List<AbstractEvent>> findEventosByCarteiraAndPeriodoAndTipo(
+      String usuarioId, String carteiraId, DateTime inicio, DateTime fim, TipoEvento tipo,
       {bool onlyCache});
   Future<List<AbstractEvent>> getEventsByTipoAndCarteira(
       String usuarioId, String tipoEvento, String carteiraId,
@@ -224,5 +228,22 @@ class EventRepository implements IEventRepository {
     } catch (e) {
       throw ApplicationException('Falha ao deletar evento' + e.toString());
     }
+  }
+
+  @override
+  Future<List<AbstractEvent>> findEventosByCarteiraAndPeriodoAndTipo(
+      String usuarioId, String carteiraId, DateTime inicio, DateTime fim, TipoEvento tipo,
+      {bool onlyCache = true}) async {
+    QuerySnapshot snapshot = await _db
+        .collection(_table)
+        .where("usuarioId", isEqualTo: usuarioId)
+        .where("carteiraId", isEqualTo: carteiraId)
+        .where("data", isGreaterThanOrEqualTo: inicio.millisecondsSinceEpoch)
+        .where("data", isLessThanOrEqualTo: fim.millisecondsSinceEpoch)
+        .where("tipoEvento", isEqualTo: tipo.toString())
+        .get(await CfSettrings.getOptions(onlyCache: onlyCache));
+    return List.generate(snapshot.docs.length, (i) {
+      return mapToEvent(snapshot.docs[i].data());
+    });
   }
 }

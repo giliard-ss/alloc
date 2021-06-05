@@ -200,6 +200,7 @@ class AlocacoesWidget extends StatelessWidget {
         GestureDetector(
           onTap: () {
             if (isSubAlocacao) {
+              //Modular.to.pushReplacementNamed("/carteira/sub-alocacao/${alocacao.id}");
               Modular.to.pushReplacementNamed("/carteira/sub-alocacao/${alocacao.id}");
             } else {
               Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");

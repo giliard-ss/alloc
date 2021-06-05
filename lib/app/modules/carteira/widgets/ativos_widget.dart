@@ -77,118 +77,94 @@ class AtivosWidget extends StatelessWidget {
               double variacaoPercentual = GeralUtil.variacaoPercentualDeXparaY(
                   ativo.totalAportado.toDouble(), totalAportadoAtual);
 
-              return Dismissible(
-                key: Key(ativo.id),
-                confirmDismiss: (e) async {
-                  String msg = await LoadingUtil.onLoading(context, () async {
-                    if (fncExcluir != null) {
-                      return await fncExcluir(ativo);
-                    } else if (fncExcluirSecundario != null) {
-                      return await fncExcluirSecundario(ativo, ativos);
-                    } else {
-                      return "Falha!";
-                    }
-                  });
-
-                  if (msg == null) {
-                    return true;
-                  }
-                  DialogUtil.showMessageDialog(context, msg);
-                  return false;
-                },
-                background: Container(),
-                secondaryBackground: _slideRightBackground(),
-                direction: DismissDirection.endToStart,
-                child: Column(
-                  children: [
-                    ExpansionTile(
-                      tilePadding: EdgeInsets.only(left: 0),
-                      leading: CircleInfoWidget(ativo.percentualNaAlocacaoString, index),
-                      title: Text(
-                        ativo.papel,
-                        style: TextStyle(fontSize: _textSize1),
-                      ),
-                      subtitle: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            GeralUtil.doubleToMoney(ativo.cotacaoModel.ultimo.toDouble()),
-                            style: TextStyle(
-                                fontSize: _textSize2,
-                                color: Theme.of(context).textTheme.bodyText2.color),
-                          ),
-                          VariacaoPercentualWidget(
-                            value: variacaoPercentual,
-                          ),
-                          Text(
-                            GeralUtil.doubleToMoney(totalAportadoAtual, leftSymbol: ""),
-                            style: TextStyle(
-                                fontSize: _textSize2,
-                                color: Theme.of(context).textTheme.bodyText2.color),
-                          )
-                        ],
-                      ),
+              return Column(
+                children: [
+                  ExpansionTile(
+                    tilePadding: EdgeInsets.only(left: 0),
+                    leading: CircleInfoWidget(ativo.percentualNaAlocacaoString, index),
+                    title: Text(
+                      ativo.papel,
+                      style: TextStyle(fontSize: _textSize1),
+                    ),
+                    subtitle: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          color: Color(0xffe7ecf4),
-                          child: ListTile(
-                            dense: true,
-                            title: Text(
-                              "Rendimento",
-                              style: TextStyle(fontSize: _textSize2),
-                            ),
-                            trailing: Text(GeralUtil.doubleToMoney(rendimento, leftSymbol: ""),
-                                style: TextStyle(
-                                    fontSize: _textSize2,
-                                    color: rendimento < 0 ? Colors.red : Colors.green)),
-                          ),
+                        Text(
+                          GeralUtil.doubleToMoney(ativo.cotacaoModel.ultimo.toDouble()),
+                          style: TextStyle(
+                              fontSize: _textSize2,
+                              color: Theme.of(context).textTheme.bodyText2.color),
                         ),
-                        ListTile(
-                          dense: true,
-                          title: Text(
-                              "Total Aportado - ${ativo.qtd} x ${GeralUtil.doubleToMoney(
-                                ativo.precoMedio,
-                              )}",
-                              style: TextStyle(fontSize: _textSize2)),
-                          trailing: Text(
-                              GeralUtil.doubleToMoney(ativo.totalAportado, leftSymbol: ""),
-                              style: TextStyle(fontSize: _textSize2)),
+                        VariacaoPercentualWidget(
+                          value: variacaoPercentual,
                         ),
-                        ListTile(
-                          dense: true,
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Alocação Configurada"),
-                              Visibility(
-                                  visible: ativo.alocacaoPercent == 0,
-                                  child: Icon(Icons.notification_important))
-                            ],
-                          ),
-                          trailing: Text(ativo.alocacaoPercentString + " %",
-                              style: TextStyle(fontSize: _textSize2)),
-                        ),
-                        Visibility(
-                          visible: !autoAlocacao,
-                          child: ListTile(
-                            dense: true,
-                            title: Text(
-                              "Sugestão: " + (ativo.totalInvestir < 0 ? "Vender" : "Aplicar"),
-                              style: TextStyle(color: Colors.blue),
-                            ),
-                            trailing: Text(
-                                GeralUtil.doubleToMoney(ativo.totalInvestir,
-                                    leftSymbol: (ativo.totalInvestir > 0 ? "+" : "") + "R\$ "),
-                                style: TextStyle(fontSize: _textSize2, color: Colors.blue)),
-                          ),
+                        Text(
+                          GeralUtil.doubleToMoney(totalAportadoAtual, leftSymbol: ""),
+                          style: TextStyle(
+                              fontSize: _textSize2,
+                              color: Theme.of(context).textTheme.bodyText2.color),
                         )
                       ],
                     ),
-                    Divider(
-                      height: 5,
-                    )
-                  ],
-                ),
+                    children: [
+                      Container(
+                        color: Color(0xffe7ecf4),
+                        child: ListTile(
+                          dense: true,
+                          title: Text(
+                            "Rendimento",
+                            style: TextStyle(fontSize: _textSize2),
+                          ),
+                          trailing: Text(GeralUtil.doubleToMoney(rendimento, leftSymbol: ""),
+                              style: TextStyle(
+                                  fontSize: _textSize2,
+                                  color: rendimento < 0 ? Colors.red : Colors.green)),
+                        ),
+                      ),
+                      ListTile(
+                        dense: true,
+                        title: Text(
+                            "Total Aportado - ${ativo.qtd} x ${GeralUtil.doubleToMoney(
+                              ativo.precoMedio,
+                            )}",
+                            style: TextStyle(fontSize: _textSize2)),
+                        trailing: Text(GeralUtil.doubleToMoney(ativo.totalAportado, leftSymbol: ""),
+                            style: TextStyle(fontSize: _textSize2)),
+                      ),
+                      ListTile(
+                        dense: true,
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Alocação Configurada"),
+                            Visibility(
+                                visible: ativo.alocacaoPercent == 0,
+                                child: Icon(Icons.notification_important))
+                          ],
+                        ),
+                        trailing: Text(ativo.alocacaoPercentString + " %",
+                            style: TextStyle(fontSize: _textSize2)),
+                      ),
+                      Visibility(
+                        visible: !autoAlocacao,
+                        child: ListTile(
+                          dense: true,
+                          title: Text(
+                            "Sugestão: " + (ativo.totalInvestir < 0 ? "Vender" : "Aplicar"),
+                            style: TextStyle(color: Colors.blue),
+                          ),
+                          trailing: Text(
+                              GeralUtil.doubleToMoney(ativo.totalInvestir,
+                                  leftSymbol: (ativo.totalInvestir > 0 ? "+" : "") + "R\$ "),
+                              style: TextStyle(fontSize: _textSize2, color: Colors.blue)),
+                        ),
+                      )
+                    ],
+                  ),
+                  Divider(
+                    height: 5,
+                  )
+                ],
               );
             }),
       ],

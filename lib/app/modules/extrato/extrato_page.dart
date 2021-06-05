@@ -141,7 +141,11 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
                 ExtratoResumoDTO resumo = controller.resumo[index];
                 return ListTile(
                   dense: true,
+                  selected: controller.tipoEvento != null,
                   title: Text(resumo.descricao),
+                  onTap: () {
+                    controller.selectTipoEvento(resumo.tipoEvento);
+                  },
                   trailing: MoneyTextWidget(
                     value: resumo.valor,
                     showSinal: false,
@@ -214,12 +218,15 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
                 }
               },
             ),
-            TextButton(
-              child: Text('Editar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                controller.editarEvent(event);
-              },
+            Visibility(
+              visible: controller.isPermiteEdicao(event),
+              child: TextButton(
+                child: Text('Editar'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  controller.editarEvent(event);
+                },
+              ),
             ),
             TextButton(
               child: Text('Cancelar'),

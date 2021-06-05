@@ -31,6 +31,11 @@ class CarteiraModule extends ChildModule {
         ModularRouter("/sub-alocacao/:id", child: (_, args) => SubAlocacaoPage(args.params['id'])),
         ModularRouter("/ativo/:idAlocacao",
             child: (_, args) => AtivoPage(args.params['idAlocacao'])),
+        ModularRouter("/ativo/id/:id",
+            child: (_, args) => AtivoPage(
+                  null,
+                  id: args.params['id'],
+                )),
         ModularRouter("/ativo", child: (_, args) => AtivoPage(null)),
         ModularRouter("/config", child: (_, args) => ConfiguracaoPage(null)),
         ModularRouter("/config/:idAlocacao",

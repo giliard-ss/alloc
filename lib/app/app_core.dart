@@ -85,6 +85,20 @@ class AppCore {
     });
   }
 
+  static void _refreshAlocacoesDTO() {
+    List<AlocacaoDTO> result = [];
+    for (AlocacaoDTO aloc in _alocacoesDTO.value) {
+      CarteiraDTO carteira = getCarteira(aloc.idCarteira);
+
+      aloc.totalAportado = getTotalAportadoAtivosByAlocacao(aloc.id);
+      aloc.totalAportadoAtual = aloc.totalAportado + getRendimentoAtivosByAlocacao(aloc.id);
+      double totalAposAporte = carteira.getTotalAposAporte() * _getAlocacaoReal(aloc);
+      aloc.totalInvestir = totalAposAporte - aloc.totalAportadoAtual;
+      result.add(aloc);
+    }
+    _alocacoesDTO.value = result;
+  }
+
   static void _refreshAtivosDTO() {
     runInAction(() {
       List<AtivoDTO> ativosDTO = [];
@@ -94,23 +108,6 @@ class AppCore {
       });
       _ativosDTO.value = ativosDTO;
     });
-  }
-
-  static void _refreshAlocacoesDTO() {
-    List<AlocacaoDTO> result = [];
-    for (AlocacaoDTO aloc in _alocacoesDTO.value) {
-      CarteiraDTO carteira = getCarteira(aloc.idCarteira);
-
-      aloc.totalAportado = getTotalAportadoAtivosByAlocacao(aloc.id);
-      aloc.totalAportadoAtual = aloc.totalAportado + getRendimentoAtivosByAlocacao(aloc.id);
-
-      double totalAposAporte = carteira.getTotalAposAporte() * _getAlocacaoReal(aloc);
-
-      aloc.totalInvestir = totalAposAporte - aloc.totalAportadoAtual;
-
-      result.add(aloc);
-    }
-    _alocacoesDTO.value = result;
   }
 
   //Calcula a porcentagem real levando em conta todos as alocacoes superiores

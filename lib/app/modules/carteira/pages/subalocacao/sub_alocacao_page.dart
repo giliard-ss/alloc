@@ -132,13 +132,25 @@ class _SubAlocacaoPageState extends ModularState<SubAlocacaoPage, SubAlocacaoCon
     super.dispose();
   }
 
+  Future<bool> _requestPop() async {
+    ///necessario esse tratamento pois é necessario reconstruir a tela senão a alocacaoAtual vai
+    ///ser incoerente, referenciando àquela que foi fechada.
+    if (alocacaoAtual.idSuperior != null) {
+      Modular.to.pushReplacementNamed("/carteira/sub-alocacao/${alocacaoAtual.idSuperior}");
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(alocacaoAtual.descricao),
-        ),
-        body: WidgetUtil.futureBuild(controller.init, _body));
+    return new WillPopScope(
+      onWillPop: _requestPop,
+      child: Scaffold(
+          appBar: AppBar(
+            title: Text(alocacaoAtual.descricao),
+          ),
+          body: WidgetUtil.futureBuild(controller.init, _body)),
+    );
   }
 
   _body() {

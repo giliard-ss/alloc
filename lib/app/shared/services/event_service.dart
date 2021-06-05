@@ -1,4 +1,5 @@
 import 'package:alloc/app/shared/adapters/firebase_adapter.dart';
+import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/repositories/event_repository.dart';
@@ -22,6 +23,9 @@ abstract class IEventService {
       {bool onlyCache});
   Future<List<AbstractEvent>> getEventsByCarteiraAndPeriodo(
       String usuarioId, String carteiraId, DateTime inicio, DateTime fim,
+      {bool onlyCache});
+  Future<List<AbstractEvent>> getEventsByCarteiraAndPeriodoAndTipo(
+      String usuarioId, String carteiraId, DateTime inicio, DateTime fim, TipoEvento tipoEvento,
       {bool onlyCache});
   Future<void> delete(AbstractEvent event);
   Future<void> deleteAll(List<AbstractEvent> events);
@@ -119,5 +123,14 @@ class EventService implements IEventService {
   @override
   Future<AbstractEvent> getEventById(String id) {
     return eventRepository.findEventById(id);
+  }
+
+  @override
+  Future<List<AbstractEvent>> getEventsByCarteiraAndPeriodoAndTipo(
+      String usuarioId, String carteiraId, DateTime inicio, DateTime fim, TipoEvento tipoEvento,
+      {bool onlyCache = true}) {
+    return eventRepository.findEventosByCarteiraAndPeriodoAndTipo(
+        usuarioId, carteiraId, inicio, fim, tipoEvento,
+        onlyCache: onlyCache);
   }
 }

@@ -4,6 +4,7 @@ import 'package:alloc/app/modules/extrato/dtos/extrato_resumo_dto.dart';
 import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
+import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/services/event_service.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
@@ -25,6 +26,7 @@ abstract class _ExtratoControllerBase with Store {
   DateTime _mesAno;
   @observable
   List<ExtratoResumoDTO> resumo;
+  TipoEvento tipoEvento;
 
   Future<void> init() async {
     try {
@@ -53,15 +55,22 @@ abstract class _ExtratoControllerBase with Store {
       }
       resumo[i.getTipoEvento()] = resumo[i.getTipoEvento()] + i.getValor();
     });
-    return resumo.entries.map((entry) => ExtratoResumoDTO(entry.key, entry.value)).toList();
+    return resumo.entries
+        .map((entry) => ExtratoResumoDTO(entry.key, entry.value, TipoEvento(entry.key)))
+        .toList();
   }
 
   Future<List<AbstractEvent>> getUltimosByQtdDias() async {
     if (mesAno == null) _mesAno = DateTime.now();
     DateTime inicio = DateUtil.getPrimeiraDataHoraDoMesByDate(_mesAno);
     DateTime fim = DateUtil.getUltimaDataHoraDoMesByDate(_mesAno);
-    return await _eventService.getEventsByCarteiraAndPeriodo(
-        AppCore.usuario.id, _carteiraController.carteira.id, inicio, fim);
+
+    if (tipoEvento == null)
+      return await _eventService.getEventsByCarteiraAndPeriodo(
+          AppCore.usuario.id, _carteiraController.carteira.id, inicio, fim);
+    else
+      return await _eventService.getEventsByCarteiraAndPeriodoAndTipo(
+          AppCore.usuario.id, _carteiraController.carteira.id, inicio, fim, tipoEvento);
   }
 
   void _startCarteirasReaction() {
@@ -88,15 +97,31 @@ abstract class _ExtratoControllerBase with Store {
   }
 
   void editarEvent(AbstractEvent event) {
-    if (event.getTipoEvento() == TipoEvento.PROVENTO.code) {
+    if (event.getTipoEvento() == TipoEvento.PROVENTO.code)
       Modular.to.pushNamed("/carteira/provento/${event.getId()}");
-    }
+
+    if (event is AplicacaoRendaVariavel) Modular.to.pushNamed("/carteira/ativo/id/${event.id}");
+  }
+
+  bool isPermiteEdicao(AbstractEvent event) {
+    if (event.getTipoEvento() == TipoEvento.PROVENTO.code) return true;
+    if (event is AplicacaoRendaVariavel) return true;
+    return false;
   }
 
   @action
   void selectMesAno(DateTime value) {
     _mesAno = value;
     events = [];
+    _loadEvents();
+  }
+
+  @action
+  void selectTipoEvento(TipoEvento tipoEvento) {
+    if (this.tipoEvento != null && tipoEvento.code == this.tipoEvento.code)
+      this.tipoEvento = null;
+    else
+      this.tipoEvento = tipoEvento;
     _loadEvents();
   }
 
