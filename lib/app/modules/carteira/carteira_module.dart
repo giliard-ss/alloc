@@ -1,3 +1,8 @@
+import 'package:alloc/app/modules/carteira/pages/saque/saque_page.dart';
+
+import 'pages/saque/saque_controller.dart';
+import 'package:alloc/app/modules/carteira/pages/deposito/deposito_page.dart';
+
 import 'pages/deposito/deposito_controller.dart';
 import 'package:alloc/app/modules/carteira/pages/configuracao/configuracao_page.dart';
 import 'package:alloc/app/modules/carteira/pages/provento/provento_controller.dart';
@@ -18,6 +23,7 @@ import 'carteira_page.dart';
 class CarteiraModule extends ChildModule {
   @override
   List<Bind> get binds => [
+        $SaqueController,
         $DepositoController,
         $ProventoController,
         $ConfiguracaoController,
@@ -29,10 +35,8 @@ class CarteiraModule extends ChildModule {
 
   @override
   List<ModularRouter> get routers => [
-        ModularRouter("/:id",
-            child: (_, args) => CarteiraPage(args.params['id'])),
-        ModularRouter("/sub-alocacao/:id",
-            child: (_, args) => SubAlocacaoPage(args.params['id'])),
+        ModularRouter("/:id", child: (_, args) => CarteiraPage(args.params['id'])),
+        ModularRouter("/sub-alocacao/:id", child: (_, args) => SubAlocacaoPage(args.params['id'])),
         ModularRouter("/ativo/:idAlocacao",
             child: (_, args) => AtivoPage(args.params['idAlocacao'])),
         ModularRouter("/ativo/id/:id",
@@ -48,6 +52,16 @@ class CarteiraModule extends ChildModule {
         ModularRouter("/provento", child: (_, args) => ProventoPage()),
         ModularRouter("/provento/:id",
             child: (_, args) => ProventoPage(
+                  id: args.params['id'],
+                )),
+        ModularRouter("/deposito", child: (_, args) => DepositoPage()),
+        ModularRouter("/deposito/:id",
+            child: (_, args) => DepositoPage(
+                  id: args.params['id'],
+                )),
+        ModularRouter("/saque", child: (_, args) => SaquePage()),
+        ModularRouter("/saque/:id",
+            child: (_, args) => SaquePage(
                   id: args.params['id'],
                 )),
       ];

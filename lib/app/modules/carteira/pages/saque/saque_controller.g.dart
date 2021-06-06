@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'deposito_controller.dart';
+part of 'saque_controller.dart';
 
 // **************************************************************************
 // InjectionGenerator
 // **************************************************************************
 
-final $DepositoController = BindInject(
-  (i) => DepositoController(),
+final $SaqueController = BindInject(
+  (i) => SaqueController(),
   singleton: true,
   lazy: true,
 );
@@ -18,8 +18,8 @@ final $DepositoController = BindInject(
 
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
-mixin _$DepositoController on _DepositoControllerBase, Store {
-  final _$errorAtom = Atom(name: '_DepositoControllerBase.error');
+mixin _$SaqueController on _SaqueControllerBase, Store {
+  final _$errorAtom = Atom(name: '_SaqueControllerBase.error');
 
   @override
   String get error {
@@ -32,6 +32,20 @@ mixin _$DepositoController on _DepositoControllerBase, Store {
     _$errorAtom.reportWrite(value, super.error, () {
       super.error = value;
     });
+  }
+
+  final _$_SaqueControllerBaseActionController =
+      ActionController(name: '_SaqueControllerBase');
+
+  @override
+  void onChangedValorSaque(dynamic valor) {
+    final _$actionInfo = _$_SaqueControllerBaseActionController.startAction(
+        name: '_SaqueControllerBase.onChangedValorSaque');
+    try {
+      return super.onChangedValorSaque(valor);
+    } finally {
+      _$_SaqueControllerBaseActionController.endAction(_$actionInfo);
+    }
   }
 
   @override

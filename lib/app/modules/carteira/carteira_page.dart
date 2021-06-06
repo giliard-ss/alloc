@@ -123,12 +123,12 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
 
           case "deposito":
             {
-              _showDepositoDialog();
+              Modular.to.pushNamed("/carteira/deposito");
             }
             break;
           case "saque":
             {
-              _showRetiradaDialog();
+              Modular.to.pushNamed("/carteira/saque");
             }
             break;
 
@@ -285,24 +285,22 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
             "Carteira Nova!",
             style: TextStyle(fontSize: 16),
           ),
-          Text("Informe seu primeiro depósito:"),
+          Text("Vamos registrar primeiro o valor de depósito destinado à aplicações"),
           SizedBox(
             height: 20,
           ),
-          TextField(
-            keyboardType: TextInputType.number,
-            onChanged: (text) => controller.valorDeposito = double.parse(text),
-            decoration: InputDecoration(
-                errorStyle: TextStyle(color: Colors.red),
-                errorText: controller.errorDialog,
-                labelText: "Valor",
-                border: const OutlineInputBorder()),
-          ),
-          RaisedButton(
-            child: Text("Continuar"),
-            onPressed: () async {
-              bool ok = await LoadingUtil.onLoading(context, controller.salvarDeposito);
+          MaterialButton(
+            onPressed: () {
+              Modular.to.pushNamed("/carteira/deposito");
             },
+            color: Colors.blue,
+            textColor: Colors.white,
+            child: Icon(
+              Icons.arrow_forward_ios,
+              size: 24,
+            ),
+            padding: EdgeInsets.all(16),
+            shape: CircleBorder(),
           )
         ],
       ),
@@ -374,50 +372,6 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
       } else {
         Navigator.of(context).pop();
         Navigator.of(context).pop();
-        Navigator.of(context).pop();
-      }
-    });
-  }
-
-  _showRetiradaDialog() {
-    controller.limparErrorDialog();
-    DialogUtil.showAlertDialog(context, title: "Saque", content: Observer(
-      builder: (_) {
-        return TextField(
-          keyboardType: TextInputType.number,
-          onChanged: (text) => controller.valorSaque = double.parse(text),
-          decoration: InputDecoration(
-              errorStyle: TextStyle(color: Colors.red),
-              errorText: controller.errorDialog,
-              labelText: "Valor",
-              border: const OutlineInputBorder()),
-        );
-      },
-    ), onConcluir: () async {
-      bool ok = await LoadingUtil.onLoading(context, controller.salvarSaque);
-      if (ok) {
-        Navigator.of(context).pop();
-      }
-    });
-  }
-
-  _showDepositoDialog() {
-    controller.limparErrorDialog();
-    DialogUtil.showAlertDialog(context, title: "Depósito", content: Observer(
-      builder: (_) {
-        return TextField(
-          keyboardType: TextInputType.number,
-          onChanged: (text) => controller.valorDeposito = double.parse(text),
-          decoration: InputDecoration(
-              errorStyle: TextStyle(color: Colors.red),
-              errorText: controller.errorDialog,
-              labelText: "Valor",
-              border: const OutlineInputBorder()),
-        );
-      },
-    ), onConcluir: () async {
-      bool ok = await LoadingUtil.onLoading(context, controller.salvarDeposito);
-      if (ok) {
         Navigator.of(context).pop();
       }
     });

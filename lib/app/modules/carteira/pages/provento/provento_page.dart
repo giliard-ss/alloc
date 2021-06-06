@@ -43,12 +43,11 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
+        appBar: AppBar(),
+        floatingActionButton: _buttonSalvar(),
         body: WidgetUtil.futureBuild(controller.init, () {
           return Container(
-            padding: EdgeInsets.all(10),
+            padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
             child: _body(),
           );
         }));
@@ -58,6 +57,7 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
+          Text("Informe os dados do provento"),
           Observer(
             builder: (_) {
               return Visibility(
@@ -91,18 +91,6 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
           SizedBox(
             height: 10,
           ),
-          RaisedButton(
-            // color: Colors.green[900],
-            child: Text('Salvar', style: TextStyle(color: Colors.white)),
-            onPressed: () async {
-              bool ok = await LoadingUtil.onLoading(context, controller.salvar);
-              if (ok) {
-                setState(() {
-                  Modular.to.pop();
-                });
-              }
-            },
-          )
         ],
       ),
     );
@@ -111,9 +99,13 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
   Widget _createValorTextField() {
     _moneyController.text = controller.valorTotal != null ? controller.valorTotal.toString() : null;
     return TextField(
-      decoration: InputDecoration(labelText: "Valor Total", border: const OutlineInputBorder()),
+      decoration: InputDecoration(labelText: "Valor Total", labelStyle: TextStyle(fontSize: 16)),
       controller: _moneyController,
       keyboardType: TextInputType.number,
+      style: TextStyle(
+        fontSize: 25,
+        fontWeight: FontWeight.w600,
+      ),
       onChanged: (value) {
         controller.valorTotal = _moneyController.numberValue;
       },
@@ -128,8 +120,12 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
     return TextField(
       controller: _qtdController,
       keyboardType: TextInputType.numberWithOptions(decimal: true),
+      style: TextStyle(
+        fontSize: 25,
+        fontWeight: FontWeight.w600,
+      ),
       onChanged: (text) => controller.qtd = double.parse(text),
-      decoration: InputDecoration(labelText: "Quantidade", border: const OutlineInputBorder()),
+      decoration: InputDecoration(labelText: "Quantidade", labelStyle: TextStyle(fontSize: 16)),
     );
   }
 
@@ -142,13 +138,17 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
           textFieldConfiguration: TextFieldConfiguration(
             controller: _papelController,
             keyboardType: TextInputType.text,
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.w600,
+            ),
             onChanged: (text) => controller.setPapel(text.toUpperCase()),
             autofocus: controller.papel == null,
             decoration: InputDecoration(
                 errorText:
                     StringUtil.isEmpty(controller.papel) || controller.papelValido ? null : "",
-                border: OutlineInputBorder(),
-                labelText: "Papel"),
+                labelText: "Papel",
+                labelStyle: TextStyle(fontSize: 16)),
           ),
           suggestionsCallback: (pattern) {
             return controller.getSugestoes(pattern);
@@ -176,11 +176,30 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
         }
       },
       controller: _dataController,
+      style: TextStyle(
+        fontSize: 25,
+        fontWeight: FontWeight.w600,
+      ),
       inputFormatters: [maskFormatter],
       keyboardType: TextInputType.number,
       maxLength: 10,
       decoration:
-          InputDecoration(labelText: "Data", border: const OutlineInputBorder(), counterText: ""),
+          InputDecoration(labelText: "Data", counterText: "", labelStyle: TextStyle(fontSize: 16)),
+    );
+  }
+
+  Widget _buttonSalvar() {
+    return FloatingActionButton.extended(
+      onPressed: () async {
+        bool ok = await LoadingUtil.onLoading(context, controller.salvar);
+        if (ok) {
+          setState(() {
+            Modular.to.pop();
+          });
+        }
+      },
+      label: const Text('Salvar'),
+      icon: const Icon(Icons.check),
     );
   }
 }

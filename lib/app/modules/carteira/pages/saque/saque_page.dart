@@ -1,4 +1,5 @@
 import 'package:alloc/app/shared/utils/date_util.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
@@ -6,21 +7,20 @@ import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'deposito_controller.dart';
+import 'saque_controller.dart';
 
-class DepositoPage extends StatefulWidget {
+class SaquePage extends StatefulWidget {
   final String title;
   final String id;
-  const DepositoPage({this.id, Key key, this.title = "Deposito"}) : super(key: key);
+  const SaquePage({this.id, Key key, this.title = "Saque"}) : super(key: key);
 
   @override
-  _DepositoPageState createState() => _DepositoPageState();
+  _SaquePageState createState() => _SaquePageState();
 }
 
-class _DepositoPageState extends ModularState<DepositoPage, DepositoController> {
+class _SaquePageState extends ModularState<SaquePage, SaqueController> {
   final _moneyController = new MoneyMaskedTextController(leftSymbol: "R\$ ");
-  TextEditingController _dataController =
-      TextEditingController(text: DateUtil.dateToString(DateTime.now()));
+  TextEditingController _dataController = TextEditingController();
   var maskFormatter =
       new MaskTextInputFormatter(mask: '##/##/####', filter: {"#": RegExp(r'[0-9]')});
 
@@ -45,7 +45,7 @@ class _DepositoPageState extends ModularState<DepositoPage, DepositoController> 
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Text(
-            "Qual a data e o valor do depósito?",
+            "Qual a data e o valor do saque?",
           ),
           SizedBox(
             height: 50,
@@ -61,15 +61,15 @@ class _DepositoPageState extends ModularState<DepositoPage, DepositoController> 
   }
 
   Widget _textfieldValor() {
-    if (controller.isEdicao()) _moneyController.updateValue(controller.valorDeposito);
+    if (controller.isEdicao()) _moneyController.updateValue(controller.valorSaque);
     return Observer(
       builder: (_) {
         return TextField(
           autofocus: true,
           decoration: InputDecoration(
-            errorStyle: TextStyle(color: Colors.red),
-            errorText: controller.error,
-          ),
+              errorStyle: TextStyle(color: Colors.red),
+              errorText: controller.error,
+              helperText: "Saldo atual " + GeralUtil.doubleToMoney(controller.getSaldoAtual())),
           style: TextStyle(
             fontSize: 35,
             fontWeight: FontWeight.w600,
@@ -77,7 +77,7 @@ class _DepositoPageState extends ModularState<DepositoPage, DepositoController> 
           controller: _moneyController,
           keyboardType: TextInputType.number,
           onChanged: (value) {
-            controller.valorDeposito = _moneyController.numberValue;
+            controller.onChangedValorSaque(_moneyController.numberValue);
           },
         );
       },
@@ -107,7 +107,7 @@ class _DepositoPageState extends ModularState<DepositoPage, DepositoController> 
   Widget _buttonSalvar() {
     return FloatingActionButton.extended(
       onPressed: () async {
-        bool ok = await LoadingUtil.onLoading(context, controller.salvarDeposito);
+        bool ok = await LoadingUtil.onLoading(context, controller.salvarSaque);
         if (ok) {
           Modular.to.pop();
         }

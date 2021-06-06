@@ -5,10 +5,7 @@ import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
-import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
-import 'package:alloc/app/shared/models/evento_deposito.dart';
-import 'package:alloc/app/shared/models/evento_saque.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
 import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
@@ -87,50 +84,6 @@ abstract class _CarteiraControllerBase with Store {
     list.forEach((e) => e.percentualNaAlocacao = _getPercentualAtualAloc(e, list));
     list.sort((e1, e2) => e2.percentualNaAlocacao.compareTo(e1.percentualNaAlocacao));
     alocacoes = list;
-  }
-
-  Future<bool> salvarDeposito() async {
-    try {
-      if (valorDeposito == null || valorDeposito <= 0)
-        throw new ApplicationException("Valor de depósito inválido!");
-
-      EventoDeposito deposito = new EventoDeposito(null, DateTime.now().millisecondsSinceEpoch,
-          _carteira.id, AppCore.usuario.id, valorDeposito);
-
-      _eventService.save(deposito);
-
-      await AppCore.notifyUpdateCarteira();
-      return true;
-    } on ApplicationException catch (e) {
-      errorDialog = e.toString();
-    } on Exception catch (e) {
-      LoggerUtil.error(e);
-      errorDialog = "Falha ao salvar nova alocação.";
-    }
-    return false;
-  }
-
-  Future<bool> salvarSaque() async {
-    try {
-      if (valorSaque == null || valorSaque <= 0)
-        throw new ApplicationException("Valor de saque inválido!");
-
-      if (carteira.saldo < valorSaque)
-        throw new ApplicationException("Valor de saque acima do saldo!");
-
-      EventoSaque saque = new EventoSaque(null, DateTime.now().millisecondsSinceEpoch, _carteira.id,
-          AppCore.usuario.id, valorSaque);
-
-      _eventService.save(saque);
-      await AppCore.notifyUpdateCarteira();
-      return true;
-    } on ApplicationException catch (e) {
-      errorDialog = e.toString();
-    } on Exception catch (e) {
-      LoggerUtil.error(e);
-      errorDialog = "Falha ao salvar nova alocação.";
-    }
-    return false;
   }
 
   Future<String> excluir(AtivoDTO ativoDTO) async {

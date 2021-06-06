@@ -1,7 +1,6 @@
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
-import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_provento.dart';
 
 import 'package:alloc/app/shared/services/event_service.dart';

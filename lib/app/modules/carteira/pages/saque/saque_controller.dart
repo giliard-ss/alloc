@@ -1,19 +1,19 @@
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
-import 'package:alloc/app/shared/models/evento_deposito.dart';
+import 'package:alloc/app/shared/models/evento_saque.dart';
 import 'package:alloc/app/shared/services/event_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
-part 'deposito_controller.g.dart';
+part 'saque_controller.g.dart';
 
 @Injectable()
-class DepositoController = _DepositoControllerBase with _$DepositoController;
+class SaqueController = _SaqueControllerBase with _$SaqueController;
 
-abstract class _DepositoControllerBase with Store {
+abstract class _SaqueControllerBase with Store {
   CarteiraController _carteiraController = Modular.get();
   IEventService _eventService = Modular.get<EventService>();
 
@@ -22,15 +22,15 @@ abstract class _DepositoControllerBase with Store {
 
   String _id;
   DateTime data;
-  double valorDeposito;
+  double valorSaque;
 
   Future<void> init() async {
     try {
       data = DateTime.now();
       if (!StringUtil.isEmpty(_id)) {
-        EventoDeposito deposito = await _eventService.getEventById(_id);
-        valorDeposito = deposito.valor;
-        data = deposito.getData();
+        EventoSaque saque = await _eventService.getEventById(_id);
+        valorSaque = saque.valor;
+        data = saque.getData();
       }
     } catch (e) {
       LoggerUtil.error(e);
@@ -42,24 +42,28 @@ abstract class _DepositoControllerBase with Store {
     return _id != null;
   }
 
-  Future<bool> salvarDeposito() async {
+  double getSaldoAtual() {
+    return _carteiraController.carteira.saldo;
+  }
+
+  Future<bool> salvarSaque() async {
     try {
-      if (valorDeposito == null || valorDeposito <= 0)
-        throw new ApplicationException("Valor de depósito inválido!");
+      if (valorSaque == null || valorSaque <= 0)
+        throw new ApplicationException("Valor de saque inválido!");
 
-      EventoDeposito deposito;
-
+      if (_carteiraController.carteira.saldo < valorSaque)
+        throw new ApplicationException("Valor de saque acima do saldo!");
+      EventoSaque saque;
       if (isEdicao()) {
-        deposito = await _eventService.getEventById(_id);
-        deposito.valor = valorDeposito;
-        deposito.data = data.millisecondsSinceEpoch;
+        saque = await _eventService.getEventById(_id);
+        saque.valor = valorSaque;
+        saque.data = data.millisecondsSinceEpoch;
       } else {
-        deposito = new EventoDeposito(null, data.millisecondsSinceEpoch,
-            _carteiraController.carteira.id, AppCore.usuario.id, valorDeposito);
+        saque = new EventoSaque(null, data.millisecondsSinceEpoch, _carteiraController.carteira.id,
+            AppCore.usuario.id, valorSaque);
       }
 
-      _eventService.save(deposito);
-
+      _eventService.save(saque);
       await AppCore.notifyUpdateCarteira();
       return true;
     } on ApplicationException catch (e) {
@@ -69,6 +73,12 @@ abstract class _DepositoControllerBase with Store {
       error = "Falha ao salvar nova alocação.";
     }
     return false;
+  }
+
+  @action
+  void onChangedValorSaque(valor) {
+    valorSaque = valor;
+    error = null;
   }
 
   String get id => this._id;
