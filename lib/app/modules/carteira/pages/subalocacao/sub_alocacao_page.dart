@@ -172,7 +172,7 @@ class _SubAlocacaoPageState extends ModularState<SubAlocacaoPage, SubAlocacaoCon
                   resumoWidget: Container(),
                   fncNovaAlocacao: _showNovaAlocacaoDialog,
                   fncNovoAtivo: () {
-                    Modular.to.pushNamed("/carteira/ativo/${alocacaoAtual.id}");
+                    Modular.to.pushNamed("/carteira/ativo/comprar/alocacao/${alocacaoAtual.id}");
                   },
                 ),
               );
@@ -282,9 +282,7 @@ class _SubAlocacaoPageState extends ModularState<SubAlocacaoPage, SubAlocacaoCon
           ativos: _ativos.value,
           autoAlocacao: alocacaoAtual.autoAlocacao,
           fncExcluirSecundario: controller.excluir,
-          fncAdd: () {
-            Modular.to.pushNamed("/carteira/ativo/${alocacaoAtual.id}");
-          },
+          idAlocacao: alocacaoAtual.id,
         ),
       );
     });

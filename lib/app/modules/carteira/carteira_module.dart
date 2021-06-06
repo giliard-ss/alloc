@@ -1,4 +1,5 @@
 import 'package:alloc/app/modules/carteira/pages/saque/saque_page.dart';
+import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
 
 import 'pages/saque/saque_controller.dart';
 import 'package:alloc/app/modules/carteira/pages/deposito/deposito_page.dart';
@@ -37,14 +38,35 @@ class CarteiraModule extends ChildModule {
   List<ModularRouter> get routers => [
         ModularRouter("/:id", child: (_, args) => CarteiraPage(args.params['id'])),
         ModularRouter("/sub-alocacao/:id", child: (_, args) => SubAlocacaoPage(args.params['id'])),
-        ModularRouter("/ativo/:idAlocacao",
-            child: (_, args) => AtivoPage(args.params['idAlocacao'])),
-        ModularRouter("/ativo/id/:id",
+        ModularRouter("/ativo/:id",
             child: (_, args) => AtivoPage(
-                  null,
                   id: args.params['id'],
                 )),
-        ModularRouter("/ativo", child: (_, args) => AtivoPage(null)),
+        ModularRouter("/ativo/comprar",
+            child: (_, args) => AtivoPage(
+                  tipoEvento: TipoEvento.APLICACAO.code,
+                )),
+        ModularRouter("/ativo/comprar/papel/:papel",
+            child: (_, args) => AtivoPage(
+                  tipoEvento: TipoEvento.APLICACAO.code,
+                  papel: args.params['papel'],
+                )),
+        ModularRouter("/ativo/comprar/alocacao/:idAlocacao",
+            child: (_, args) => AtivoPage(
+                  idAlocacao: args.params['idAlocacao'],
+                  tipoEvento: TipoEvento.APLICACAO.code,
+                )),
+        ModularRouter("/ativo/comprar/alocacao/:idAlocacao/papel/:papel",
+            child: (_, args) => AtivoPage(
+                  idAlocacao: args.params['idAlocacao'],
+                  papel: args.params['papel'],
+                  tipoEvento: TipoEvento.APLICACAO.code,
+                )),
+        ModularRouter("/ativo/vender/papel/:papel",
+            child: (_, args) => AtivoPage(
+                  tipoEvento: TipoEvento.VENDA.code,
+                  papel: args.params['papel'],
+                )),
         ModularRouter("/config", child: (_, args) => ConfiguracaoPage(null)),
         ModularRouter("/config/:idAlocacao",
             child: (_, args) => ConfiguracaoPage(args.params['idAlocacao'])),

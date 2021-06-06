@@ -31,76 +31,15 @@ class AlocacoesWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  iconSize: 25,
-                  icon: Icon(
-                    Icons.settings,
-                  ),
-                  onPressed: fncConfig,
-                )
-              ],
-            )
-          ],
-        ),
+        _rowTitleAlocacoes(),
         SizedBox(
           height: 10,
         ),
-        ListView.builder(
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: alocacoes.length,
-            itemBuilder: (context, index) {
-              AlocacaoDTO alocacao = alocacoes[index];
-
-              return Dismissible(
-                key: Key(alocacao.id),
-                confirmDismiss: (e) async {
-                  String msg = await LoadingUtil.onLoading(context, () async {
-                    if (fncExcluir != null)
-                      return await fncExcluir(alocacao);
-                    else if (fncExcluirSecundario != null)
-                      return await fncExcluirSecundario(alocacao, alocacoes);
-                    else
-                      "Falha!";
-                  });
-
-                  if (msg == null) {
-                    return true;
-                  }
-                  DialogUtil.showMessageDialog(context, msg);
-                  return false;
-                },
-                background: Container(),
-                secondaryBackground: _slideRightBackground(),
-                direction: DismissDirection.endToStart,
-                child: _createTile(context, alocacao, index),
-              );
-            }),
+        _listViewAlocacoes(),
         SizedBox(
           height: 10,
         ),
-        MaterialButton(
-          onPressed: fncAdd,
-          color: Colors.blue,
-          textColor: Colors.white,
-          child: Icon(
-            Icons.add,
-            size: 24,
-          ),
-          padding: EdgeInsets.all(16),
-          shape: CircleBorder(),
-        ),
+        _buttonAddAlocacao(),
         SizedBox(
           height: 10,
         ),
@@ -108,7 +47,80 @@ class AlocacoesWidget extends StatelessWidget {
     );
   }
 
-  _createTile(context, AlocacaoDTO alocacao, int index) {
+  Widget _rowTitleAlocacoes() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IconButton(
+              iconSize: 25,
+              icon: Icon(
+                Icons.settings,
+              ),
+              onPressed: fncConfig,
+            )
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _listViewAlocacoes() {
+    return ListView.builder(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        itemCount: alocacoes.length,
+        itemBuilder: (context, index) {
+          AlocacaoDTO alocacao = alocacoes[index];
+
+          return Dismissible(
+            key: Key(alocacao.id),
+            confirmDismiss: (e) async {
+              String msg = await LoadingUtil.onLoading(context, () async {
+                if (fncExcluir != null)
+                  return await fncExcluir(alocacao);
+                else if (fncExcluirSecundario != null)
+                  return await fncExcluirSecundario(alocacao, alocacoes);
+                else
+                  "Falha!";
+              });
+
+              if (msg == null) {
+                return true;
+              }
+              DialogUtil.showMessageDialog(context, msg);
+              return false;
+            },
+            background: Container(),
+            secondaryBackground: _slideRightBackground(),
+            direction: DismissDirection.endToStart,
+            child: _cardAlocacao(context, alocacao, index),
+          );
+        });
+  }
+
+  _buttonAddAlocacao() {
+    return MaterialButton(
+      onPressed: fncAdd,
+      color: Colors.blue,
+      textColor: Colors.white,
+      child: Icon(
+        Icons.add,
+        size: 24,
+      ),
+      padding: EdgeInsets.all(16),
+      shape: CircleBorder(),
+    );
+  }
+
+  _cardAlocacao(context, AlocacaoDTO alocacao, int index) {
     return Card(
       elevation: 2,
       shadowColor: Colors.grey[300],
@@ -116,11 +128,11 @@ class AlocacoesWidget extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25),
       ),
-      child: tileExpansion(context, alocacao, index),
+      child: _tileExpansionAlocacao(context, alocacao, index),
     );
   }
 
-  Widget titleExpansion(AlocacaoDTO alocacao, index) {
+  Widget _rowTitleExpansionTileAlocacao(AlocacaoDTO alocacao, index) {
     return Row(
       children: [
         CircleInfoWidget(alocacao.percentualNaAlocacaoString, index),
@@ -135,7 +147,7 @@ class AlocacoesWidget extends StatelessWidget {
     );
   }
 
-  Widget subtitleExpansion(context, AlocacaoDTO alocacao, int index) {
+  Widget _columnSubtitleTileExpansionAlocacao(context, AlocacaoDTO alocacao, int index) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -170,64 +182,79 @@ class AlocacoesWidget extends StatelessWidget {
     );
   }
 
-  Widget tileExpansion(context, AlocacaoDTO alocacao, int index) {
+  Widget _tileExpansionAlocacao(context, AlocacaoDTO alocacao, int index) {
     return ExpansionTile(
-      title: titleExpansion(alocacao, index),
-      subtitle: subtitleExpansion(context, alocacao, index),
+      title: _rowTitleExpansionTileAlocacao(alocacao, index),
+      subtitle: _columnSubtitleTileExpansionAlocacao(context, alocacao, index),
       children: [
-        ListTile(
-          dense: true,
-          title: Text("Rendimento", style: TextStyle(fontSize: _textSize2)),
-          trailing: Text(
-            GeralUtil.doubleToMoney(alocacao.rendimento, leftSymbol: ""),
-            style: TextStyle(
-                fontSize: _textSize2, color: alocacao.rendimento < 0 ? Colors.red : Colors.green),
-          ),
-        ),
+        _listTileRendimento(alocacao),
         Divider(
           height: 5,
         ),
-        ListTile(
-          dense: true,
-          title: Text("Total Aportado", style: TextStyle(fontSize: _textSize2)),
-          trailing: Text(GeralUtil.doubleToMoney(alocacao.totalAportado, leftSymbol: ""),
-              style: TextStyle(fontSize: _textSize2)),
-        ),
+        _listTileTotalAportado(alocacao),
         Divider(
           height: 5,
         ),
-        ListTile(
-          dense: true,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Alocação Configurada", style: TextStyle(fontSize: _textSize2)),
-              Visibility(
-                  visible: alocacao.alocacaoPercent == 0, child: Icon(Icons.notification_important))
-            ],
-          ),
-          trailing:
-              Text(alocacao.alocacaoPercentString + "%", style: TextStyle(fontSize: _textSize2)),
-        ),
-        GestureDetector(
-          onTap: () {
-            if (isSubAlocacao) {
-              Modular.to.pushReplacementNamed("/carteira/sub-alocacao/${alocacao.id}");
-            } else {
-              Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
-            }
-          },
-          child: Container(
-            height: 40,
-            width: double.infinity,
-            decoration: BoxDecoration(
-                color: Color(0xffe7ecf4),
-                borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(23), bottomRight: Radius.circular(23))),
-            child: Icon(Icons.search),
-          ),
-        )
+        _listTileAlocacaoConfigurada(alocacao),
+        _buttonDetalhes(alocacao)
       ],
+    );
+  }
+
+  Widget _listTileRendimento(AlocacaoDTO alocacao) {
+    return ListTile(
+      dense: true,
+      title: Text("Rendimento", style: TextStyle(fontSize: _textSize2)),
+      trailing: Text(
+        GeralUtil.doubleToMoney(alocacao.rendimento, leftSymbol: ""),
+        style: TextStyle(
+            fontSize: _textSize2, color: alocacao.rendimento < 0 ? Colors.red : Colors.green),
+      ),
+    );
+  }
+
+  Widget _listTileTotalAportado(AlocacaoDTO alocacao) {
+    return ListTile(
+      dense: true,
+      title: Text("Total Aportado", style: TextStyle(fontSize: _textSize2)),
+      trailing: Text(GeralUtil.doubleToMoney(alocacao.totalAportado, leftSymbol: ""),
+          style: TextStyle(fontSize: _textSize2)),
+    );
+  }
+
+  Widget _listTileAlocacaoConfigurada(AlocacaoDTO alocacao) {
+    return ListTile(
+      dense: true,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text("Alocação Configurada", style: TextStyle(fontSize: _textSize2)),
+          Visibility(
+              visible: alocacao.alocacaoPercent == 0, child: Icon(Icons.notification_important))
+        ],
+      ),
+      trailing: Text(alocacao.alocacaoPercentString + "%", style: TextStyle(fontSize: _textSize2)),
+    );
+  }
+
+  Widget _buttonDetalhes(AlocacaoDTO alocacao) {
+    return GestureDetector(
+      onTap: () {
+        if (isSubAlocacao) {
+          Modular.to.pushReplacementNamed("/carteira/sub-alocacao/${alocacao.id}");
+        } else {
+          Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
+        }
+      },
+      child: Container(
+        height: 40,
+        width: double.infinity,
+        decoration: BoxDecoration(
+            color: Color(0xffe7ecf4),
+            borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(23), bottomRight: Radius.circular(23))),
+        child: Icon(Icons.search),
+      ),
     );
   }
 

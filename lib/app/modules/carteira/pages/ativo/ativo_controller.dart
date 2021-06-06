@@ -34,6 +34,7 @@ abstract class _AtivoControllerBase with Store {
   double preco;
   double custos = 0.0;
   String _id;
+  String _tipoEvento;
 
   Future<void> init() async {
     try {
@@ -223,4 +224,8 @@ abstract class _AtivoControllerBase with Store {
   void setId(String id) {
     this._id = id;
   }
+
+  get tipoEvento => this._tipoEvento;
+
+  set tipoEvento(value) => this._tipoEvento = value;
 }

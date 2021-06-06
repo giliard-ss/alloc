@@ -129,7 +129,7 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
                       _showNovaAlocacaoDialog();
                     },
                     fncNovoAtivo: () {
-                      Modular.to.pushNamed("/carteira/ativo");
+                      Modular.to.pushNamed("/carteira/ativo/comprar");
                     },
                   ),
                 );
@@ -312,9 +312,6 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
           ativos: controller.ativos,
           autoAlocacao: controller.carteira.autoAlocacao,
           fncExcluir: controller.excluir,
-          fncAdd: () {
-            Modular.to.pushNamed("/carteira/ativo");
-          },
         ),
       );
     });

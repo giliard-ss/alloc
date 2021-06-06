@@ -104,7 +104,7 @@ abstract class _ExtratoControllerBase with Store {
       Modular.to.pushNamed("/carteira/provento/${event.getId()}");
 
     if (event is AplicacaoRendaVariavel || event is VendaRendaVariavelEvent)
-      Modular.to.pushNamed("/carteira/ativo/id/${event.getId()}");
+      Modular.to.pushNamed("/carteira/ativo/${event.getId()}");
 
     if (event is EventoDeposito) Modular.to.pushNamed("/carteira/deposito/${event.getId()}");
     if (event is EventoSaque) Modular.to.pushNamed("/carteira/saque/${event.getId()}");

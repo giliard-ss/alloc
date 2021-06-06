@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
@@ -15,7 +16,11 @@ class AtivoPage extends StatefulWidget {
   final String title;
   final String idAlocacao;
   final String id;
-  const AtivoPage(this.idAlocacao, {this.id, Key key, this.title = "Ativo"}) : super(key: key);
+  final String tipoEvento;
+  final String papel;
+  const AtivoPage(
+      {this.idAlocacao, this.tipoEvento, this.papel, this.id, Key key, this.title = "Ativo"})
+      : super(key: key);
 
   @override
   _AtivoPageState createState() => _AtivoPageState();
@@ -29,11 +34,20 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
   final _cotacaoController = new MoneyMaskedTextController(leftSymbol: "R\$ ");
   final TextEditingController _papelController = TextEditingController();
   final TextEditingController _qtdController = TextEditingController();
+  String titulo;
 
   @override
   void initState() {
     controller.setAlocacaoAtual(widget.idAlocacao);
     controller.setId(widget.id);
+    controller.papel = widget.papel;
+    if (widget.tipoEvento == TipoEvento.APLICACAO.code)
+      titulo = "Aplicação";
+    else if (widget.tipoEvento == TipoEvento.VENDA.code)
+      titulo = "Venda";
+    else
+      titulo = widget.title;
+
     super.initState();
   }
 
@@ -41,8 +55,14 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(widget.title),
-        ),
+            title: Text(widget.title),
+            leading: IconButton(
+              icon: Icon(Icons.close),
+              onPressed: () {
+                Modular.to.pop();
+              },
+            )),
+        floatingActionButton: _buttonSalvar(),
         body: WidgetUtil.futureBuild(controller.init, () {
           _preencherCampos();
 
@@ -63,158 +83,135 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
     } else {
       _dataController.text = DateUtil.dateToString(DateTime.now());
     }
+    _papelController.text = controller.papel;
   }
 
   _body() {
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
-          Observer(
-            builder: (_) {
-              return Visibility(
-                visible: controller.error.isNotEmpty,
-                child: Text(
-                  controller.error,
-                  style: TextStyle(color: Colors.red),
-                ),
-              );
-            },
-          ),
+          _textError(),
           SizedBox(
-            height: 10,
-          ),
-          SizedBox(
-            height: 10,
+            height: 20,
           ),
           _dataTextField(),
           SizedBox(
             height: 10,
           ),
-          Observer(
-            builder: (_) {
-              return TypeAheadField(
-                hideOnEmpty: true,
-                textFieldConfiguration: TextFieldConfiguration(
-                  controller: _papelController,
-                  keyboardType: TextInputType.text,
-                  onChanged: (text) => controller.setPapel(text.toUpperCase()),
-                  autofocus: !controller.isEdicao(),
-                  decoration: InputDecoration(
-                      errorText: StringUtil.isEmpty(controller.papel) || controller.papelValido
-                          ? null
-                          : "",
-                      border: OutlineInputBorder(),
-                      labelText: "Papel"),
-                ),
-                suggestionsCallback: (pattern) {
-                  return controller.getSugestoes(pattern);
-                },
-                itemBuilder: (context, suggestion) {
-                  return ListTile(
-                    title: Text(suggestion),
-                  );
-                },
-                onSuggestionSelected: (suggestion) {
-                  this._papelController.text = suggestion;
-                  controller.papel = suggestion.toUpperCase();
-                },
-              );
-            },
-          ),
+          _textFieldPapel(),
           SizedBox(
             height: 10,
           ),
-          TextField(
-            controller: _qtdController,
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
-            onChanged: (text) => controller.qtd = double.parse(text),
-            decoration:
-                InputDecoration(labelText: "Quantidade", border: const OutlineInputBorder()),
-          ),
+          _textFieldQuantidade(),
           SizedBox(
             height: 10,
           ),
-          TextField(
-            decoration: InputDecoration(labelText: "Cotação", border: const OutlineInputBorder()),
-            controller: _cotacaoController,
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
-              controller.preco = _cotacaoController.numberValue;
-            },
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          _buttons()
+          _textFieldCotacao(),
         ],
       ),
     );
   }
 
-  Widget _buttons() {
-    if (controller.isEdicao()) {
-      return _buttonSalvar();
-    } else {
-      return Row(
-        children: [
-          _buttonVender(),
-          SizedBox(
-            width: 10,
+  Widget _textError() {
+    return Observer(
+      builder: (_) {
+        return Visibility(
+          visible: controller.error.isNotEmpty,
+          child: Text(
+            controller.error,
+            style: TextStyle(color: Colors.red),
           ),
-          _buttonComprar()
-        ],
-      );
-    }
+        );
+      },
+    );
+  }
+
+  Widget _textFieldPapel() {
+    return Observer(
+      builder: (_) {
+        return TypeAheadField(
+          hideOnEmpty: true,
+          textFieldConfiguration: TextFieldConfiguration(
+            controller: _papelController,
+            keyboardType: TextInputType.text,
+            onChanged: (text) => controller.setPapel(text.toUpperCase()),
+            autofocus: controller.papel == null,
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.w600,
+            ),
+            decoration: InputDecoration(
+                errorText:
+                    StringUtil.isEmpty(controller.papel) || controller.papelValido ? null : "",
+                labelStyle: TextStyle(fontSize: 16),
+                labelText: "Papel"),
+          ),
+          suggestionsCallback: (pattern) {
+            return controller.getSugestoes(pattern);
+          },
+          itemBuilder: (context, suggestion) {
+            return ListTile(
+              title: Text(suggestion),
+            );
+          },
+          onSuggestionSelected: (suggestion) {
+            this._papelController.text = suggestion;
+            controller.papel = suggestion.toUpperCase();
+          },
+        );
+      },
+    );
+  }
+
+  Widget _textFieldQuantidade() {
+    return TextField(
+      controller: _qtdController,
+      autofocus: widget.tipoEvento != null && widget.papel != null,
+      keyboardType: TextInputType.numberWithOptions(decimal: true),
+      onChanged: (text) => controller.qtd = double.parse(text),
+      style: TextStyle(
+        fontSize: 25,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: InputDecoration(labelText: "Quantidade", labelStyle: TextStyle(fontSize: 16)),
+    );
+  }
+
+  Widget _textFieldCotacao() {
+    return TextField(
+      style: TextStyle(
+        fontSize: 25,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: InputDecoration(labelText: "Cotação", labelStyle: TextStyle(fontSize: 16)),
+      controller: _cotacaoController,
+      keyboardType: TextInputType.number,
+      onChanged: (value) {
+        controller.preco = _cotacaoController.numberValue;
+      },
+    );
   }
 
   Widget _buttonSalvar() {
-    return RaisedButton(
-      child: Text('Salvar', style: TextStyle(color: Colors.white)),
+    return FloatingActionButton.extended(
       onPressed: () async {
-        bool ok = await LoadingUtil.onLoading(context, controller.salvar);
+        bool ok;
+        if (controller.isEdicao()) {
+          ok = await LoadingUtil.onLoading(context, controller.salvar);
+        } else if (widget.tipoEvento == TipoEvento.VENDA.code) {
+          ok = await LoadingUtil.onLoading(context, controller.vender);
+        } else if (widget.tipoEvento == TipoEvento.APLICACAO.code) {
+          ok = await LoadingUtil.onLoading(context, controller.comprar);
+        }
+
         if (ok) {
           setState(() {
             Modular.to.pop();
           });
         }
       },
-    );
-  }
-
-  Widget _buttonComprar() {
-    return Flexible(
-      child: RaisedButton(
-        color: Colors.green[900],
-        child: Text('Comprar', style: TextStyle(color: Colors.white)),
-        onPressed: () async {
-          bool ok = await LoadingUtil.onLoading(context, controller.comprar);
-          if (ok) {
-            setState(() {
-              Modular.to.pop();
-            });
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _buttonVender() {
-    return Flexible(
-      child: RaisedButton(
-        color: Colors.red[900],
-        onPressed: () async {
-          bool ok = await LoadingUtil.onLoading(context, controller.vender);
-          if (ok) {
-            setState(() {
-              Modular.to.pop();
-            });
-          }
-        },
-        child: Text(
-          'Vender',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
+      label: const Text('Salvar'),
+      icon: const Icon(Icons.check),
     );
   }
 
@@ -229,8 +226,12 @@ class _AtivoPageState extends ModularState<AtivoPage, AtivoController> {
       inputFormatters: [maskFormatter],
       keyboardType: TextInputType.number,
       maxLength: 10,
+      style: TextStyle(
+        fontSize: 25,
+        fontWeight: FontWeight.w600,
+      ),
       decoration:
-          InputDecoration(labelText: "Data", border: const OutlineInputBorder(), counterText: ""),
+          InputDecoration(labelText: "Data", counterText: "", labelStyle: TextStyle(fontSize: 16)),
     );
   }
 }
