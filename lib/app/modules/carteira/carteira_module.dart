@@ -62,6 +62,12 @@ class CarteiraModule extends ChildModule {
                   papel: args.params['papel'],
                   tipoEvento: TipoEvento.APLICACAO.code,
                 )),
+        ModularRouter("/ativo/vender/alocacao/:idAlocacao/papel/:papel",
+            child: (_, args) => AtivoPage(
+                  idAlocacao: args.params['idAlocacao'],
+                  papel: args.params['papel'],
+                  tipoEvento: TipoEvento.VENDA.code,
+                )),
         ModularRouter("/ativo/vender/papel/:papel",
             child: (_, args) => AtivoPage(
                   tipoEvento: TipoEvento.VENDA.code,

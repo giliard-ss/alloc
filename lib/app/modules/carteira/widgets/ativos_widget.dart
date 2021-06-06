@@ -226,7 +226,11 @@ class AtivosWidget extends StatelessWidget {
             style: TextStyle(color: Colors.grey[600]),
           ),
           onPressed: () {
-            Modular.to.pushNamed("/carteira/ativo/vender/papel/${ativo.papel}");
+            if (idAlocacao != null)
+              Modular.to
+                  .pushNamed("/carteira/ativo/vender/alocacao/${idAlocacao}/papel/${ativo.papel}");
+            else
+              Modular.to.pushNamed("/carteira/ativo/vender/papel/${ativo.papel}");
           }),
     );
   }
