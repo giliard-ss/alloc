@@ -30,13 +30,17 @@ class _ConfiguracaoPageState extends ModularState<ConfiguracaoPage, Configuracao
       appBar: AppBar(
         title: Text(widget.title),
       ),
+      floatingActionButton: _buttonSalvar(),
       body: WidgetUtil.futureBuild(controller.init, _body),
     );
   }
 
   _body() {
     return SingleChildScrollView(
-      child: Column(children: [_buttonAlocacaoAutomatica(), _getAlocacoes(), _buttonSalvar()]),
+      child: Column(children: [
+        _buttonAlocacaoAutomatica(),
+        _getAlocacoes(),
+      ]),
     );
   }
 
@@ -59,7 +63,7 @@ class _ConfiguracaoPageState extends ModularState<ConfiguracaoPage, Configuracao
   }
 
   Widget _buttonSalvar() {
-    return RaisedButton(
+    return FloatingActionButton.extended(
       onPressed: () async {
         String msg = await LoadingUtil.onLoading(context, () async {
           return await controller.salvar();
@@ -73,7 +77,8 @@ class _ConfiguracaoPageState extends ModularState<ConfiguracaoPage, Configuracao
           Modular.to.pop();
         }
       },
-      child: Text('Salvar'),
+      label: const Text('Salvar'),
+      icon: const Icon(Icons.check),
     );
   }
 
@@ -100,8 +105,6 @@ class _ConfiguracaoPageState extends ModularState<ConfiguracaoPage, Configuracao
                       return Observer(
                         builder: (_) {
                           return ListTile(
-                              subtitle: Text(
-                                  "Aportado: ${alocacao.totalAportado.toString()}     ${alocacao.totalInvestir < 0 ? 'Vender' : 'Investir'}: ${alocacao.totalInvestir.toString()}  "),
                               title: Text(alocacao.descricao),
                               trailing:
                                   Container(width: 60.0, child: _percentualAlocWidget(alocacao)));
@@ -118,7 +121,10 @@ class _ConfiguracaoPageState extends ModularState<ConfiguracaoPage, Configuracao
 
   Widget _percentualAlocWidget(AlocacaoDTO alocacao) {
     if (controller.autoAlocacao) {
-      return Text(alocacao.alocacaoPercent.toString() + " %");
+      return Text((alocacao.alocacaoPercent % 2 == 0
+              ? alocacao.alocacaoPercent.round().toString()
+              : alocacao.alocacaoPercent.toString()) +
+          " %");
     }
     return _percentualAlocTextField(alocacao);
   }
@@ -127,7 +133,9 @@ class _ConfiguracaoPageState extends ModularState<ConfiguracaoPage, Configuracao
     return TextFormField(
       keyboardType: TextInputType.number,
       maxLength: 4,
-      initialValue: alocacao.alocacaoPercent.toString(),
+      initialValue: alocacao.alocacaoPercent % 2 == 0
+          ? alocacao.alocacaoPercent.round().toString()
+          : alocacao.alocacaoPercent.toString(),
       onChanged: (value) {
         if (value.isEmpty) value = "0";
         alocacao.alocacaoPercent = double.parse(value);

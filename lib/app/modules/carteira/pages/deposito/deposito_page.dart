@@ -11,7 +11,7 @@ import 'deposito_controller.dart';
 class DepositoPage extends StatefulWidget {
   final String title;
   final String id;
-  const DepositoPage({this.id, Key key, this.title = "Deposito"}) : super(key: key);
+  const DepositoPage({this.id, Key key, this.title = "Depósito"}) : super(key: key);
 
   @override
   _DepositoPageState createState() => _DepositoPageState();
@@ -33,7 +33,14 @@ class _DepositoPageState extends ModularState<DepositoPage, DepositoController> 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+            title: Text(widget.title),
+            leading: IconButton(
+              icon: Icon(Icons.close),
+              onPressed: () {
+                Modular.to.pop();
+              },
+            )),
         floatingActionButton: _buttonSalvar(),
         body: WidgetUtil.futureBuild(controller.init, _body));
   }

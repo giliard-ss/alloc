@@ -33,7 +33,14 @@ class _SaquePageState extends ModularState<SaquePage, SaqueController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+            title: Text(widget.title),
+            leading: IconButton(
+              icon: Icon(Icons.close),
+              onPressed: () {
+                Modular.to.pop();
+              },
+            )),
         floatingActionButton: _buttonSalvar(),
         body: WidgetUtil.futureBuild(controller.init, _body));
   }

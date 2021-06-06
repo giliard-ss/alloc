@@ -43,7 +43,37 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
           title: Text(controller.title),
           actions: [createPopMenuButton()],
         ),
-        key: _scaffoldKey,
+        bottomNavigationBar: BottomNavigationBar(
+          selectedItemColor: Colors.grey,
+          unselectedItemColor: Colors.grey,
+          type: BottomNavigationBarType.fixed,
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.download_sharp),
+              label: "Depositar",
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.upload_sharp), label: "Sacar"),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.monetization_on_sharp), label: "Novo Provento"),
+            BottomNavigationBarItem(icon: Icon(Icons.article), label: "Extrato"),
+          ],
+          onTap: (index) {
+            switch (index) {
+              case 0:
+                Modular.to.pushNamed("/carteira/deposito");
+                break;
+              case 1:
+                Modular.to.pushNamed("/carteira/saque");
+                break;
+              case 2:
+                Modular.to.pushNamed("/carteira/provento");
+                break;
+              case 3:
+                Modular.to.pushNamed("/carteira/extrato");
+                break;
+            }
+          },
+        ),
         body: WidgetUtil.futureBuild(controller.init, _body));
   }
 
@@ -51,25 +81,6 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
     return PopupMenuButton(
       icon: Icon(Icons.menu),
       itemBuilder: (BuildContext bc) => [
-        PopupMenuItem(
-          enabled: true,
-          child: Row(
-            children: [
-              Icon(Icons.upload_rounded),
-              Text("Depósito"),
-            ],
-          ),
-          value: "deposito",
-        ),
-        PopupMenuItem(
-            enabled: true,
-            child: Row(
-              children: [
-                Icon(Icons.monetization_on_outlined),
-                Text("Saque"),
-              ],
-            ),
-            value: "saque"),
         PopupMenuItem(
             enabled: true,
             child: Row(
@@ -79,61 +90,10 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
               ],
             ),
             value: "excluirCarteira"),
-        PopupMenuItem(
-            enabled: true,
-            child: Row(
-              children: [
-                Icon(Icons.article_outlined),
-                Text("Extrato"),
-              ],
-            ),
-            value: "extrato"),
-        PopupMenuItem(
-            enabled: true,
-            child: Row(
-              children: [
-                Icon(Icons.article_outlined),
-                Text("Proventos"),
-              ],
-            ),
-            value: "provento")
       ],
       onSelected: (e) {
         if (e == 'excluirCarteira') {
           _showExcluirCarteiraDialog();
-        }
-        if (e == 'config') {
-          Modular.to.pushNamed("/carteira/config");
-        }
-
-        if (e == 'extrato') {
-          Modular.to.pushNamed("/carteira/extrato");
-        }
-
-        if (e == 'provento') {
-          Modular.to.pushNamed("/carteira/provento");
-        }
-
-        switch (e) {
-          case 'excluirCarteira':
-            {
-              _showExcluirCarteiraDialog();
-            }
-            break;
-
-          case "deposito":
-            {
-              Modular.to.pushNamed("/carteira/deposito");
-            }
-            break;
-          case "saque":
-            {
-              Modular.to.pushNamed("/carteira/saque");
-            }
-            break;
-
-          default:
-            break;
         }
       },
     );
@@ -350,7 +310,6 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
         visible: controller.ativos.isNotEmpty && controller.alocacoes.isEmpty,
         child: AtivosWidget(
           ativos: controller.ativos,
-          showButtonAdd: true,
           autoAlocacao: controller.carteira.autoAlocacao,
           fncExcluir: controller.excluir,
           fncAdd: () {

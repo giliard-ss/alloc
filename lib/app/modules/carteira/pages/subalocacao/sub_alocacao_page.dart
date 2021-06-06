@@ -280,7 +280,6 @@ class _SubAlocacaoPageState extends ModularState<SubAlocacaoPage, SubAlocacaoCon
         visible: _ativos.value.isNotEmpty && _alocacoes.value.isEmpty,
         child: AtivosWidget(
           ativos: _ativos.value,
-          showButtonAdd: true,
           autoAlocacao: alocacaoAtual.autoAlocacao,
           fncExcluirSecundario: controller.excluir,
           fncAdd: () {

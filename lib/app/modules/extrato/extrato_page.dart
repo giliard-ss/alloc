@@ -36,6 +36,12 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.close),
+          onPressed: () {
+            Modular.to.pop();
+          },
+        ),
         title: Text(widget.title),
       ),
       body: Padding(

@@ -17,7 +17,7 @@ class ProventoPage extends StatefulWidget {
   const ProventoPage({
     this.id,
     Key key,
-    this.title = "Proventos",
+    this.title = "Provento",
   }) : super(key: key);
 
   @override
@@ -43,7 +43,14 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+            title: Text(widget.title),
+            leading: IconButton(
+              icon: Icon(Icons.close),
+              onPressed: () {
+                Modular.to.pop();
+              },
+            )),
         floatingActionButton: _buttonSalvar(),
         body: WidgetUtil.futureBuild(controller.init, () {
           return Container(

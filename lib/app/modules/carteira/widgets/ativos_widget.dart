@@ -15,7 +15,7 @@ class AtivosWidget extends StatelessWidget {
   Function(AtivoDTO) fncExcluir;
   Function(AtivoDTO, List<AtivoDTO>) fncExcluirSecundario;
   Function fncAdd;
-  bool showButtonAdd;
+
   bool autoAlocacao;
 
   AtivosWidget(
@@ -23,7 +23,6 @@ class AtivosWidget extends StatelessWidget {
       this.fncExcluir,
       this.fncExcluirSecundario,
       @required this.fncAdd,
-      @required this.showButtonAdd,
       @required this.autoAlocacao});
 
   @override
@@ -32,34 +31,6 @@ class AtivosWidget extends StatelessWidget {
       children: [
         TitleWidget(
           title: "Ativos",
-          rightItems: [
-            Visibility(
-              visible: showButtonAdd,
-              child: GestureDetector(
-                onTap: fncAdd,
-                child: Container(
-                  child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Aplicar/Vender",
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  width: 140,
-                  height: 30,
-                  decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
-                      borderRadius: BorderRadius.all(Radius.circular(40))),
-                ),
-              ),
-            ),
-          ],
         ),
         ListView.builder(
             scrollDirection: Axis.vertical,
@@ -158,6 +129,29 @@ class AtivosWidget extends StatelessWidget {
                                   leftSymbol: (ativo.totalInvestir > 0 ? "+" : "") + "R\$ "),
                               style: TextStyle(fontSize: _textSize2, color: Colors.blue)),
                         ),
+                      ),
+                      GestureDetector(
+                        onTap: fncAdd,
+                        child: Container(
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Vender",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          width: 140,
+                          height: 30,
+                          decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.all(Radius.circular(40))),
+                        ),
                       )
                     ],
                   ),
@@ -167,28 +161,21 @@ class AtivosWidget extends StatelessWidget {
                 ],
               );
             }),
-      ],
-    );
-  }
-
-  Widget _slideRightBackground() {
-    return Container(
-      color: Colors.red,
-      child: Align(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Icon(
-              Icons.delete,
-              color: Colors.white,
-            ),
-            SizedBox(
-              width: 15,
-            )
-          ],
+        SizedBox(
+          height: 25,
         ),
-        alignment: Alignment.centerRight,
-      ),
+        MaterialButton(
+          onPressed: fncAdd,
+          color: Colors.blue,
+          textColor: Colors.white,
+          child: Icon(
+            Icons.add,
+            size: 24,
+          ),
+          padding: EdgeInsets.all(16),
+          shape: CircleBorder(),
+        ),
+      ],
     );
   }
 }

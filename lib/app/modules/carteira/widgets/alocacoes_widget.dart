@@ -42,14 +42,9 @@ class AlocacoesWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
+                  iconSize: 25,
                   icon: Icon(
-                    Icons.add_circle_outline_sharp,
-                  ),
-                  onPressed: fncAdd,
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.dashboard_outlined,
+                    Icons.settings,
                   ),
                   onPressed: fncConfig,
                 )
@@ -92,6 +87,23 @@ class AlocacoesWidget extends StatelessWidget {
                 child: _createTile(context, alocacao, index),
               );
             }),
+        SizedBox(
+          height: 10,
+        ),
+        MaterialButton(
+          onPressed: fncAdd,
+          color: Colors.blue,
+          textColor: Colors.white,
+          child: Icon(
+            Icons.add,
+            size: 24,
+          ),
+          padding: EdgeInsets.all(16),
+          shape: CircleBorder(),
+        ),
+        SizedBox(
+          height: 10,
+        ),
       ],
     );
   }
@@ -200,7 +212,6 @@ class AlocacoesWidget extends StatelessWidget {
         GestureDetector(
           onTap: () {
             if (isSubAlocacao) {
-              //Modular.to.pushReplacementNamed("/carteira/sub-alocacao/${alocacao.id}");
               Modular.to.pushReplacementNamed("/carteira/sub-alocacao/${alocacao.id}");
             } else {
               Modular.to.pushNamed("/carteira/sub-alocacao/${alocacao.id}");
