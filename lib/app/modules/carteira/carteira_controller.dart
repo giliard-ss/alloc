@@ -7,7 +7,6 @@ import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/alocacao_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/services/alocacao_service.dart';
-import 'package:alloc/app/shared/services/ativo_service.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
 import 'package:alloc/app/shared/services/event_service.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
@@ -22,7 +21,6 @@ class CarteiraController = _CarteiraControllerBase with _$CarteiraController;
 abstract class _CarteiraControllerBase with Store {
   ReactionDisposer _carteirasReactDispose;
   IAlocacaoService _alocacaoService = Modular.get<AlocacaoService>();
-  IAtivoService _ativoService = Modular.get<AtivoService>();
   ICarteiraService _carteiraService = Modular.get<CarteiraService>();
   IEventService _eventService = Modular.get<EventService>();
 

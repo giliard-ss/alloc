@@ -328,7 +328,6 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
       } else {
         Navigator.of(context).pop();
         Navigator.of(context).pop();
-        Navigator.of(context).pop();
       }
     });
   }
