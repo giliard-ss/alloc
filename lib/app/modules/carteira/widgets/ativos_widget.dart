@@ -195,7 +195,7 @@ class AtivosWidget extends StatelessWidget {
           elevation: 0,
           color: Color(0xffe7ecf4),
           icon: Icon(
-            Icons.download_rounded,
+            Icons.upload_rounded,
             color: Colors.grey[600],
           ),
           label: Text(
@@ -218,7 +218,7 @@ class AtivosWidget extends StatelessWidget {
           color: Color(0xffe7ecf4),
           elevation: 0,
           icon: Icon(
-            Icons.upload_rounded,
+            Icons.download_rounded,
             color: Colors.grey[600],
           ),
           label: Text(

@@ -49,10 +49,10 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
           type: BottomNavigationBarType.fixed,
           items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.download_sharp),
+              icon: Icon(Icons.upload_rounded),
               label: "Depositar",
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.upload_sharp), label: "Sacar"),
+            BottomNavigationBarItem(icon: Icon(Icons.download_rounded), label: "Sacar"),
             BottomNavigationBarItem(
                 icon: Icon(Icons.monetization_on_sharp), label: "Novo Provento"),
             BottomNavigationBarItem(icon: Icon(Icons.article), label: "Extrato"),
