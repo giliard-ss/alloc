@@ -85,10 +85,15 @@ class CarteiraModule extends ChildModule {
             duration: Duration(milliseconds: 500),
             child: (_, args) => ProventoPage()),
         ModularRouter("/provento/crud", child: (_, args) => ProventoCrudPage()),
+        ModularRouter("/provento/crud/event/:id",
+            child: (_, args) => ProventoCrudPage(
+                  idEvent: args.params['id'],
+                )),
         ModularRouter("/provento/crud/:id",
             child: (_, args) => ProventoCrudPage(
-                  id: args.params['id'],
+                  idProvento: args.params['id'],
                 )),
+        ModularRouter("/provento/crud", child: (_, args) => ProventoCrudPage()),
         ModularRouter("/deposito",
             transition: TransitionType.downToUp,
             duration: Duration(milliseconds: 500),

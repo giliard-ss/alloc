@@ -12,10 +12,12 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class ProventoCrudPage extends StatefulWidget {
   final String title;
-  final String id;
+  final String idEvent;
+  final String idProvento;
 
   const ProventoCrudPage({
-    this.id,
+    this.idEvent,
+    this.idProvento,
     Key key,
     this.title = "Provento",
   }) : super(key: key);
@@ -36,7 +38,8 @@ class _ProventoCrudPageState extends ModularState<ProventoCrudPage, ProventoCrud
 
   @override
   void initState() {
-    controller.id = widget.id;
+    controller.idEvent = widget.idEvent;
+    controller.idProvento = widget.idProvento;
     super.initState();
   }
 
@@ -104,7 +107,7 @@ class _ProventoCrudPageState extends ModularState<ProventoCrudPage, ProventoCrud
   }
 
   Widget _createValorTextField() {
-    _moneyController.text = controller.valorTotal != null ? controller.valorTotal.toString() : null;
+    _moneyController.updateValue(controller.valorTotal);
     return TextField(
       decoration: InputDecoration(labelText: "Valor Total", labelStyle: TextStyle(fontSize: 16)),
       controller: _moneyController,

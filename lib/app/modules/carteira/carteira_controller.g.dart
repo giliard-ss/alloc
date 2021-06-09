@@ -64,6 +64,23 @@ mixin _$CarteiraController on _CarteiraControllerBase, Store {
     });
   }
 
+  final _$existeProventosParaLancarAtom =
+      Atom(name: '_CarteiraControllerBase.existeProventosParaLancar');
+
+  @override
+  bool get existeProventosParaLancar {
+    _$existeProventosParaLancarAtom.reportRead();
+    return super.existeProventosParaLancar;
+  }
+
+  @override
+  set existeProventosParaLancar(bool value) {
+    _$existeProventosParaLancarAtom
+        .reportWrite(value, super.existeProventosParaLancar, () {
+      super.existeProventosParaLancar = value;
+    });
+  }
+
   final _$errorDialogAtom = Atom(name: '_CarteiraControllerBase.errorDialog');
 
   @override
@@ -84,6 +101,7 @@ mixin _$CarteiraController on _CarteiraControllerBase, Store {
     return '''
 alocacoes: ${alocacoes},
 ativos: ${ativos},
+existeProventosParaLancar: ${existeProventosParaLancar},
 errorDialog: ${errorDialog}
     ''';
   }

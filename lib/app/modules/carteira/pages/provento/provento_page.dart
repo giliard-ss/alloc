@@ -100,7 +100,19 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
       ),
       subtitle: Text(
           "${provento.qtd.toString()} x  ${GeralUtil.doubleToMoney(provento.valorDouble)} = ${GeralUtil.doubleToMoney(provento.valorTotal)}"),
-      children: [_containerButtonsProvento(provento)],
+      children: [_listTileValorRecebido(provento), _containerButtonsProvento(provento)],
+    );
+  }
+
+  Widget _listTileValorRecebido(ProventoDTO provento) {
+    return Container(
+      color: Color(0xffe7ecf4),
+      child: ListTile(
+        dense: true,
+        title: Text("Total ", style: TextStyle(fontSize: 16)),
+        trailing: Text(GeralUtil.doubleToMoney(provento.valorTotal, leftSymbol: ""),
+            style: TextStyle(fontSize: 16)),
+      ),
     );
   }
 
@@ -113,7 +125,7 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
       ),
       child: Row(
         children: [
-          _buttonAlterar(),
+          _buttonAlterar(provento),
           SizedBox(
             width: 1,
             child: Container(
@@ -126,7 +138,7 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
     );
   }
 
-  Widget _buttonAlterar() {
+  Widget _buttonAlterar(ProventoDTO provento) {
     return Flexible(
       child: RaisedButton.icon(
           elevation: 0,
@@ -136,7 +148,9 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
             "Recebi diferente",
             style: TextStyle(color: Colors.white),
           ),
-          onPressed: () {}),
+          onPressed: () {
+            controller.recebiDiferente(provento);
+          }),
     );
   }
 
@@ -147,7 +161,7 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
           color: Colors.green,
           icon: Icon(Icons.check, color: Colors.white),
           label: Text(
-            "Recebi ",
+            "Recebi o total",
             style: TextStyle(color: Colors.white),
           ),
           onPressed: () async {
@@ -161,11 +175,8 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
 
   Widget _buttonNovoProvento() {
     return FloatingActionButton.extended(
-      onPressed: () async {
-        /* bool ok = await LoadingUtil.onLoading(context, controller.salvarDeposito);
-        if (ok) {
-          Modular.to.pop();
-        }*/
+      onPressed: () {
+        Modular.to.pushReplacementNamed("/carteira/provento/crud");
       },
       label: const Text('Novo'),
       icon: const Icon(Icons.add),

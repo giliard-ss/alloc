@@ -101,7 +101,7 @@ abstract class _ExtratoControllerBase with Store {
 
   void editarEvent(AbstractEvent event) {
     if (event.getTipoEvento() == TipoEvento.PROVENTO.code)
-      Modular.to.pushNamed("/carteira/provento/crud/${event.getId()}");
+      Modular.to.pushNamed("/carteira/provento/crud/event/${event.getId()}");
 
     if (event is AplicacaoRendaVariavel || event is VendaRendaVariavelEvent)
       Modular.to.pushNamed("/carteira/ativo/${event.getId()}");

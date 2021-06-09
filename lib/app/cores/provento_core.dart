@@ -36,7 +36,7 @@ class ProventoCore {
   Future<void> _loadProventosPendentesLancar() async {
     DateTime primeiroDiaDoMes = DateUtil.getPrimeiraDataHoraDoMesByDate(DateTime.now());
     List<ProventoModel> proventos =
-        await _proventoService.findProventos(primeiroDiaDoMes, onlyCache: true);
+        await _proventoService.findProventos(primeiroDiaDoMes, onlyCache: false);
     _proventos = _extrairApenasProventosDeAtivosExistentes(proventos);
   }
 

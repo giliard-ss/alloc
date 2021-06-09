@@ -34,6 +34,8 @@ abstract class _CarteiraControllerBase with Store {
   List<AtivoDTO> ativos = [];
   @observable
   CarteiraDTO _carteira;
+  @observable
+  bool existeProventosParaLancar = false;
 
   @observable
   String errorDialog;
@@ -41,6 +43,7 @@ abstract class _CarteiraControllerBase with Store {
   Future<void> init() async {
     try {
       await _loadAlocacoesOuAtivos();
+      await _checkProventos();
       _startCarteirasReaction();
       refreshAlocacoes();
     } catch (e, stacktrace) {
@@ -57,7 +60,13 @@ abstract class _CarteiraControllerBase with Store {
       _carteira = AppCore.getCarteira(_carteira.id);
       refreshAlocacoes();
       _loadAtivos();
+      _checkProventos();
     });
+  }
+
+  Future<void> _checkProventos() async {
+    existeProventosParaLancar =
+        (await AppCore.getProventosNaoLancadosByCarteira(_carteira.id)).isNotEmpty;
   }
 
   Future<bool> salvarNovaAlocacao() async {

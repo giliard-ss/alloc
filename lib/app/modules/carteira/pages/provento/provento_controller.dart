@@ -59,4 +59,8 @@ abstract class _ProventoControllerBase with Store {
       return "Falha ao confirmar recebimento!";
     }
   }
+
+  void recebiDiferente(ProventoDTO provento) {
+    Modular.to.pushReplacementNamed("/carteira/provento/crud/${provento.id}");
+  }
 }

@@ -54,7 +54,14 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
             ),
             BottomNavigationBarItem(icon: Icon(Icons.download_rounded), label: "Sacar"),
             BottomNavigationBarItem(
-                icon: Icon(Icons.monetization_on_sharp), label: "Novo Provento"),
+              icon: Observer(builder: (_) {
+                return Icon(
+                  Icons.monetization_on_sharp,
+                  color: controller.existeProventosParaLancar ? Colors.green : null,
+                );
+              }),
+              label: "Novo Provento",
+            ),
             BottomNavigationBarItem(icon: Icon(Icons.article), label: "Extrato"),
           ],
           onTap: (index) {

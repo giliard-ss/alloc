@@ -1,3 +1,5 @@
+import 'package:alloc/app/shared/dtos/provento_dto.dart';
+
 class ProventoModel {
   String _id;
   String _papel;

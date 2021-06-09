@@ -1,5 +1,7 @@
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/carteira_controller.dart';
+import 'package:alloc/app/modules/carteira/pages/provento/provento_controller.dart';
+import 'package:alloc/app/shared/dtos/provento_dto.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/evento_provento.dart';
 
@@ -17,8 +19,12 @@ class ProventoCrudController = _ProventoCrudControllerBase with _$ProventoCrudCo
 
 abstract class _ProventoCrudControllerBase with Store {
   CarteiraController _carteiraController = Modular.get();
+  ProventoController _proventoController = Modular.get();
+
   IEventService _eventService = Modular.get<EventService>();
-  String _id;
+  String _idEvent;
+  String _idProvento;
+
   @observable
   String error = "";
 
@@ -26,21 +32,35 @@ abstract class _ProventoCrudControllerBase with Store {
   @observable
   String papel;
   double qtd;
-  double valorTotal;
+  double valorTotal = 0;
 
   Future<void> init() async {
     try {
-      if (!StringUtil.isEmpty(_id)) {
-        EventoProvento provento = await _eventService.getEventById(_id);
-        data = provento.getData();
-        papel = provento.papel;
-        qtd = provento.qtd;
-        valorTotal = provento.valor;
+      if (!StringUtil.isEmpty(_idEvent)) {
+        _loadAtributosByEventId(_idEvent);
+      } else if (!StringUtil.isEmpty(_idProvento)) {
+        _loadAtributosByProventoId(_idProvento);
       }
     } catch (e) {
       LoggerUtil.error(e);
       error = e.toString();
     }
+  }
+
+  Future<void> _loadAtributosByEventId(String idEvent) async {
+    EventoProvento provento = await _eventService.getEventById(idEvent);
+    data = provento.getData();
+    papel = provento.papel;
+    qtd = provento.qtd;
+    valorTotal = provento.valor;
+  }
+
+  Future<void> _loadAtributosByProventoId(String idProvento) async {
+    ProventoDTO provento = _proventoController.proventos.firstWhere((e) => e.id == idProvento);
+    data = provento.data;
+    papel = provento.papel;
+    qtd = provento.qtd.toDouble();
+    valorTotal = provento.valorTotal;
   }
 
   @action
@@ -56,8 +76,8 @@ abstract class _ProventoCrudControllerBase with Store {
         return false;
       }
 
-      EventoProvento provento = new EventoProvento(_id, data.millisecondsSinceEpoch,
-          _carteiraController.carteira.id, AppCore.usuario.id, valorTotal, qtd, papel);
+      EventoProvento provento = new EventoProvento(_idEvent, data.millisecondsSinceEpoch,
+          _carteiraController.carteira.id, AppCore.usuario.id, valorTotal, qtd, papel, _idProvento);
 
       await _eventService.save(provento);
       await AppCore.notifyAddDelEvent();
@@ -88,5 +108,7 @@ abstract class _ProventoCrudControllerBase with Store {
         .toList();
   }
 
-  set id(value) => _id = value;
+  set idEvent(value) => _idEvent = value;
+
+  set idProvento(String value) => this._idProvento = value;
 }
