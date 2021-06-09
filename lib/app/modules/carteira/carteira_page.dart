@@ -73,7 +73,10 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
                 Modular.to.pushNamed("/carteira/saque");
                 break;
               case 2:
-                Modular.to.pushNamed("/carteira/provento");
+                if (controller.existeProventosParaLancar)
+                  Modular.to.pushNamed("/carteira/provento");
+                else
+                  Modular.to.pushNamed("/carteira/provento/crud");
                 break;
               case 3:
                 Modular.to.pushNamed("/carteira/extrato");

@@ -1,3 +1,7 @@
+import 'dart:ui';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'package:intl/intl.dart';
 
 /*
@@ -47,7 +51,8 @@ SECOND                       s
 */
 class DateUtil {
   static String dateToString(DateTime date, {String mask = "dd/MM/yyyy"}) {
-    DateFormat formatter = DateFormat(mask);
+    initializeDateFormatting();
+    DateFormat formatter = DateFormat(mask, "pt");
     return formatter.format(date);
   }
 

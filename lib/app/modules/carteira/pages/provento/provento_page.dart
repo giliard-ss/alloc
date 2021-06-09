@@ -56,7 +56,7 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
             height: 10,
           ),
           Text(
-            "Proventos de ${DateUtil.dateToString(DateTime.now(), mask: 'MMMM')}",
+            "Proventos de ${DateUtil.dateToString(DateTime.now(), mask: 'MMMM').toUpperCase()}",
             style: TextStyle(fontSize: 25),
           ),
           SizedBox(
