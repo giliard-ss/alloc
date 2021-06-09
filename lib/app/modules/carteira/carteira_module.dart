@@ -1,16 +1,15 @@
+import 'package:alloc/app/modules/carteira/pages/provento/provento_controller.dart';
+import 'package:alloc/app/modules/carteira/pages/provento/provento_crud_controller.dart';
+import 'package:alloc/app/modules/carteira/pages/provento/provento_crud_page.dart';
 import 'package:alloc/app/modules/carteira/pages/saque/saque_page.dart';
 import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
-
 import 'pages/saque/saque_controller.dart';
 import 'package:alloc/app/modules/carteira/pages/deposito/deposito_page.dart';
-
 import 'pages/deposito/deposito_controller.dart';
 import 'package:alloc/app/modules/carteira/pages/configuracao/configuracao_page.dart';
-import 'package:alloc/app/modules/carteira/pages/provento/provento_controller.dart';
 import 'package:alloc/app/modules/carteira/pages/provento/provento_page.dart';
 import 'package:alloc/app/modules/extrato/extrato_controller.dart';
 import 'package:alloc/app/modules/extrato/extrato_page.dart';
-
 import 'pages/configuracao/configuracao_controller.dart';
 import 'package:alloc/app/modules/carteira/pages/ativo/ativo_page.dart';
 import 'package:alloc/app/modules/carteira/pages/subalocacao/sub_alocacao_controller.dart';
@@ -26,6 +25,7 @@ class CarteiraModule extends ChildModule {
   List<Bind> get binds => [
         $SaqueController,
         $DepositoController,
+        $ProventoCrudController,
         $ProventoController,
         $ConfiguracaoController,
         $AtivoController,
@@ -84,8 +84,9 @@ class CarteiraModule extends ChildModule {
             transition: TransitionType.downToUp,
             duration: Duration(milliseconds: 500),
             child: (_, args) => ProventoPage()),
-        ModularRouter("/provento/:id",
-            child: (_, args) => ProventoPage(
+        ModularRouter("/provento/crud", child: (_, args) => ProventoCrudPage()),
+        ModularRouter("/provento/crud/:id",
+            child: (_, args) => ProventoCrudPage(
                   id: args.params['id'],
                 )),
         ModularRouter("/deposito",

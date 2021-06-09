@@ -3,11 +3,13 @@ import 'package:alloc/app/cores/alocacao_core.dart';
 import 'package:alloc/app/cores/ativo_core.dart';
 import 'package:alloc/app/cores/carteira_core.dart';
 import 'package:alloc/app/cores/cotacao_core.dart';
+import 'package:alloc/app/cores/provento_core.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
+import 'package:alloc/app/shared/models/provento_model.dart';
 import 'package:alloc/app/shared/models/usuario_model.dart';
 
 import 'package:mobx/mobx.dart';
@@ -18,6 +20,7 @@ class AppCore {
   static CotacaoCore _cotacaoCore;
   static AtivoCore _ativoCore;
   static AlocacaoCore _alocacaoCore;
+  static ProventoCore _proventoCore;
 
   static Future<void> init(UsuarioModel usuario) async {
     _usuario = usuario;
@@ -25,6 +28,7 @@ class AppCore {
     _ativoCore = await AtivoCore.initInstance(usuario, _cotacaoCore);
     _carteiraCore = await CarteiraCore.initInstance(usuario, _ativoCore);
     _alocacaoCore = await AlocacaoCore.initInstance(usuario, _carteiraCore, _ativoCore);
+    _proventoCore = await ProventoCore.initInstance(usuario, _ativoCore);
     _startReactionCotacoes();
   }
 
@@ -73,6 +77,12 @@ class AppCore {
     await _ativoCore.findAtivoById(idAtivo, onlyCache: false);
     await _ativoCore.loadAtivos();
     //await _loadCotacoes();
+    _alocacaoCore.refreshAlocacoesDTO();
+    _carteiraCore.refreshCarteiraDTO();
+  }
+
+  static Future<void> notifyAddDelProvento() async {
+    await _carteiraCore.loadCarteiras(onlyCache: true);
     _alocacaoCore.refreshAlocacoesDTO();
     _carteiraCore.refreshCarteiraDTO();
   }
@@ -170,6 +180,10 @@ class AppCore {
 
   static List<AtivoModel> getAtivosModelByIdSuperior(String superiorId) {
     return _ativoCore.getAtivosModelByIdSuperior(superiorId);
+  }
+
+  static Future<List<ProventoModel>> getProventosNaoLancadosByCarteira(String idCarteira) {
+    return _proventoCore.getProventosNaoLancadosByCarteira(idCarteira);
   }
 
   static UsuarioModel get usuario => _usuario;

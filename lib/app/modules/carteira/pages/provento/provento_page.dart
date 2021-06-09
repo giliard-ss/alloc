@@ -1,4 +1,8 @@
+import 'package:alloc/app/shared/dtos/provento_dto.dart';
+import 'package:alloc/app/shared/models/provento_model.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
+import 'package:alloc/app/shared/utils/dialog_util.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/string_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
@@ -12,10 +16,8 @@ import 'provento_controller.dart';
 
 class ProventoPage extends StatefulWidget {
   final String title;
-  final String id;
 
   const ProventoPage({
-    this.id,
     Key key,
     this.title = "Provento",
   }) : super(key: key);
@@ -25,21 +27,6 @@ class ProventoPage extends StatefulWidget {
 }
 
 class _ProventoPageState extends ModularState<ProventoPage, ProventoController> {
-  //use 'controller' variable to access controller
-  TextEditingController _dataController =
-      TextEditingController(text: DateUtil.dateToString(DateTime.now()));
-  var maskFormatter =
-      new MaskTextInputFormatter(mask: '##/##/####', filter: {"#": RegExp(r'[0-9]')});
-  final _moneyController = new MoneyMaskedTextController(leftSymbol: "R\$ ");
-  final TextEditingController _papelController = TextEditingController();
-  TextEditingController _qtdController = TextEditingController();
-
-  @override
-  void initState() {
-    controller.id = widget.id;
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +38,7 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
                 Modular.to.pop();
               },
             )),
-        floatingActionButton: _buttonSalvar(),
+        floatingActionButton: _buttonNovoProvento(),
         body: WidgetUtil.futureBuild(controller.init, () {
           return Container(
             padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
@@ -63,150 +50,125 @@ class _ProventoPageState extends ModularState<ProventoPage, ProventoController> 
   _body() {
     return SingleChildScrollView(
       child: Column(
-        children: <Widget>[
-          Text("Informe os dados do provento"),
-          Observer(
-            builder: (_) {
-              return Visibility(
-                visible: controller.error.isNotEmpty,
-                child: Text(
-                  controller.error,
-                  style: TextStyle(color: Colors.red),
-                ),
-              );
-            },
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 10,
+          ),
+          Text(
+            "Proventos de ${DateUtil.dateToString(DateTime.now(), mask: 'MMMM')}",
+            style: TextStyle(fontSize: 25),
           ),
           SizedBox(
             height: 10,
           ),
-          SizedBox(
-            height: 10,
+          Container(
+            child: Observer(
+              builder: (_) {
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: controller.proventos.length,
+                  itemBuilder: (context, index) {
+                    ProventoDTO provento = controller.proventos[index];
+
+                    return _expansionTileProvento(provento);
+                  },
+                );
+              },
+            ),
           ),
-          _dataTextField(),
           SizedBox(
-            height: 10,
-          ),
-          _createPapelTextField(),
-          SizedBox(
-            height: 10,
-          ),
-          _createQtdTextField(),
-          SizedBox(
-            height: 10,
-          ),
-          _createValorTextField(),
-          SizedBox(
-            height: 10,
+            height: 20,
           ),
         ],
       ),
     );
   }
 
-  Widget _createValorTextField() {
-    _moneyController.text = controller.valorTotal != null ? controller.valorTotal.toString() : null;
-    return TextField(
-      decoration: InputDecoration(labelText: "Valor Total", labelStyle: TextStyle(fontSize: 16)),
-      controller: _moneyController,
-      keyboardType: TextInputType.number,
-      style: TextStyle(
-        fontSize: 25,
-        fontWeight: FontWeight.w600,
+  Widget _expansionTileProvento(ProventoDTO provento) {
+    return ExpansionTile(
+      tilePadding: EdgeInsets.only(left: 0),
+      title: Text(
+        "Proventos de ${provento.papel}",
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       ),
-      onChanged: (value) {
-        controller.valorTotal = _moneyController.numberValue;
-      },
+      leading: Text(DateUtil.dateToString(provento.data, mask: "dd/MM")),
+      trailing: Text(
+        GeralUtil.doubleToMoney(provento.valorDouble),
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      ),
+      subtitle: Text(
+          "${provento.qtd.toString()} x  ${GeralUtil.doubleToMoney(provento.valorDouble)} = ${GeralUtil.doubleToMoney(provento.valorTotal)}"),
+      children: [_containerButtonsProvento(provento)],
     );
   }
 
-  Widget _createQtdTextField() {
-    if (controller.qtd != null)
-      _qtdController.text =
-          controller.qtd % 1 == 0 ? controller.qtd.round().toString() : controller.qtd.toString();
-
-    return TextField(
-      controller: _qtdController,
-      keyboardType: TextInputType.numberWithOptions(decimal: true),
-      style: TextStyle(
-        fontSize: 25,
-        fontWeight: FontWeight.w600,
+  Widget _containerButtonsProvento(ProventoDTO provento) {
+    return Container(
+      height: 40,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Color(0xffe7ecf4),
       ),
-      onChanged: (text) => controller.qtd = double.parse(text),
-      decoration: InputDecoration(labelText: "Quantidade", labelStyle: TextStyle(fontSize: 16)),
-    );
-  }
-
-  Widget _createPapelTextField() {
-    _papelController.text = controller.papel;
-    return Observer(
-      builder: (_) {
-        return TypeAheadField(
-          hideOnEmpty: true,
-          textFieldConfiguration: TextFieldConfiguration(
-            controller: _papelController,
-            keyboardType: TextInputType.text,
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.w600,
+      child: Row(
+        children: [
+          _buttonAlterar(),
+          SizedBox(
+            width: 1,
+            child: Container(
+              color: Colors.white,
             ),
-            onChanged: (text) => controller.setPapel(text.toUpperCase()),
-            autofocus: controller.papel == null,
-            decoration: InputDecoration(
-                errorText:
-                    StringUtil.isEmpty(controller.papel) || controller.papelValido ? null : "",
-                labelText: "Papel",
-                labelStyle: TextStyle(fontSize: 16)),
           ),
-          suggestionsCallback: (pattern) {
-            return controller.getSugestoes(pattern);
-          },
-          itemBuilder: (context, suggestion) {
-            return ListTile(
-              title: Text(suggestion),
-            );
-          },
-          onSuggestionSelected: (suggestion) {
-            this._papelController.text = suggestion;
-            controller.papel = suggestion.toUpperCase();
-          },
-        );
-      },
-    );
-  }
-
-  Widget _dataTextField() {
-    _dataController.text = DateUtil.dateToString(controller.data);
-    return TextField(
-      onChanged: (e) {
-        if (e.length == 10) {
-          controller.data = DateUtil.StringToDate(e);
-        }
-      },
-      controller: _dataController,
-      style: TextStyle(
-        fontSize: 25,
-        fontWeight: FontWeight.w600,
+          _buttonConfirmar(provento)
+        ],
       ),
-      inputFormatters: [maskFormatter],
-      keyboardType: TextInputType.number,
-      maxLength: 10,
-      decoration:
-          InputDecoration(labelText: "Data", counterText: "", labelStyle: TextStyle(fontSize: 16)),
     );
   }
 
-  Widget _buttonSalvar() {
+  Widget _buttonAlterar() {
+    return Flexible(
+      child: RaisedButton.icon(
+          elevation: 0,
+          color: Colors.blue,
+          icon: Icon(Icons.edit, color: Colors.white),
+          label: Text(
+            "Recebi diferente",
+            style: TextStyle(color: Colors.white),
+          ),
+          onPressed: () {}),
+    );
+  }
+
+  Widget _buttonConfirmar(ProventoDTO provento) {
+    return Flexible(
+      child: RaisedButton.icon(
+          elevation: 0,
+          color: Colors.green,
+          icon: Icon(Icons.check, color: Colors.white),
+          label: Text(
+            "Recebi ",
+            style: TextStyle(color: Colors.white),
+          ),
+          onPressed: () async {
+            String error = await LoadingUtil.onLoading(context, () {
+              return controller.recebi(provento);
+            });
+            if (error != null) DialogUtil.showMessageDialog(context, error);
+          }),
+    );
+  }
+
+  Widget _buttonNovoProvento() {
     return FloatingActionButton.extended(
       onPressed: () async {
-        bool ok = await LoadingUtil.onLoading(context, controller.salvar);
+        /* bool ok = await LoadingUtil.onLoading(context, controller.salvarDeposito);
         if (ok) {
-          setState(() {
-            Modular.to.pop();
-          });
-        }
+          Modular.to.pop();
+        }*/
       },
-      label: const Text('Salvar'),
-      icon: const Icon(Icons.check),
+      label: const Text('Novo'),
+      icon: const Icon(Icons.add),
     );
   }
 }

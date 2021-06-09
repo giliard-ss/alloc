@@ -10,9 +10,11 @@ class EventoProvento extends Evento implements AbstractEvent {
   double _qtd;
   String _papel;
   String _tipoAtivo;
+  String _idProvento;
 
   EventoProvento(String id, int dataMilliSeconds, String carteiraId, String usuarioId, this._valor,
-      this._qtd, this._papel)
+      this._qtd, this._papel,
+      [this._idProvento])
       : super(id, dataMilliSeconds, carteiraId, name, usuarioId) {
     this._tipoAtivo = TipoAtivo.byPapel(this._papel).toString();
   }
@@ -23,6 +25,7 @@ class EventoProvento extends Evento implements AbstractEvent {
     this._qtd = map['qtd'];
     this._papel = map['papel'];
     this._tipoAtivo = map['tipoAtivo'];
+    this._idProvento = map['idProvento'];
   }
 
   Map<String, dynamic> toMap() {
@@ -31,6 +34,7 @@ class EventoProvento extends Evento implements AbstractEvent {
     map['qtd'] = this._qtd;
     map['papel'] = this._papel;
     map['tipoAtivo'] = this._tipoAtivo;
+    map['idProvento'] = this._idProvento;
     return map;
   }
 
@@ -47,6 +51,10 @@ class EventoProvento extends Evento implements AbstractEvent {
   String get tipoAtivo => this._tipoAtivo;
 
   String get papel => this._papel;
+
+  String get idProvento => this._idProvento;
+
+  set idProvento(String value) => this._idProvento = value;
 
   @override
   fromMap(Map map) {
