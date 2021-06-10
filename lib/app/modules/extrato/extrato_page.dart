@@ -3,6 +3,8 @@ import 'package:alloc/app/modules/extrato/dtos/extrato_resumo_dto.dart';
 import 'package:alloc/app/modules/extrato/widgets/extrato_item.dart';
 import 'package:alloc/app/modules/extrato/widgets/extrato_item_descricao.dart';
 import 'package:alloc/app/modules/extrato/widgets/extrato_item_title.dart';
+import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
+import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/models/evento_aplicacao_renda_variavel.dart';
 import 'package:alloc/app/shared/models/evento_deposito.dart';
@@ -80,9 +82,6 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     return Column(
       children: [
         createDataSelect(),
-        SizedBox(
-          height: 20,
-        ),
         Observer(
           builder: (_) {
             return Visibility(
@@ -108,7 +107,7 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
       builder: (_) {
         return RaisedButton.icon(
           padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-          elevation: 3,
+          elevation: 0,
           icon: Icon(Icons.calendar_today),
           color: Colors.white,
           label: Text(
@@ -122,7 +121,11 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
               initialDate: controller.mesAno,
               locale: Locale("pt"),
             ).then((DateTime date) {
-              if (date != null) controller.selectMesAno(date);
+              if (date != null) {
+                LoadingUtil.onLoading(context, () {
+                  return controller.selectMesAno(date);
+                });
+              }
             });
           },
         );
@@ -138,15 +141,30 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
 
   Widget createExtratoContent() {
     return Column(
-      children: [createExtratoResumo(), createExtratoEvents()],
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        createExtratoResumo(),
+        SizedBox(
+          height: 45,
+        ),
+        Text(
+          "Lançamentos",
+          style: TextStyle(fontSize: 18),
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        createExtratoEvents()
+      ],
     );
   }
 
   Widget createExtratoResumo() {
-    return Card(
-      child: Observer(
-        builder: (_) {
-          return ListView.builder(
+    return Observer(
+      builder: (_) {
+        return Container(
+          color: Colors.white,
+          child: ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               itemCount: controller.resumo.length,
@@ -157,17 +175,15 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
                   selected: controller.tipoEvento != null,
                   title: Text(resumo.descricao),
                   onTap: () {
-                    controller.selectTipoEvento(resumo.tipoEvento);
+                    LoadingUtil.onLoading(context, () {
+                      return controller.selectTipoEvento(resumo.tipoEvento);
+                    });
                   },
-                  trailing: MoneyTextWidget(
-                    value: resumo.valor,
-                    showSinal: false,
-                    color: Colors.black,
-                  ),
+                  trailing: Text(GeralUtil.doubleToMoney(resumo.valor)),
                 );
-              });
-        },
-      ),
+              }),
+        );
+      },
     );
   }
 
@@ -278,9 +294,11 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     return ExtratoItem(
       data: createItemData ? aplicacao.getData() : null,
       title: ExtratoItemTitle(
-        text1: aplicacao.tipoEvento,
-        text2: aplicacao.tipoAtivo,
-        text3: aplicacao.papel,
+        text: TipoEvento(aplicacao.tipoEvento).descricao +
+            " em " +
+            TipoAtivo(aplicacao.tipoAtivo).descricao +
+            " " +
+            aplicacao.papel,
       ),
       subtitle: ExtratoItemSubtitle(
         text: aplicacao.qtdString +
@@ -296,9 +314,11 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     return ExtratoItem(
       data: createItemData ? venda.getData() : null,
       title: ExtratoItemTitle(
-        text1: venda.tipoEvento,
-        text2: venda.tipoAtivo,
-        text3: venda.papel,
+        text: TipoEvento(venda.tipoEvento).descricao +
+            " de " +
+            TipoAtivo(venda.tipoAtivo).descricao +
+            " " +
+            venda.papel,
       ),
       subtitle: ExtratoItemSubtitle(
         text: venda.qtdString + " x " + GeralUtil.doubleToMoney(venda.precoUnitario).toString(),
@@ -312,9 +332,11 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     return ExtratoItem(
       data: createItemData ? provento.getData() : null,
       title: ExtratoItemTitle(
-        text1: provento.tipoEvento,
-        text2: provento.tipoAtivo,
-        text3: provento.papel,
+        text: TipoEvento(provento.tipoEvento).descricao +
+            " de " +
+            TipoAtivo(provento.tipoAtivo).descricao +
+            " " +
+            provento.papel,
       ),
       subtitle: ExtratoItemSubtitle(
         text:
@@ -329,7 +351,7 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     return ExtratoItem(
       data: createItemData ? deposito.getData() : null,
       title: ExtratoItemTitle(
-        text1: deposito.getTipoEvento(),
+        text: TipoEvento(deposito.tipoEvento).descricao,
       ),
       subtitle: createDescricaoItemApenasValor(deposito.valor),
       onLongPress: () => _showEditarDialog(deposito),
@@ -340,7 +362,7 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     return ExtratoItem(
       data: createItemData ? saque.getData() : null,
       title: ExtratoItemTitle(
-        text1: saque.getTipoEvento(),
+        text: TipoEvento(saque.tipoEvento).descricao,
       ),
       subtitle: createDescricaoItemApenasValor(saque.valor),
       onLongPress: () => _showEditarDialog(saque),

@@ -64,29 +64,21 @@ mixin _$ExtratoController on _ExtratoControllerBase, Store {
     });
   }
 
-  final _$_ExtratoControllerBaseActionController =
-      ActionController(name: '_ExtratoControllerBase');
+  final _$selectMesAnoAsyncAction =
+      AsyncAction('_ExtratoControllerBase.selectMesAno');
 
   @override
-  void selectMesAno(DateTime value) {
-    final _$actionInfo = _$_ExtratoControllerBaseActionController.startAction(
-        name: '_ExtratoControllerBase.selectMesAno');
-    try {
-      return super.selectMesAno(value);
-    } finally {
-      _$_ExtratoControllerBaseActionController.endAction(_$actionInfo);
-    }
+  Future<void> selectMesAno(DateTime value) {
+    return _$selectMesAnoAsyncAction.run(() => super.selectMesAno(value));
   }
 
+  final _$selectTipoEventoAsyncAction =
+      AsyncAction('_ExtratoControllerBase.selectTipoEvento');
+
   @override
-  void selectTipoEvento(TipoEvento tipoEvento) {
-    final _$actionInfo = _$_ExtratoControllerBaseActionController.startAction(
-        name: '_ExtratoControllerBase.selectTipoEvento');
-    try {
-      return super.selectTipoEvento(tipoEvento);
-    } finally {
-      _$_ExtratoControllerBaseActionController.endAction(_$actionInfo);
-    }
+  Future<void> selectTipoEvento(TipoEvento tipoEvento) {
+    return _$selectTipoEventoAsyncAction
+        .run(() => super.selectTipoEvento(tipoEvento));
   }
 
   @override

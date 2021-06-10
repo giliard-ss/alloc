@@ -59,7 +59,8 @@ abstract class _ExtratoControllerBase with Store {
       resumo[i.getTipoEvento()] = resumo[i.getTipoEvento()] + i.getValor();
     });
     return resumo.entries
-        .map((entry) => ExtratoResumoDTO(entry.key, entry.value, TipoEvento(entry.key)))
+        .map((entry) => ExtratoResumoDTO(
+            TipoEvento(entry.key).descricaoPlural, entry.value, TipoEvento(entry.key)))
         .toList();
   }
 
@@ -120,19 +121,18 @@ abstract class _ExtratoControllerBase with Store {
   }
 
   @action
-  void selectMesAno(DateTime value) {
+  Future<void> selectMesAno(DateTime value) async {
     _mesAno = value;
-    events = [];
-    _loadEvents();
+    await _loadEvents();
   }
 
   @action
-  void selectTipoEvento(TipoEvento tipoEvento) {
+  Future<void> selectTipoEvento(TipoEvento tipoEvento) async {
     if (this.tipoEvento != null && tipoEvento.code == this.tipoEvento.code)
       this.tipoEvento = null;
     else
       this.tipoEvento = tipoEvento;
-    _loadEvents();
+    await _loadEvents();
   }
 
   get mesAno => _mesAno;

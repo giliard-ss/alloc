@@ -1,3 +1,5 @@
+import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
+
 class Evento {
   String _id;
   num _data;

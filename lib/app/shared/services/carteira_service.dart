@@ -56,7 +56,7 @@ class CarteiraService implements ICarteiraService {
 
   Future<double> _getTotalDepositadoCarteira(CarteiraModel carteiraModel) async {
     List<AbstractEvent> depositos = await eventRepository.getEventsByTipoAndCarteira(
-        carteiraModel.idUsuario, EventoDeposito.name, carteiraModel.id);
+        carteiraModel.idUsuario, EventoDeposito.tipo.code, carteiraModel.id);
 
     double total = 0;
     depositos.forEach((e) {
@@ -68,7 +68,7 @@ class CarteiraService implements ICarteiraService {
 
   Future<double> _getTotalSacadoCarteira(CarteiraModel carteiraModel) async {
     List<AbstractEvent> saques = await eventRepository.getEventsByTipoAndCarteira(
-        carteiraModel.idUsuario, EventoSaque.name, carteiraModel.id);
+        carteiraModel.idUsuario, EventoSaque.tipo.code, carteiraModel.id);
 
     double total = 0;
     saques.forEach((e) {
@@ -80,7 +80,7 @@ class CarteiraService implements ICarteiraService {
 
   Future<double> _getTotalLucroVendasCarteira(CarteiraModel carteiraModel) async {
     List<AbstractEvent> vendas = await eventRepository.getEventsByTipoAndCarteira(
-        carteiraModel.idUsuario, EventoVenda.name, carteiraModel.id);
+        carteiraModel.idUsuario, EventoVenda.tipo.code, carteiraModel.id);
 
     double total = 0;
     vendas.forEach((e) {
@@ -91,7 +91,7 @@ class CarteiraService implements ICarteiraService {
 
   Future<double> _getTotalProventosCarteira(CarteiraModel carteiraModel) async {
     List<AbstractEvent> proventos = await eventRepository.getEventsByTipoAndCarteira(
-        carteiraModel.idUsuario, EventoProvento.name, carteiraModel.id);
+        carteiraModel.idUsuario, EventoProvento.tipo.code, carteiraModel.id);
 
     double total = 0;
     proventos.forEach((e) {

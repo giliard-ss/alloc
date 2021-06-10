@@ -1,7 +1,9 @@
+import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
+
 import 'evento.dart';
 
 class EventoVenda extends Evento {
-  static final name = "VENDA";
+  static final tipo = TipoEvento.VENDA;
   double _valor;
   double _custos;
   List _superiores;
@@ -9,7 +11,7 @@ class EventoVenda extends Evento {
 
   EventoVenda(String id, int dataMilliSeconds, String carteiraId, this._valor, this._custos,
       this._superiores, this._tipoAtivo, String usuarioId)
-      : super(id, dataMilliSeconds, carteiraId, name, usuarioId);
+      : super(id, dataMilliSeconds, carteiraId, tipo.code, usuarioId);
 
   EventoVenda.fromMap(Map map)
       : super(map['id'], map['data'], map['carteiraId'], map['tipoEvento'], map['usuarioId']) {

@@ -2,7 +2,11 @@ import 'package:alloc/app/shared/exceptions/application_exception.dart';
 
 class TipoEvento {
   static final _codigos = ["APLICACAO", "DEPOSITO", "PROVENTO", "SAQUE", "VENDA"];
+  static final _descricoes = ["Aplicação", "Depósito", "Provento", "Saque", "Venda"];
+  static final _descricoesPlural = ["Aplicações", "Depósitos", "Proventos", "Saques", "Vendas"];
   String _code;
+  String _descricao;
+  String _descricaoPlural;
 
   @override
   String toString() {
@@ -10,6 +14,10 @@ class TipoEvento {
   }
 
   String get code => _code;
+
+  String get descricaoPlural => this._descricaoPlural;
+
+  String get descricao => this._descricao;
 
   bool equals(TipoEvento tipo) {
     return this._code == tipo.code;
@@ -19,6 +27,8 @@ class TipoEvento {
     int indexTipo = _codigos.indexOf(codigo);
     if (indexTipo == -1) throw ApplicationException("Tipo do evento não encontrado ($codigo).");
     this._code = codigo;
+    this._descricao = _descricoes[indexTipo];
+    this._descricaoPlural = _descricoesPlural[indexTipo];
   }
 
   static TipoEvento get APLICACAO => TipoEvento(_codigoAplicacao());

@@ -1,11 +1,12 @@
 import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
+import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 
 import 'evento.dart';
 
 class EventoProvento extends Evento implements AbstractEvent {
-  static final name = "PROVENTO";
+  static final tipo = TipoEvento.PROVENTO;
   double _valor;
   double _qtd;
   String _papel;
@@ -15,7 +16,7 @@ class EventoProvento extends Evento implements AbstractEvent {
   EventoProvento(String id, int dataMilliSeconds, String carteiraId, String usuarioId, this._valor,
       this._qtd, this._papel,
       [this._idProvento])
-      : super(id, dataMilliSeconds, carteiraId, name, usuarioId) {
+      : super(id, dataMilliSeconds, carteiraId, tipo.code, usuarioId) {
     this._tipoAtivo = TipoAtivo.byPapel(this._papel).toString();
   }
 

@@ -2,7 +2,15 @@ import 'package:alloc/app/shared/exceptions/application_exception.dart';
 
 class TipoAtivo {
   static final _codigos = ["ACAO", "FIIS", "RENDA_FIXA", "CRIPTOMOEDA", "ETF"];
+  static final _descricoes = [
+    "Ação",
+    "Fundo Imob.",
+    "Renda Fixa",
+    "Criptomoeda",
+    "Fundo de Índice"
+  ];
   String _code;
+  String _descricao;
 
   @override
   String toString() {
@@ -10,6 +18,7 @@ class TipoAtivo {
   }
 
   String get code => _code;
+  String get descricao => this._descricao;
 
   bool equals(TipoAtivo tipo) {
     return this._code == tipo.code;
@@ -19,6 +28,7 @@ class TipoAtivo {
     int indexTipo = _codigos.indexOf(codigo);
     if (indexTipo == -1) throw ApplicationException("Tipo do ativo não encontrado ($codigo).");
     this._code = codigo;
+    this._descricao = _descricoes[indexTipo];
   }
 
   TipoAtivo.byPapel(String papel) {

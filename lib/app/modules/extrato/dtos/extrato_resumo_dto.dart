@@ -10,7 +10,7 @@ class ExtratoResumoDTO {
 
   set descricao(String value) => this._descricao = value;
 
-  get valor => this._valor;
+  double get valor => this._valor;
 
   set valor(value) => this._valor = value;
 

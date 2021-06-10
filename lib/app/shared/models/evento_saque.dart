@@ -1,13 +1,14 @@
+import 'package:alloc/app/shared/enums/tipo_evento_enum.dart';
 import 'package:alloc/app/shared/models/abstract_event.dart';
 
 import 'evento.dart';
 
 class EventoSaque extends Evento implements AbstractEvent {
-  static final name = "SAQUE";
+  static final tipo = TipoEvento.SAQUE;
   double _valor;
 
   EventoSaque(String id, int dataMilliSeconds, String carteiraId, String usuarioId, this._valor)
-      : super(id, dataMilliSeconds, carteiraId, name, usuarioId);
+      : super(id, dataMilliSeconds, carteiraId, tipo.code, usuarioId);
 
   EventoSaque.fromMap(Map map)
       : super(map['id'], map['data'], map['carteiraId'], map['tipoEvento'], map['usuarioId']) {

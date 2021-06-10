@@ -82,23 +82,24 @@ class EventRepository implements IEventRepository {
   }
 
   AbstractEvent mapToEvent(Map map) {
-    if (map['tipoEvento'] == EventoDeposito.name) {
+    if (map['tipoEvento'] == EventoDeposito.tipo.code) {
       return EventoDeposito.fromMap(map);
     }
 
-    if (map['tipoEvento'] == EventoSaque.name) {
+    if (map['tipoEvento'] == EventoSaque.tipo.code) {
       return EventoSaque.fromMap(map);
     }
 
-    if (map['tipoEvento'] == EventoProvento.name) {
+    if (map['tipoEvento'] == EventoProvento.tipo.code) {
       return EventoProvento.fromMap(map);
     }
 
-    if (map['tipoEvento'] == EventoVenda.name && TipoAtivo(map["tipoAtivo"]).isRendaVariavel()) {
+    if (map['tipoEvento'] == EventoVenda.tipo.code &&
+        TipoAtivo(map["tipoAtivo"]).isRendaVariavel()) {
       return VendaRendaVariavelEvent.fromMap(map);
     }
 
-    if (map['tipoEvento'] == EventoAplicacao.name &&
+    if (map['tipoEvento'] == EventoAplicacao.tipo.code &&
         TipoAtivo(map["tipoAtivo"]).isRendaVariavel()) {
       return AplicacaoRendaVariavel.fromMap(map);
     }
