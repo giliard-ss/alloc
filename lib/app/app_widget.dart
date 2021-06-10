@@ -2,6 +2,7 @@ import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 class AppWidget extends StatelessWidget {
   @override
@@ -17,7 +18,15 @@ class AppWidget extends StatelessWidget {
     return MaterialApp(
       navigatorKey: Modular.navigatorKey,
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Slidy',
+      title: 'Alloc',
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale('pt', 'BR'),
+      ],
       theme: ThemeData(
           //  textTheme: TextTheme(bodyText2: TextStyle(color: Colors.grey[800])),
           primaryColor: Color(0xff24509d),

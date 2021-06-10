@@ -289,10 +289,6 @@ class AtivoCore {
   void _excludeAtivosJaVendidos(List<AtivoDTO> ativos, VendaRendaVariavelEvent event) {
     double qtdRemover = event.qtd;
 
-    if (event.papel == "MALL11") {
-      print(event);
-    }
-
     for (int i = ativos.length - 1; i >= 0; i--) {
       AtivoDTO a = ativos[i];
       if (a.idCarteira != event.carteiraId) continue;

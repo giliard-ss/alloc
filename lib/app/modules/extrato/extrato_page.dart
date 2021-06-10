@@ -33,6 +33,11 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
   //use 'controller' variable to access controller
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -46,7 +51,9 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
       ),
       body: Padding(
         padding: EdgeInsets.all(10),
-        child: WidgetUtil.futureBuild(controller.init, _body),
+        child: WidgetUtil.futureBuild(() async {
+          await controller.init();
+        }, _body),
       ),
     );
   }
@@ -60,9 +67,6 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: 20,
-                ),
                 createContent(),
               ],
             ),
@@ -76,6 +80,9 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
     return Column(
       children: [
         createDataSelect(),
+        SizedBox(
+          height: 20,
+        ),
         Observer(
           builder: (_) {
             return Visibility(
@@ -97,16 +104,16 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
   }
 
   Widget createDataSelect() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Observer(
-          builder: (_) {
-            return Text(DateUtil.dateToString(controller.mesAno, mask: "MMMM/y").toUpperCase());
-          },
-        ),
-        IconButton(
+    return Observer(
+      builder: (_) {
+        return RaisedButton.icon(
+          padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+          elevation: 3,
           icon: Icon(Icons.calendar_today),
+          color: Colors.white,
+          label: Text(
+            DateUtil.dateToString(controller.mesAno, mask: "MMMM/y").toUpperCase(),
+          ),
           onPressed: () {
             showMonthPicker(
               context: context,
@@ -118,8 +125,8 @@ class _ExtratoPageState extends ModularState<ExtratoPage, ExtratoController> {
               if (date != null) controller.selectMesAno(date);
             });
           },
-        )
-      ],
+        );
+      },
     );
   }
 
