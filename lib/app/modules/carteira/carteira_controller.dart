@@ -1,4 +1,5 @@
 import 'package:alloc/app/app_core.dart';
+import 'package:alloc/app/modules/home/home_controller.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
@@ -20,6 +21,7 @@ class CarteiraController = _CarteiraControllerBase with _$CarteiraController;
 
 abstract class _CarteiraControllerBase with Store {
   ReactionDisposer _carteirasReactDispose;
+  HomeController _homeController = Modular.get();
   IAlocacaoService _alocacaoService = Modular.get<AlocacaoService>();
   ICarteiraService _carteiraService = Modular.get<CarteiraService>();
   IEventService _eventService = Modular.get<EventService>();
@@ -84,6 +86,13 @@ abstract class _CarteiraControllerBase with Store {
       errorDialog = "Falha ao salvar nova alocação.";
     }
     return false;
+  }
+
+  List getVariacaoTotal() {
+    if (alocacoes.isEmpty) return _homeController.getVariacaoTotal(ativos, onlyHoje: true);
+
+    List<AtivoDTO> list = AppCore.getAtivosByCarteira(_carteira.id);
+    return _homeController.getVariacaoTotal(list, onlyHoje: true);
   }
 
   void refreshAlocacoes() {

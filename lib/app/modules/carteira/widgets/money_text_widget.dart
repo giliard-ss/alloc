@@ -7,15 +7,22 @@ class MoneyTextWidget extends StatelessWidget {
   FontWeight fontWeight;
   Color color;
   bool showSinal;
+  String leftSymbol;
 
   MoneyTextWidget(
-      {this.value = 0.0, this.fontSize = 16, this.fontWeight, this.color, this.showSinal = true});
+      {this.value = 0.0,
+      this.fontSize = 16,
+      this.fontWeight,
+      this.color,
+      this.showSinal = true,
+      this.leftSymbol = "R\$ "});
 
   @override
   Widget build(BuildContext context) {
     definirCor();
     return Text(
-      getSinal() + GeralUtil.doubleToMoney(value, showSinalNegativo: showSinal),
+      getSinal() +
+          GeralUtil.doubleToMoney(value, showSinalNegativo: showSinal, leftSymbol: leftSymbol),
       style: TextStyle(fontSize: fontSize, color: color, fontWeight: fontWeight),
     );
   }

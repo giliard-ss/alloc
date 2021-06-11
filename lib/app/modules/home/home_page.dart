@@ -1,5 +1,6 @@
 import 'package:alloc/app/app_core.dart';
 import 'package:alloc/app/modules/carteira/widgets/carteira_icon.dart';
+import 'package:alloc/app/modules/carteira/widgets/money_text_widget.dart';
 import 'package:alloc/app/modules/home/widgets/cotacao_card.dart';
 import 'package:alloc/app/modules/home/widgets/title_widget.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
@@ -159,9 +160,9 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
                   children: [
                     Container(
                       width: 180,
-                      child: Text(
-                        GeralUtil.doubleToMoney(variacao[0]),
-                        style: TextStyle(fontSize: 16),
+                      child: MoneyTextWidget(
+                        value: variacao[0],
+                        fontSize: 16,
                       ),
                     ),
                     VariacaoPercentualWidget(
@@ -456,31 +457,35 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
         physics: NeverScrollableScrollPhysics(),
         itemCount: controller.carteiras.length,
         itemBuilder: (context, index) {
-          CarteiraDTO carteira = controller.carteiras[index];
+          return Observer(
+            builder: (_) {
+              CarteiraDTO carteira = controller.carteiras[index];
 
-          return Container(
-            child: Column(
-              children: [
-                ListTile(
-                  onTap: () {
-                    Modular.to.pushNamed("/carteira/${carteira.id}");
-                  },
-                  leading: CarteiraIcon(carteira.descricao),
-                  title: Text(
-                    carteira.descricao,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: subtitleCarteira(carteira),
+              return Container(
+                child: Column(
+                  children: [
+                    ListTile(
+                      onTap: () {
+                        Modular.to.pushNamed("/carteira/${carteira.id}");
+                      },
+                      leading: CarteiraIcon(carteira.descricao),
+                      title: Text(
+                        carteira.descricao,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: subtitleCarteira(carteira),
+                    ),
+                    Visibility(
+                        visible: controller.carteiras.length > 1 &&
+                            (controller.carteiras.length - 1) != index,
+                        child: Divider(
+                          height: 10,
+                          color: Colors.grey,
+                        ))
+                  ],
                 ),
-                Visibility(
-                    visible: controller.carteiras.length > 1 &&
-                        (controller.carteiras.length - 1) != index,
-                    child: Divider(
-                      height: 10,
-                      color: Colors.grey,
-                    ))
-              ],
-            ),
+              );
+            },
           );
         });
   }

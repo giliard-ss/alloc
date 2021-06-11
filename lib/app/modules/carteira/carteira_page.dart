@@ -163,20 +163,32 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
     return Observer(
       builder: (_) {
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _columnConta(),
             SizedBox(
               height: 20,
             ),
+            _columnDesempenhoCarteira()
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _columnConta() {
+    return Observer(
+      builder: (_) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "CONTA",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Divider(
+              height: 5,
+            ),
             _resumoRow("Total Depositado", controller.carteira.totalDeposito),
-            Divider(
-              height: 5,
-            ),
-            _resumoRow("Total Proventos", controller.carteira.totalProventos),
-            Divider(
-              height: 5,
-            ),
-            _resumoRow("Lucro de Vendas", controller.carteira.totalLucroVendas),
             Divider(
               height: 5,
             ),
@@ -191,20 +203,103 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
     );
   }
 
-  _resumoRow(String descricao, double valor, {valorFW: FontWeight.normal}) {
+  Widget _columnDesempenhoCarteira() {
+    return Observer(
+      builder: (_) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "DESEMPENHO",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Divider(
+              height: 5,
+            ),
+            _resumoRow("Total Proventos", 0.0,
+                widgetValor: MoneyTextWidget(
+                  leftSymbol: "",
+                  fontSize: 14,
+                  value: controller.carteira.totalProventos,
+                )),
+            Divider(
+              height: 5,
+            ),
+            _resumoRow("Lucro de Vendas", 0.0,
+                widgetValor: MoneyTextWidget(
+                  leftSymbol: "",
+                  fontSize: 14,
+                  value: controller.carteira.totalLucroVendas,
+                )),
+            Divider(
+              height: 5,
+            ),
+            _resumoRow("Rendimento do Total Aplicado", 0.0,
+                widgetValor: MoneyTextWidget(
+                  showSinal: false,
+                  leftSymbol: "",
+                  fontSize: 14,
+                  value: controller.carteira.valorizacaoTotal,
+                ),
+                iconRight: _getIconVariacao(controller.carteira.valorizacaoTotal, 14)),
+            Divider(
+              height: 5,
+            ),
+            _resumoRow("Variação do Total Aplicado", 0.0,
+                widgetValor: VariacaoPercentualWidget(
+                  withSinal: false,
+                  withIcon: true,
+                  value: controller.carteira.valorizacaoTotalPercent,
+                )),
+          ],
+        );
+      },
+    );
+  }
+
+  Icon _getIconVariacao(double value, double fontSize) {
+    if (value == 0) return null;
+    Color color = value > 0 ? Colors.green : Colors.red;
+    if (value > 0)
+      return Icon(
+        Icons.call_made_rounded,
+        size: fontSize,
+        color: color,
+      );
+    return Icon(
+      Icons.south_east_rounded,
+      size: fontSize,
+      color: color,
+    );
+  }
+
+  _resumoRow(String descricao, double valor,
+      {valorFW: FontWeight.normal, Widget widgetValor, Icon iconRight}) {
+    List<Widget> items = [Text(descricao)];
+
+    if (widgetValor == null) {
+      widgetValor = Text(
+        GeralUtil.doubleToMoney(valor, leftSymbol: ""),
+        style: TextStyle(fontWeight: valorFW),
+      );
+    }
+
+    if (iconRight != null) {
+      items.add(Row(
+        children: [widgetValor, iconRight],
+      ));
+    } else {
+      items.add(widgetValor);
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(descricao),
-        Text(
-          GeralUtil.doubleToMoney(valor, leftSymbol: ""),
-          style: TextStyle(fontWeight: valorFW),
-        )
-      ],
+      children: items,
     );
   }
 
   _header() {
+    List varicacaoHoje = controller.getVariacaoTotal();
     return Observer(
       builder: (_) {
         return Column(
@@ -221,7 +316,7 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
             SizedBox(
               height: 10,
             ),
-            Text("Valorização do Valor Aplicado"),
+            Text("Variação"),
             SizedBox(
               height: 5,
             ),
@@ -230,11 +325,12 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
                 Container(
                   width: 180,
                   child: MoneyTextWidget(
-                    value: controller.carteira.valorizacaoTotal,
+                    value: varicacaoHoje[0],
                   ),
                 ),
                 VariacaoPercentualWidget(
-                  value: controller.carteira.valorizacaoTotalPercent,
+                  value: varicacaoHoje[1],
+                  withIcon: true,
                 )
               ],
             ),
