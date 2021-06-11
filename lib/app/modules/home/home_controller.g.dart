@@ -26,14 +26,6 @@ mixin _$HomeController on _HomeControllerBase, Store {
       (_$patrimonioComputed ??= Computed<double>(() => super.patrimonio,
               name: '_HomeControllerBase.patrimonio'))
           .value;
-  Computed<int> _$maiorQuantItemsExistenteListasComputed;
-
-  @override
-  int get maiorQuantItemsExistenteListas =>
-      (_$maiorQuantItemsExistenteListasComputed ??= Computed<int>(
-              () => super.maiorQuantItemsExistenteListas,
-              name: '_HomeControllerBase.maiorQuantItemsExistenteListas'))
-          .value;
 
   final _$errorAtom = Atom(name: '_HomeControllerBase.error');
 
@@ -80,33 +72,123 @@ mixin _$HomeController on _HomeControllerBase, Store {
     });
   }
 
-  final _$acoesAtom = Atom(name: '_HomeControllerBase.acoes');
+  final _$acoesEmAltaAtom = Atom(name: '_HomeControllerBase.acoesEmAlta');
 
   @override
-  List<AtivoDTO> get acoes {
-    _$acoesAtom.reportRead();
-    return super.acoes;
+  List<CotacaoModel> get acoesEmAlta {
+    _$acoesEmAltaAtom.reportRead();
+    return super.acoesEmAlta;
   }
 
   @override
-  set acoes(List<AtivoDTO> value) {
-    _$acoesAtom.reportWrite(value, super.acoes, () {
-      super.acoes = value;
+  set acoesEmAlta(List<CotacaoModel> value) {
+    _$acoesEmAltaAtom.reportWrite(value, super.acoesEmAlta, () {
+      super.acoesEmAlta = value;
     });
   }
 
-  final _$fiisAtom = Atom(name: '_HomeControllerBase.fiis');
+  final _$acoesEmBaixaAtom = Atom(name: '_HomeControllerBase.acoesEmBaixa');
 
   @override
-  List<AtivoDTO> get fiis {
-    _$fiisAtom.reportRead();
-    return super.fiis;
+  List<CotacaoModel> get acoesEmBaixa {
+    _$acoesEmBaixaAtom.reportRead();
+    return super.acoesEmBaixa;
   }
 
   @override
-  set fiis(List<AtivoDTO> value) {
-    _$fiisAtom.reportWrite(value, super.fiis, () {
-      super.fiis = value;
+  set acoesEmBaixa(List<CotacaoModel> value) {
+    _$acoesEmBaixaAtom.reportWrite(value, super.acoesEmBaixa, () {
+      super.acoesEmBaixa = value;
+    });
+  }
+
+  final _$acoesEmAltaB3Atom = Atom(name: '_HomeControllerBase.acoesEmAltaB3');
+
+  @override
+  List<CotacaoModel> get acoesEmAltaB3 {
+    _$acoesEmAltaB3Atom.reportRead();
+    return super.acoesEmAltaB3;
+  }
+
+  @override
+  set acoesEmAltaB3(List<CotacaoModel> value) {
+    _$acoesEmAltaB3Atom.reportWrite(value, super.acoesEmAltaB3, () {
+      super.acoesEmAltaB3 = value;
+    });
+  }
+
+  final _$acoesEmBaixaB3Atom = Atom(name: '_HomeControllerBase.acoesEmBaixaB3');
+
+  @override
+  List<CotacaoModel> get acoesEmBaixaB3 {
+    _$acoesEmBaixaB3Atom.reportRead();
+    return super.acoesEmBaixaB3;
+  }
+
+  @override
+  set acoesEmBaixaB3(List<CotacaoModel> value) {
+    _$acoesEmBaixaB3Atom.reportWrite(value, super.acoesEmBaixaB3, () {
+      super.acoesEmBaixaB3 = value;
+    });
+  }
+
+  final _$fiisEmAltaAtom = Atom(name: '_HomeControllerBase.fiisEmAlta');
+
+  @override
+  List<CotacaoModel> get fiisEmAlta {
+    _$fiisEmAltaAtom.reportRead();
+    return super.fiisEmAlta;
+  }
+
+  @override
+  set fiisEmAlta(List<CotacaoModel> value) {
+    _$fiisEmAltaAtom.reportWrite(value, super.fiisEmAlta, () {
+      super.fiisEmAlta = value;
+    });
+  }
+
+  final _$fiisEmBaixaAtom = Atom(name: '_HomeControllerBase.fiisEmBaixa');
+
+  @override
+  List<CotacaoModel> get fiisEmBaixa {
+    _$fiisEmBaixaAtom.reportRead();
+    return super.fiisEmBaixa;
+  }
+
+  @override
+  set fiisEmBaixa(List<CotacaoModel> value) {
+    _$fiisEmBaixaAtom.reportWrite(value, super.fiisEmBaixa, () {
+      super.fiisEmBaixa = value;
+    });
+  }
+
+  final _$fiisEmAltaB3Atom = Atom(name: '_HomeControllerBase.fiisEmAltaB3');
+
+  @override
+  List<CotacaoModel> get fiisEmAltaB3 {
+    _$fiisEmAltaB3Atom.reportRead();
+    return super.fiisEmAltaB3;
+  }
+
+  @override
+  set fiisEmAltaB3(List<CotacaoModel> value) {
+    _$fiisEmAltaB3Atom.reportWrite(value, super.fiisEmAltaB3, () {
+      super.fiisEmAltaB3 = value;
+    });
+  }
+
+  final _$fiisEmBaixaB3Atom = Atom(name: '_HomeControllerBase.fiisEmBaixaB3');
+
+  @override
+  List<CotacaoModel> get fiisEmBaixaB3 {
+    _$fiisEmBaixaB3Atom.reportRead();
+    return super.fiisEmBaixaB3;
+  }
+
+  @override
+  set fiisEmBaixaB3(List<CotacaoModel> value) {
+    _$fiisEmBaixaB3Atom.reportWrite(value, super.fiisEmBaixaB3, () {
+      super.fiisEmBaixaB3 = value;
     });
   }
 
@@ -139,10 +221,15 @@ mixin _$HomeController on _HomeControllerBase, Store {
 error: ${error},
 lastUpdate: ${lastUpdate},
 carteiras: ${carteiras},
-acoes: ${acoes},
-fiis: ${fiis},
-patrimonio: ${patrimonio},
-maiorQuantItemsExistenteListas: ${maiorQuantItemsExistenteListas}
+acoesEmAlta: ${acoesEmAlta},
+acoesEmBaixa: ${acoesEmBaixa},
+acoesEmAltaB3: ${acoesEmAltaB3},
+acoesEmBaixaB3: ${acoesEmBaixaB3},
+fiisEmAlta: ${fiisEmAlta},
+fiisEmBaixa: ${fiisEmBaixa},
+fiisEmAltaB3: ${fiisEmAltaB3},
+fiisEmBaixaB3: ${fiisEmBaixaB3},
+patrimonio: ${patrimonio}
     ''';
   }
 }

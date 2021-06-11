@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 
@@ -25,6 +26,34 @@ class CotacaoModel {
     };
   }
 
+  CotacaoModel clone() {
+    return new CotacaoModel(this._id, this._ultimo, this._variacao, this._date);
+  }
+
+  bool isAcao() {
+    try {
+      return TipoAtivo.byPapel(_id).code == TipoAtivo.ACAO.code;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  bool isETF() {
+    try {
+      return TipoAtivo.byPapel(_id).code == TipoAtivo.ETF.code;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  bool isFIIS() {
+    try {
+      return TipoAtivo.byPapel(_id).code == TipoAtivo.FIIS.code;
+    } catch (e) {
+      return false;
+    }
+  }
+
   double get precoAbertura => (ultimo * 100) / (100 + variacaoDouble);
 
   double get precoAberturaHoje => (ultimo * 100) / (100 + variacaoHoje);
@@ -35,8 +64,7 @@ class CotacaoModel {
 
   num get ultimo => _ultimo;
 
-  String get ultimoString =>
-      GeralUtil.limitaCasasDecimais(ultimo.toDouble()).toString();
+  String get ultimoString => GeralUtil.limitaCasasDecimais(ultimo.toDouble()).toString();
 
   set ultimo(num value) => _ultimo = value;
 

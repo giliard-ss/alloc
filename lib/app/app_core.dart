@@ -57,6 +57,10 @@ class AppCore {
     return _cotacaoCore.getCotacao(id);
   }
 
+  static List<CotacaoModel> get allCotacoes {
+    return _cotacaoCore.allCotacoes;
+  }
+
   static Future<void> notifyAddDelCarteira() async {
     await _carteiraCore.loadCarteiras(onlyCache: false);
     _carteiraCore.refreshCarteiraDTO();

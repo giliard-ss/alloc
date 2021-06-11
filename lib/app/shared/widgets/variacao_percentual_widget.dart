@@ -7,13 +7,17 @@ class VariacaoPercentualWidget extends StatelessWidget {
   final bool withSinal;
   final int casasDecimais;
   final bool withIcon;
+  final FontWeight fontWeight;
+  final MainAxisAlignment mainAxisAlignment;
 
   VariacaoPercentualWidget(
       {this.value = 0,
       this.fontSize = 13,
       this.withSinal = true,
       this.casasDecimais = 2,
-      this.withIcon = false}) {
+      this.withIcon = false,
+      this.mainAxisAlignment = MainAxisAlignment.start,
+      this.fontWeight = FontWeight.normal}) {
     value = GeralUtil.limitaCasasDecimais(value, casasDecimais: casasDecimais);
   }
 
@@ -31,11 +35,13 @@ class VariacaoPercentualWidget extends StatelessWidget {
     Color color = value > 0 ? Colors.green : Colors.red;
     if (value > 0)
       return Icon(
-        Icons.arrow_drop_up_outlined,
+        Icons.call_made_rounded,
+        size: fontSize,
         color: color,
       );
     return Icon(
-      Icons.arrow_drop_down,
+      Icons.south_east_rounded,
+      size: fontSize,
       color: color,
     );
   }
@@ -63,10 +69,12 @@ class VariacaoPercentualWidget extends StatelessWidget {
     text = sinal + text + "%";
 
     return Row(
+      mainAxisAlignment: this.mainAxisAlignment,
       children: [
         Text(text,
             style: TextStyle(
               fontSize: fontSize,
+              fontWeight: fontWeight,
               color: color,
             )),
         getIcon(),

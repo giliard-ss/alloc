@@ -1,5 +1,7 @@
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
+import 'package:alloc/app/shared/utils/ativo_util.dart';
+import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -26,6 +28,7 @@ abstract class _CotacaoControllerBase with Store {
   void loadAtivos(String tipo) {
     String tipoSimilar = (tipo == TipoAtivo.ACAO.toString() ? TipoAtivo.ETF.toString() : tipo);
     ativos = AppCore.allAtivos.where((e) => e.tipo == tipo || e.tipo == tipoSimilar).toList();
+    ativos = AtivoUtil.agruparAtivosPorPapel(ativos);
     ativos.sort((e1, e2) => e2.cotacaoModel.variacaoHoje.compareTo(e1.cotacaoModel.variacaoHoje));
   }
 }

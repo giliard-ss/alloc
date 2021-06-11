@@ -118,23 +118,6 @@ class AtivoCore {
     return List<AtivoDTO>.from(GeralUtil.mapToList(temp));
   }
 
-  List<AtivoDTO> _agruparAtivosPorPapel(List<AtivoDTO> ativos) {
-    Map<String, AtivoDTO> temp = {};
-    for (AtivoDTO ativo in ativos) {
-      String key = ativo.papel;
-
-      if (temp.containsKey(key)) {
-        AtivoDTO ativoTemp = temp[key];
-        ativoTemp.totalAplicado += ativo.totalAplicado;
-        ativoTemp.qtd += ativo.qtd;
-        temp[key] = ativoTemp;
-      } else {
-        temp[key] = ativo;
-      }
-    }
-    return List<AtivoDTO>.from(GeralUtil.mapToList(temp));
-  }
-
   void _ajustarPorcentagemDeAlocacaoDosAtivos(List<AtivoDTO> ativos) {
     Map<String, int> qtdPapeisPorAlocacao = _getQuantidadePapeisPorAlocacao(ativos);
     for (AtivoDTO ativo in ativos) {
@@ -190,7 +173,6 @@ class AtivoCore {
 
   List<AtivoDTO> get allAtivos {
     List<AtivoDTO> result = [];
-    // List<AtivoDTO> ativosAgrupados = _agruparAtivosPorPapel(_ativosDTO.value);
     _ativosDTO.value.forEach((e) => result.add(e.clone()));
     return result;
   }

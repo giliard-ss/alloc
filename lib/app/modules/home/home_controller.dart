@@ -7,6 +7,7 @@ import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
 import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/services/carteira_service.dart';
+import 'package:alloc/app/shared/utils/ativo_util.dart';
 import 'package:alloc/app/shared/utils/date_util.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/logger_util.dart';
@@ -20,6 +21,7 @@ part 'home_controller.g.dart';
 class HomeController = _HomeControllerBase with _$HomeController;
 
 abstract class _HomeControllerBase with Store {
+  static const int QUANT_ATIVOS_EM_ALTA_OU_BAIXA = 3;
   ICarteiraService _carteiraService = Modular.get<CarteiraService>();
   ReactionDisposer _carteirasReactDispose;
   String descricao;
@@ -34,10 +36,28 @@ abstract class _HomeControllerBase with Store {
   List<CarteiraDTO> carteiras = [];
 
   @observable
-  List<AtivoDTO> acoes = [];
+  List<CotacaoModel> acoesEmAlta = [];
 
   @observable
-  List<AtivoDTO> fiis = [];
+  List<CotacaoModel> acoesEmBaixa = [];
+
+  @observable
+  List<CotacaoModel> acoesEmAltaB3 = [];
+
+  @observable
+  List<CotacaoModel> acoesEmBaixaB3 = [];
+
+  @observable
+  List<CotacaoModel> fiisEmAlta = [];
+
+  @observable
+  List<CotacaoModel> fiisEmBaixa = [];
+
+  @observable
+  List<CotacaoModel> fiisEmAltaB3 = [];
+
+  @observable
+  List<CotacaoModel> fiisEmBaixaB3 = [];
 
   @action
   Future<void> init() async {
@@ -45,6 +65,8 @@ abstract class _HomeControllerBase with Store {
       carteiras = AppCore.carteiras;
       loadAcoes();
       loadFiis();
+      _loadAcoesB3();
+      _loadFiisB3();
       _startCarteirasReaction();
       _runSchedule();
     } catch (e) {
@@ -60,30 +82,70 @@ abstract class _HomeControllerBase with Store {
   }
 
   void loadAcoes() {
-    List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.isAcao || e.isETF).toList();
-    list.sort((e1, e2) => e2.cotacaoModel.variacaoHoje.compareTo(e1.cotacaoModel.variacaoHoje));
-    if (list.length > 5) {
-      list = list.sublist(0, 5);
+    List<CotacaoModel> list = [];
+    AtivoUtil.agruparAtivosPorPapel(AppCore.allAtivos.where((e) => e.isAcao || e.isETF).toList())
+        .forEach((e) => list.add(e.cotacaoModel));
+    list.sort((e1, e2) => e2.variacaoHoje.compareTo(e1.variacaoHoje));
+
+    acoesEmAlta = _extrairCotacoesEmAlta(list);
+    acoesEmBaixa = _extrairCotacoesEmBaixa(list);
+  }
+
+  void _loadAcoesB3() {
+    List<CotacaoModel> list = AppCore.allCotacoes.where((e) => e.isAcao() || e.isETF()).toList();
+    list.sort((e1, e2) => e2.variacaoHoje.compareTo(e1.variacaoHoje));
+
+    acoesEmAltaB3 = _extrairCotacoesEmAlta(list);
+    acoesEmBaixaB3 = _extrairCotacoesEmBaixa(list);
+  }
+
+  List<CotacaoModel> _extrairCotacoesEmAlta(List<CotacaoModel> cotacoes) {
+    List<CotacaoModel> result = [];
+    bool cotacoesAtualizadasHoje = cotacoes.isNotEmpty &&
+        DateUtil.equals(
+          cotacoes[0].date,
+          DateTime.now(),
+        );
+    for (int i = 0; i < cotacoes.length; i++) {
+      if (i >= QUANT_ATIVOS_EM_ALTA_OU_BAIXA) break;
+      if (cotacoesAtualizadasHoje && cotacoes[i].variacaoHoje <= 0) break;
+      result.add(cotacoes[i]);
     }
-    acoes = list;
+    return result;
+  }
+
+  List<CotacaoModel> _extrairCotacoesEmBaixa(List<CotacaoModel> cotacoes) {
+    List<CotacaoModel> result = [];
+    bool cotacoesAtualizadasHoje = cotacoes.isNotEmpty &&
+        DateUtil.equals(
+          cotacoes[0].date,
+          DateTime.now(),
+        );
+
+    for (int i = cotacoes.length - 1; i >= 0; i--) {
+      if (i < cotacoes.length - QUANT_ATIVOS_EM_ALTA_OU_BAIXA) break;
+      if (cotacoesAtualizadasHoje && cotacoes[i].variacaoHoje >= 0) break;
+      result.add(cotacoes[i]);
+    }
+    return result;
   }
 
   void loadFiis() {
-    List<AtivoDTO> list = AppCore.allAtivos.where((e) => e.isFII).toList();
-    list.sort((e1, e2) => e2.cotacaoModel.variacaoHoje.compareTo(e1.cotacaoModel.variacaoHoje));
-    if (list.length > 5) {
-      list = list.sublist(0, 5);
-    }
+    List<CotacaoModel> list = [];
+    AppCore.allAtivos.where((e) => e.isFII).forEach((e) => list.add(e.cotacaoModel));
+    list.sort((e1, e2) => e2.variacaoHoje.compareTo(e1.variacaoHoje));
 
-    fiis = list;
+    fiisEmAlta = _extrairCotacoesEmAlta(list);
+    fiisEmBaixa = _extrairCotacoesEmBaixa(list);
   }
 
-  @computed
-  int get maiorQuantItemsExistenteListas {
-    if (acoes.length > fiis.length)
-      return acoes.length;
-    else
-      return fiis.length;
+  void _loadFiisB3() {
+    List<CotacaoModel> list = [];
+    AppCore.allCotacoes.where((e) => e.isFIIS()).forEach((e) => list.add(e));
+    list.sort((e1, e2) => e2.variacaoHoje.compareTo(e1.variacaoHoje));
+
+    fiisEmAltaB3 = _extrairCotacoesEmAlta(list);
+    fiisEmBaixaB3 = _extrairCotacoesEmBaixa(list);
   }
 
   CotacaoModel getCotacaoIndiceByTipo(TipoAtivo tipo) {
@@ -161,7 +223,7 @@ abstract class _HomeControllerBase with Store {
   void _runSchedule() {
     if (_schedule != null) _schedule.cancel();
 
-    _schedule = Timer.periodic(new Duration(minutes: 1), (timer) {
+    _schedule = Timer.periodic(new Duration(seconds: 60), (timer) {
       refreshLastUpdate();
     });
   }
@@ -175,6 +237,7 @@ abstract class _HomeControllerBase with Store {
       this.carteiras = AppCore.carteiras;
       loadAcoes();
       loadFiis();
+      _loadAcoesB3();
       refreshLastUpdate();
     });
   }

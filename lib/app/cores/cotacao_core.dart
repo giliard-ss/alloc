@@ -88,4 +88,10 @@ class CotacaoCore {
     _cotacoes.value.forEach((e) => result.add(e.id));
     return result;
   }
+
+  List<CotacaoModel> get allCotacoes {
+    List<CotacaoModel> result = [];
+    _cotacoes.value.forEach((e) => result.add(e.clone()));
+    return result;
+  }
 }

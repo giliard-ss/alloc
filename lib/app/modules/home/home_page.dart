@@ -4,6 +4,7 @@ import 'package:alloc/app/modules/home/widgets/cotacao_card.dart';
 import 'package:alloc/app/modules/home/widgets/title_widget.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
 import 'package:alloc/app/shared/enums/tipo_ativo_enum.dart';
+import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
 import 'package:alloc/app/shared/utils/loading_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
@@ -61,8 +62,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
           ),
         ),
         body: Container(
-            padding: EdgeInsets.all(15),
-            child: WidgetUtil.futureBuild(controller.init, _body)));
+            padding: EdgeInsets.all(15), child: WidgetUtil.futureBuild(controller.init, _body)));
   }
 
   Widget getImage() {
@@ -94,12 +94,17 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
     return SingleChildScrollView(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         // menu(),
-        resumo(),
-        getCarteiras(),
+
+        _cardResumo(),
+        _getCardCarteiras(),
         SizedBox(
           height: 15,
         ),
-        carousel()
+        _carouselAtivos(),
+        SizedBox(
+          height: 15,
+        ),
+        _carouselCotacoesB3()
       ]),
     );
   }
@@ -123,53 +128,58 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
     );
   }
 
-  Widget resumo() {
-    return Observer(
-      builder: (_) {
-        List variacao = controller.getVariacaoPatrimonio();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 50,
-            ),
-            Text("PATRIMÔNIO"),
-            Text(
-              GeralUtil.doubleToMoney(controller.patrimonio),
-              style: TextStyle(
-                fontSize: 30,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Text("Variação " + controller.lastUpdate),
-            SizedBox(
-              height: 5,
-            ),
-            Row(
+  Widget _cardResumo() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Observer(
+          builder: (_) {
+            List variacao = controller.getVariacaoPatrimonio();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 180,
-                  child: Text(
-                    GeralUtil.doubleToMoney(variacao[0]),
-                    style: TextStyle(fontSize: 16),
+                TitleWidget(
+                  title: "Patrimônio",
+                  withDivider: true,
+                ),
+                Text(
+                  GeralUtil.doubleToMoney(controller.patrimonio),
+                  style: TextStyle(
+                    fontSize: 25,
                   ),
                 ),
-                VariacaoPercentualWidget(
-                  withIcon: true,
-                  withSinal: false,
-                  value: variacao[1],
-                  fontSize: 16,
-                )
+                SizedBox(
+                  height: 10,
+                ),
+                Text("Variação " + controller.lastUpdate),
+                SizedBox(
+                  height: 5,
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: 180,
+                      child: Text(
+                        GeralUtil.doubleToMoney(variacao[0]),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    VariacaoPercentualWidget(
+                      withIcon: true,
+                      withSinal: false,
+                      value: variacao[1],
+                      fontSize: 16,
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: 15,
+                ),
               ],
-            ),
-            SizedBox(
-              height: 15,
-            ),
-          ],
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -208,8 +218,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
             RaisedButton(
               child: Text("Concluir"),
               onPressed: () async {
-                bool ok = await LoadingUtil.onLoading(
-                    context, controller.salvarNovaCarteira);
+                bool ok = await LoadingUtil.onLoading(context, controller.salvarNovaCarteira);
                 if (ok) Navigator.of(context).pop();
               },
             )
@@ -219,15 +228,16 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
     );
   }
 
-  Widget carousel() {
+  Widget _carouselAtivos() {
     return Observer(
       builder: (_) {
         return Visibility(
-          visible: controller.acoes.isNotEmpty || controller.fiis.isNotEmpty,
+          visible: controller.acoesEmAlta.isNotEmpty ||
+              controller.acoesEmBaixa.isNotEmpty ||
+              controller.fiisEmAlta.isNotEmpty ||
+              controller.fiisEmBaixa.isNotEmpty,
           child: CarouselWithIndicator(
-            height:
-                ((controller.maiorQuantItemsExistenteListas.toDouble()) * 50) +
-                    110,
+            height: 340.0,
             items: cotacaoAtivosCard(),
           ),
         );
@@ -235,39 +245,137 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
     );
   }
 
+  Widget _carouselCotacoesB3() {
+    return Observer(
+      builder: (_) {
+        return Visibility(
+          visible: controller.acoesEmAlta.isNotEmpty ||
+              controller.acoesEmBaixa.isNotEmpty ||
+              controller.fiisEmAlta.isNotEmpty ||
+              controller.fiisEmBaixa.isNotEmpty,
+          child: CarouselWithIndicator(
+            height: 340.0,
+            items: cotacaoB3Card(),
+          ),
+        );
+      },
+    );
+  }
+
+  List<Widget> cotacaoB3Card() {
+    List<Widget> list = [];
+
+    if (controller.acoesEmAltaB3.isNotEmpty || controller.acoesEmBaixaB3.isNotEmpty)
+      list.add(_cotacaoCardAcoesB3());
+
+    if (controller.fiisEmAltaB3.isNotEmpty || controller.fiisEmBaixaB3.isNotEmpty)
+      list.add(_cotacaoCardFiisB3());
+
+    return list;
+  }
+
   List<Widget> cotacaoAtivosCard() {
     List<Widget> list = [];
-    if (controller.acoes.isNotEmpty) {
-      list.add(Observer(
-        builder: (_) {
-          return CotacaoCard(
-            cotacaoIndice: controller.getCotacaoIndiceByTipo(TipoAtivo.ACAO),
-            variacaoTotal: controller.getVariacaoTotalAcoes(),
-            ativos: controller.acoes,
-            onTap: () {
-              Modular.to.pushNamed("/home/cotacao/${TipoAtivo.ACAO.code}");
-            },
-            title: "Ações e ETFs",
-          );
-        },
-      ));
-    }
-    if (controller.fiis.isNotEmpty) {
-      list.add(Observer(
-        builder: (_) {
-          return CotacaoCard(
-            cotacaoIndice: controller.getCotacaoIndiceByTipo(TipoAtivo.FIIS),
-            variacaoTotal: controller.getVariacaoTotalFiis(),
-            ativos: controller.fiis,
-            onTap: () {
-              Modular.to.pushNamed("/home/cotacao/${TipoAtivo.FIIS.code}");
-            },
-            title: "Fundos Imobiliários",
-          );
-        },
-      ));
-    }
+
+    if (controller.acoesEmAlta.isNotEmpty || controller.acoesEmBaixa.isNotEmpty)
+      list.add(_cotacaoCardAcoes());
+
+    if (controller.fiisEmAlta.isNotEmpty || controller.fiisEmBaixa.isNotEmpty)
+      list.add(_cotacaoCardFIIs());
+
     return list;
+  }
+
+  Widget _cotacaoCardFIIs() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Observer(
+          builder: (_) {
+            return CotacaoCard(
+              cotacaoIndice: controller.getCotacaoIndiceByTipo(TipoAtivo.FIIS),
+              variacaoTotal: controller.getVariacaoTotalFiis(),
+              cotacoesEmAlta: controller.fiisEmAlta,
+              cotacoesEmBaixa: controller.fiisEmBaixa,
+              onTap: () {
+                Modular.to.pushNamed("/home/cotacao/${TipoAtivo.FIIS.code}");
+              },
+              title: "Fundos Imobiliários",
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _cotacaoCardAcoes() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Observer(
+          builder: (_) {
+            return CotacaoCard(
+              cotacaoIndice: controller.getCotacaoIndiceByTipo(TipoAtivo.ACAO),
+              variacaoTotal: controller.getVariacaoTotalAcoes(),
+              cotacoesEmAlta: controller.acoesEmAlta,
+              cotacoesEmBaixa: controller.acoesEmBaixa,
+              onTap: () {
+                Modular.to.pushNamed("/home/cotacao/${TipoAtivo.ACAO.code}");
+              },
+              title: "Ações e ETFs",
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _cotacaoCardAcoesB3() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Observer(
+          builder: (_) {
+            CotacaoModel cotacao = controller.getCotacaoIndiceByTipo(TipoAtivo.ACAO);
+
+            return CotacaoCard(
+              cotacaoIndice: cotacao,
+              variacaoTotal: cotacao.variacaoHoje,
+              cotacoesEmAlta: controller.acoesEmAltaB3,
+              cotacoesEmBaixa: controller.acoesEmBaixaB3,
+              onTap: () {
+                //Modular.to.pushNamed("/home/cotacao/${TipoAtivo.ACAO.code}");
+              },
+              title: "Ibovespa",
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _cotacaoCardFiisB3() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Observer(
+          builder: (_) {
+            CotacaoModel cotacao = controller.getCotacaoIndiceByTipo(TipoAtivo.FIIS);
+
+            return CotacaoCard(
+              cotacaoIndice: cotacao,
+              variacaoTotal: cotacao.variacaoHoje,
+              cotacoesEmAlta: controller.fiisEmAltaB3,
+              cotacoesEmBaixa: controller.fiisEmBaixaB3,
+              onTap: () {
+                //Modular.to.pushNamed("/home/cotacao/${TipoAtivo.ACAO.code}");
+              },
+              title: "Fundos Imob. (IFIX)",
+            );
+          },
+        ),
+      ),
+    );
   }
 
   Widget subtitleCarteira(CarteiraDTO carteira) {
@@ -297,8 +405,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
         ),
         Text(
             (carteira.saldo < 0
-                ? ('Vender ' +
-                    (GeralUtil.doubleToMoney(carteira.saldo * -1)).toString())
+                ? ('Vender ' + (GeralUtil.doubleToMoney(carteira.saldo * -1)).toString())
                 : 'Aplicar ' + GeralUtil.doubleToMoney(carteira.saldo)),
             style: TextStyle(color: Colors.grey)),
         SizedBox(
@@ -308,64 +415,73 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
     );
   }
 
-  Widget getCarteiras() {
-    return Column(
-      children: [
-        Observer(builder: (_) {
-          return Column(
-            children: [
-              TitleWidget(
-                title: "Carteiras",
-                rightItems: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.add_circle_outline_rounded,
-                    ),
-                    onPressed: _showNovaCarteiraDialog,
-                  )
+  Widget _getCardCarteiras() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Column(
+          children: [
+            Observer(builder: (_) {
+              return Column(
+                children: [
+                  TitleWidget(
+                    title: "Carteiras",
+                    rightItems: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.add_circle_outline_rounded,
+                        ),
+                        onPressed: _showNovaCarteiraDialog,
+                      )
+                    ],
+                    withDivider: true,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  _listViewCarteiras(),
                 ],
-                withDivider: true,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: controller.carteiras.length,
-                  itemBuilder: (context, index) {
-                    CarteiraDTO carteira = controller.carteiras[index];
-
-                    return Container(
-                      child: Column(
-                        children: [
-                          ListTile(
-                            onTap: () {
-                              Modular.to.pushNamed("/carteira/${carteira.id}");
-                            },
-                            leading: CarteiraIcon(carteira.descricao),
-                            title: Text(
-                              carteira.descricao,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: subtitleCarteira(carteira),
-                          ),
-                          Visibility(
-                              visible: controller.carteiras.length > 1 &&
-                                  (controller.carteiras.length - 1) != index,
-                              child: Divider(
-                                height: 10,
-                                color: Colors.grey,
-                              ))
-                        ],
-                      ),
-                    );
-                  }),
-            ],
-          );
-        })
-      ],
+              );
+            })
+          ],
+        ),
+      ),
     );
+  }
+
+  _listViewCarteiras() {
+    return ListView.builder(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        itemCount: controller.carteiras.length,
+        itemBuilder: (context, index) {
+          CarteiraDTO carteira = controller.carteiras[index];
+
+          return Container(
+            child: Column(
+              children: [
+                ListTile(
+                  onTap: () {
+                    Modular.to.pushNamed("/carteira/${carteira.id}");
+                  },
+                  leading: CarteiraIcon(carteira.descricao),
+                  title: Text(
+                    carteira.descricao,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: subtitleCarteira(carteira),
+                ),
+                Visibility(
+                    visible: controller.carteiras.length > 1 &&
+                        (controller.carteiras.length - 1) != index,
+                    child: Divider(
+                      height: 10,
+                      color: Colors.grey,
+                    ))
+              ],
+            ),
+          );
+        });
   }
 }

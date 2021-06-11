@@ -9,8 +9,7 @@ import 'cotacao_controller.dart';
 class CotacaoPage extends StatefulWidget {
   final String title;
   final String tipo;
-  const CotacaoPage(this.tipo, {Key key, this.title = "Cotacao"})
-      : super(key: key);
+  const CotacaoPage(this.tipo, {Key key, this.title = "Cotacao"}) : super(key: key);
 
   @override
   _CotacaoPageState createState() => _CotacaoPageState();
@@ -29,8 +28,13 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
-      ),
+          title: Text(widget.title),
+          leading: IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () {
+              Modular.to.pop();
+            },
+          )),
       body: _body(),
     );
   }
@@ -44,6 +48,7 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
             height: 20,
           ),
           Container(
+            padding: EdgeInsets.all(10),
             child: Observer(
               builder: (_) {
                 return ListView.builder(
@@ -53,9 +58,7 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
                   itemBuilder: (context, index) {
                     AtivoDTO ativo = controller.ativos[index];
 
-                    return itemCotacao(
-                        ativo.papel,
-                        ativo.cotacaoModel.ultimo.toDouble(),
+                    return itemCotacao(ativo.papel, ativo.cotacaoModel.ultimo.toDouble(),
                         ativo.cotacaoModel.variacaoHoje);
                   },
                 );
@@ -78,20 +81,24 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(papel, style: TextStyle(fontSize: 13)),
+                  Text(papel, style: TextStyle(fontSize: 16)),
                   Text(
                     GeralUtil.doubleToMoney(ultimo, leftSymbol: ""),
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 13),
                   )
                 ],
               ),
               VariacaoPercentualWidget(
+                fontSize: 14,
                 withIcon: true,
                 withSinal: false,
                 value: variacao,
               ),
             ],
           ),
+          Divider(
+            height: 5,
+          )
         ],
       ),
     );
