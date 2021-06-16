@@ -160,18 +160,14 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
   }
 
   _resumo() {
-    return Observer(
-      builder: (_) {
-        return Column(
-          children: [
-            _columnConta(),
-            SizedBox(
-              height: 20,
-            ),
-            _columnDesempenhoCarteira()
-          ],
-        );
-      },
+    return Column(
+      children: [
+        _columnConta(),
+        SizedBox(
+          height: 20,
+        ),
+        _columnDesempenhoCarteira()
+      ],
     );
   }
 
@@ -305,9 +301,6 @@ class _CarteiraPageState extends ModularState<CarteiraPage, CarteiraController> 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 50,
-            ),
             Text("VALOR APLICADO ATUALIZADO"),
             Text(
               GeralUtil.doubleToMoney(controller.carteira.totalAportadoAtual),

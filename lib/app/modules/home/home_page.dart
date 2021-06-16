@@ -345,7 +345,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
               cotacoesEmAlta: controller.acoesEmAltaB3,
               cotacoesEmBaixa: controller.acoesEmBaixaB3,
               onTap: () {
-                //Modular.to.pushNamed("/home/cotacao/${TipoAtivo.ACAO.code}");
+                Modular.to.pushNamed("/home/cotacao/b3/${TipoAtivo.ACAO.code}");
               },
               title: "Ibovespa",
             );
@@ -369,7 +369,7 @@ class _HomePageState extends ModularState<HomePage, HomeController> {
               cotacoesEmAlta: controller.fiisEmAltaB3,
               cotacoesEmBaixa: controller.fiisEmBaixaB3,
               onTap: () {
-                //Modular.to.pushNamed("/home/cotacao/${TipoAtivo.ACAO.code}");
+                Modular.to.pushNamed("/home/cotacao/b3/${TipoAtivo.FIIS.code}");
               },
               title: "Fundos Imob. (IFIX)",
             );

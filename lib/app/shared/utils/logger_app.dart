@@ -21,8 +21,7 @@ class LoggerApp extends LogPrinter {
     if (event.level == Level.error) {
       return logError(event);
     }
-    LogEvent e =
-        LogEvent(event.level, event.message, event.error, event.stackTrace);
+    LogEvent e = LogEvent(event.level, event.message, event.error, event.stackTrace);
     return p.log(e);
   }
 
@@ -32,10 +31,10 @@ class LoggerApp extends LogPrinter {
 
     if (event.message is ApplicationException) {
       ApplicationException e = event.message;
-      mensagem =
-          "ApplicationException: ${e.message}\n${e.getStackString()}\n$origem";
+      mensagem = "ApplicationException: ${e.message}\n${e.getStackString()}\n$origem";
     } else {
-      mensagem = "${event.message.toString()}\n$origem";
+      mensagem =
+          "${event.message.toString()}\n ${ExceptionUtil.reduzirStackTrace(StackTrace.current, 15)}\n$origem";
     }
 
     LogEvent e = LogEvent(event.level, mensagem, event.error, event.stackTrace);

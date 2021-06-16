@@ -1,5 +1,7 @@
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
+import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/utils/geral_util.dart';
+import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:alloc/app/shared/widgets/variacao_percentual_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -9,7 +11,8 @@ import 'cotacao_controller.dart';
 class CotacaoPage extends StatefulWidget {
   final String title;
   final String tipo;
-  const CotacaoPage(this.tipo, {Key key, this.title = "Cotacao"}) : super(key: key);
+  final bool isB3;
+  const CotacaoPage(this.tipo, {this.isB3 = false, key, this.title = "Cotacao"}) : super(key: key);
 
   @override
   _CotacaoPageState createState() => _CotacaoPageState();
@@ -20,7 +23,8 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
 
   @override
   void initState() {
-    controller.init(widget.tipo);
+    controller.tipo = widget.tipo;
+    controller.isB3 = widget.isB3;
     super.initState();
   }
 
@@ -35,7 +39,7 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
               Modular.to.pop();
             },
           )),
-      body: _body(),
+      body: WidgetUtil.futureBuild(controller.init, _body),
     );
   }
 
@@ -54,12 +58,11 @@ class _CotacaoPageState extends ModularState<CotacaoPage, CotacaoController> {
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
-                  itemCount: controller.ativos.length,
+                  itemCount: controller.cotacoes.length,
                   itemBuilder: (context, index) {
-                    AtivoDTO ativo = controller.ativos[index];
+                    CotacaoModel cotacao = controller.cotacoes[index];
 
-                    return itemCotacao(ativo.papel, ativo.cotacaoModel.ultimo.toDouble(),
-                        ativo.cotacaoModel.variacaoHoje);
+                    return itemCotacao(cotacao.id, cotacao.ultimo.toDouble(), cotacao.variacaoHoje);
                   },
                 );
               },

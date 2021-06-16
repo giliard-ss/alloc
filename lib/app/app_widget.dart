@@ -1,3 +1,4 @@
+import 'package:alloc/app/shared/utils/logger_util.dart';
 import 'package:alloc/app/shared/utils/widget_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -49,10 +50,11 @@ class AppWidget extends StatelessWidget {
   }
 
   Widget buildError(BuildContext context, FlutterErrorDetails error) {
+    LoggerUtil.error(error);
     return Scaffold(
       body: Center(
         child: Text(
-          "Error appeared.",
+          "Falha Inesperada!",
           style: Theme.of(context).textTheme.title,
         ),
       ),

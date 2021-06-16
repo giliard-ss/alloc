@@ -7,10 +7,13 @@ import 'package:alloc/app/cores/provento_core.dart';
 import 'package:alloc/app/shared/dtos/alocacao_dto.dart';
 import 'package:alloc/app/shared/dtos/ativo_dto.dart';
 import 'package:alloc/app/shared/dtos/carteira_dto.dart';
+import 'package:alloc/app/shared/exceptions/application_exception.dart';
 import 'package:alloc/app/shared/models/ativo_model.dart';
 import 'package:alloc/app/shared/models/cotacao_model.dart';
 import 'package:alloc/app/shared/models/provento_model.dart';
 import 'package:alloc/app/shared/models/usuario_model.dart';
+import 'package:alloc/app/shared/utils/exception_util.dart';
+import 'package:alloc/app/shared/utils/logger_util.dart';
 
 import 'package:mobx/mobx.dart';
 
@@ -23,13 +26,21 @@ class AppCore {
   static ProventoCore _proventoCore;
 
   static Future<void> init(UsuarioModel usuario) async {
-    _usuario = usuario;
-    _cotacaoCore = await CotacaoCore.initInstance();
-    _ativoCore = await AtivoCore.initInstance(usuario, _cotacaoCore);
-    _carteiraCore = await CarteiraCore.initInstance(usuario, _ativoCore);
-    _alocacaoCore = await AlocacaoCore.initInstance(usuario, _carteiraCore, _ativoCore);
-    _proventoCore = await ProventoCore.initInstance(usuario, _ativoCore);
-    _startReactionCotacoes();
+    try {
+      _usuario = usuario;
+      _cotacaoCore = await CotacaoCore.initInstance();
+      _ativoCore = await AtivoCore.initInstance(usuario, _cotacaoCore);
+      _carteiraCore = await CarteiraCore.initInstance(usuario, _ativoCore);
+      _alocacaoCore = await AlocacaoCore.initInstance(usuario, _carteiraCore, _ativoCore);
+      _proventoCore = await ProventoCore.initInstance(usuario, _ativoCore);
+      _startReactionCotacoes();
+    } catch (e) {
+      LoggerUtil.error(e);
+    }
+  }
+
+  static double getRendimentoAtivosByAlocacao(String idAlocacao) {
+    return _ativoCore.getRendimentoAtivosByAlocacao(idAlocacao);
   }
 
   static void _startReactionCotacoes() {
@@ -41,16 +52,12 @@ class AppCore {
     });
   }
 
-  static Future<void> loadAll() async {
+  static Future<void> _loadAll() async {
     await _carteiraCore.loadCarteiras();
     await _ativoCore.loadAtivos();
     await _alocacaoCore.loadAlocacoes();
     _alocacaoCore.refreshAlocacoesDTO();
     _carteiraCore.refreshCarteiraDTO();
-  }
-
-  static double getRendimentoAtivosByAlocacao(String idAlocacao) {
-    return _ativoCore.getRendimentoAtivosByAlocacao(idAlocacao);
   }
 
   static CotacaoModel getCotacao(String id) {
@@ -67,7 +74,7 @@ class AppCore {
   }
 
   static Future<void> notifyAddDelEvent() async {
-    return loadAll();
+    return _loadAll();
   }
 
   static Future<void> notifyAddDelAtivo() async {
